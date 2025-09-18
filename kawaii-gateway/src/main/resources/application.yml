@@ -1,0 +1,128 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: kawaii-gateway
+
+  # 明确指定为 Reactive Web 应用
+  main:
+    web-application-type: reactive
+
+  # Redis配置
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: 123456
+      database: 1
+      timeout: 5000ms
+
+  # Gateway配置
+  cloud:
+    gateway:
+      routes:
+        # 用户服务路由
+        - id: kawaii-user
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/v1/user/**
+          filters:
+            - RewritePath=/api/v1/user/(?<segment>.*), /user/$\{segment}
+            - name: RequestRateLimiter
+              args:
+                key-resolver: "#{@ipKeyResolver}"
+                redis-rate-limiter:
+                  replenish-rate: 10
+                  burst-capacity: 20
+                  requested-tokens: 1
+
+        # 钱包服务路由
+        - id: kawaii-core
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/v1/wallet/**
+          filters:
+            - RewritePath=/api/v1/wallet/(?<segment>.*), /wallet/$\{segment}
+
+        # 支付服务路由
+        - id: kawaii-payment
+          uri: http://localhost:8084
+          predicates:
+            - Path=/api/v1/payment/**
+          filters:
+            - RewritePath=/api/v1/payment/(?<segment>.*), /payment/$\{segment}
+
+      # 全局过滤器配置
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+        - AddResponseHeader=Access-Control-Allow-Origin, *
+        - AddResponseHeader=Access-Control-Allow-Methods, GET,POST,PUT,DELETE,OPTIONS
+        - AddResponseHeader=Access-Control-Allow-Headers, *
+
+      # 全局CORS配置
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+
+# 日志配置
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# 管理端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,gateway
+  endpoint:
+    health:
+      show-details: when_authorized
+
+# 应用安全配置
+app:
+  security:
+    routes:
+      # 公开路径 - 无需认证
+      public-paths:
+        - "/api/v1/user/register/**"
+        - "/api/v1/user/health"
+        - "/api/v1/user/login/**"
+        - "/api/v1/user/forgot-password/**"
+        - "/actuator/health"
+        - "/swagger-ui/**"
+        - "/v3/api-docs/**"
+
+      # 受保护路径 - 需要认证
+      protected-paths:
+        - "/api/v1/user/profile/**"
+        - "/api/v1/wallet/**"
+        - "/api/v1/payment/**"
+
+      # 角色路径映射 - 需要特定角色
+      role-paths:
+        "/api/v1/user/admin/**": ["ADMIN"]
+        "/api/v1/wallet/admin/**": ["ADMIN", "WALLET_ADMIN"]
+        "/api/v1/payment/merchant/**": ["MERCHANT"]
+
+      # 管理员路径 - 仅管理员可访问
+      admin-paths:
+        - "/actuator/**"
+        - "/api/v1/admin/**"
+
+      # 内部路径 - 仅服务间调用
+      internal-paths:
+        - "/internal/**"

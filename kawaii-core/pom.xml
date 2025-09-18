@@ -7,10 +7,10 @@
         <groupId>com.kawaiichainwallet</groupId>
         <artifactId>server</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-        <relativePath/>
     </parent>
 
     <artifactId>kawaii-core</artifactId>
+    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>

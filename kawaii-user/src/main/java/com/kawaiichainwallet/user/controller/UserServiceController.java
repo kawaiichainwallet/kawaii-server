@@ -5,6 +5,7 @@ import com.kawaiichainwallet.api.dto.UserInfoResponse;
 import com.kawaiichainwallet.api.dto.TokenValidationResponse;
 import com.kawaiichainwallet.api.dto.UserPaymentPermissionResponse;
 import com.kawaiichainwallet.common.response.R;
+import com.kawaiichainwallet.common.enums.ApiCode;
 import com.kawaiichainwallet.user.service.UserService;
 import com.kawaiichainwallet.user.service.AuthService;
 import com.kawaiichainwallet.user.converter.UserConverter;
@@ -37,7 +38,7 @@ public class UserServiceController implements UserServiceApi {
             // 验证内部调用Token
             if (!isValidInternalToken(internalToken)) {
                 log.warn("无效的内部调用Token");
-                return R.error(401, "无效的内部调用Token");
+                return R.error(ApiCode.INTERNAL_TOKEN_INVALID);
             }
 
             // 调用认证服务验证Token
@@ -62,7 +63,7 @@ public class UserServiceController implements UserServiceApi {
         try {
             // 验证内部调用Token
             if (!isValidInternalToken(internalToken)) {
-                return R.error(401, "无效的内部调用Token");
+                return R.error(ApiCode.INTERNAL_TOKEN_INVALID);
             }
 
             // 获取用户信息
@@ -74,7 +75,7 @@ public class UserServiceController implements UserServiceApi {
             return R.success(dto);
         } catch (Exception e) {
             log.error("获取用户信息失败: userId={}, error={}", userId, e.getMessage());
-            return R.error(500, "获取用户信息失败: " + e.getMessage());
+            return R.error(ApiCode.USER_INFO_FETCH_FAILED);
         }
     }
 
@@ -84,12 +85,12 @@ public class UserServiceController implements UserServiceApi {
 
         try {
             if (!isValidInternalToken(internalToken)) {
-                return R.error(401, "无效的内部调用Token");
+                return R.error(ApiCode.INTERNAL_TOKEN_INVALID);
             }
 
             var user = userService.getUserByUsername(username);
             if (user == null) {
-                return R.error(404, "用户不存在");
+                return R.error(ApiCode.USER_NOT_FOUND);
             }
 
             // 使用MapStruct转换用户信息
@@ -98,7 +99,7 @@ public class UserServiceController implements UserServiceApi {
             return R.success(dto);
         } catch (Exception e) {
             log.error("根据用户名获取用户信息失败: username={}, error={}", username, e.getMessage());
-            return R.error(500, "获取用户信息失败: " + e.getMessage());
+            return R.error(ApiCode.USER_INFO_FETCH_FAILED);
         }
     }
 
@@ -108,12 +109,12 @@ public class UserServiceController implements UserServiceApi {
 
         try {
             if (!isValidInternalToken(internalToken)) {
-                return R.error(401, "无效的内部调用Token");
+                return R.error(ApiCode.INTERNAL_TOKEN_INVALID);
             }
 
             var user = userService.getUserByEmail(email);
             if (user == null) {
-                return R.error(404, "用户不存在");
+                return R.error(ApiCode.USER_NOT_FOUND);
             }
 
             // 使用MapStruct转换用户信息
@@ -122,7 +123,7 @@ public class UserServiceController implements UserServiceApi {
             return R.success(dto);
         } catch (Exception e) {
             log.error("根据邮箱获取用户信息失败: email={}, error={}", email, e.getMessage());
-            return R.error(500, "获取用户信息失败: " + e.getMessage());
+            return R.error(ApiCode.USER_INFO_FETCH_FAILED);
         }
     }
 
@@ -132,7 +133,7 @@ public class UserServiceController implements UserServiceApi {
 
         try {
             if (!isValidInternalToken(internalToken)) {
-                return R.error(401, "无效的内部调用Token");
+                return R.error(ApiCode.INTERNAL_TOKEN_INVALID);
             }
 
             // TODO: 实现批量获取用户信息逻辑
@@ -141,7 +142,7 @@ public class UserServiceController implements UserServiceApi {
             return R.success(users);
         } catch (Exception e) {
             log.error("批量获取用户信息失败: userIds={}, error={}", userIds, e.getMessage());
-            return R.error(500, "批量获取用户信息失败: " + e.getMessage());
+            return R.error(ApiCode.BATCH_USER_FETCH_FAILED);
         }
     }
 
@@ -151,7 +152,7 @@ public class UserServiceController implements UserServiceApi {
 
         try {
             if (!isValidInternalToken(internalToken)) {
-                return R.error(401, "无效的内部调用Token");
+                return R.error(ApiCode.INTERNAL_TOKEN_INVALID);
             }
 
             var user = userService.getUserById(userId);
@@ -170,7 +171,7 @@ public class UserServiceController implements UserServiceApi {
 
         try {
             if (!isValidInternalToken(internalToken)) {
-                return R.error(401, "无效的内部调用Token");
+                return R.error(ApiCode.INTERNAL_TOKEN_INVALID);
             }
 
             // TODO: 实现获取用户支付权限逻辑
@@ -182,7 +183,7 @@ public class UserServiceController implements UserServiceApi {
             return R.success(permission);
         } catch (Exception e) {
             log.error("获取用户支付权限失败: userId={}, error={}", userId, e.getMessage());
-            return R.error(500, "获取用户支付权限失败: " + e.getMessage());
+            return R.error(ApiCode.USER_PAYMENT_PERMISSION_FETCH_FAILED);
         }
     }
 

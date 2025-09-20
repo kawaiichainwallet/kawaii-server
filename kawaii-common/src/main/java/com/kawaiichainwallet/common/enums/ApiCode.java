@@ -40,6 +40,9 @@ public enum ApiCode {
     INVALID_EMAIL_FORMAT(2009, "邮箱格式不正确"),
     INVALID_PHONE_FORMAT(2010, "手机号格式不正确"),
     WEAK_PASSWORD(2011, "密码强度不足"),
+    USER_INFO_FETCH_FAILED(2012, "获取用户信息失败"),
+    BATCH_USER_FETCH_FAILED(2013, "批量获取用户信息失败"),
+    USER_PAYMENT_PERMISSION_FETCH_FAILED(2014, "获取用户支付权限失败"),
 
     // 验证码相关错误 3xxx
     OTP_NOT_FOUND(3001, "验证码不存在"),
@@ -55,6 +58,7 @@ public enum ApiCode {
     TOKEN_EXPIRED(4002, "Token已过期"),
     TOKEN_MALFORMED(4003, "Token格式错误"),
     REFRESH_TOKEN_INVALID(4004, "刷新Token无效"),
+    INTERNAL_TOKEN_INVALID(4005, "无效的内部调用Token"),
 
     // 钱包相关错误 5xxx
     WALLET_NOT_FOUND(5001, "钱包不存在"),

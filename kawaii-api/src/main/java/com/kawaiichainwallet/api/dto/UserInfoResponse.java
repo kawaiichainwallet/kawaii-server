@@ -5,10 +5,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 用户信息DTO - 服务间调用统一数据传输对象
+ * 用户信息响应 - 服务间调用统一数据传输对象
  */
 @Data
-public class UserInfoDto {
+public class UserInfoResponse {
 
     /**
      * 用户ID

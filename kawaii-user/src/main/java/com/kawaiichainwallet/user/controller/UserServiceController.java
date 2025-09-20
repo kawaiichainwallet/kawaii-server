@@ -1,8 +1,9 @@
 package com.kawaiichainwallet.user.controller;
 
 import com.kawaiichainwallet.api.client.UserServiceApi;
-import com.kawaiichainwallet.api.dto.UserInfoDto;
-import com.kawaiichainwallet.api.dto.TokenValidationDto;
+import com.kawaiichainwallet.api.dto.UserInfoResponse;
+import com.kawaiichainwallet.api.dto.TokenValidationResponse;
+import com.kawaiichainwallet.api.dto.UserPaymentPermissionResponse;
 import com.kawaiichainwallet.common.response.R;
 import com.kawaiichainwallet.user.service.UserService;
 import com.kawaiichainwallet.user.service.AuthService;
@@ -29,7 +30,7 @@ public class UserServiceController implements UserServiceApi {
     private final ServiceApiConverter serviceApiConverter;
 
     @Override
-    public R<TokenValidationDto> validateToken(String authHeader, String internalToken) {
+    public R<TokenValidationResponse> validateToken(String authHeader, String internalToken) {
         log.info("内部服务Token验证请求");
 
         try {
@@ -43,19 +44,19 @@ public class UserServiceController implements UserServiceApi {
             var validationResponse = authService.validateToken(authHeader);
 
             // 转换为API DTO
-            TokenValidationDto dto = convertToTokenValidationDto(validationResponse);
+            TokenValidationResponse dto = convertToTokenValidationResponse(validationResponse);
 
             return R.success(dto);
         } catch (Exception e) {
             log.error("Token验证失败: {}", e.getMessage());
-            TokenValidationDto errorDto = serviceApiConverter.createFailedValidationDto(
+            TokenValidationResponse errorDto = serviceApiConverter.createFailedValidationResponse(
                 e.getMessage(), "VALIDATION_ERROR");
             return R.success(errorDto);
         }
     }
 
     @Override
-    public R<UserInfoDto> getUserInfo(String userId, String internalToken) {
+    public R<UserInfoResponse> getUserInfo(String userId, String internalToken) {
         log.info("内部服务获取用户信息请求: userId={}", userId);
 
         try {
@@ -68,7 +69,7 @@ public class UserServiceController implements UserServiceApi {
             var userInfoResponse = userService.getUserInfo(userId);
 
             // 转换为API DTO
-            UserInfoDto dto = convertToUserInfoDto(userInfoResponse);
+            UserInfoResponse dto = convertToUserInfoResponse(userInfoResponse);
 
             return R.success(dto);
         } catch (Exception e) {
@@ -78,7 +79,7 @@ public class UserServiceController implements UserServiceApi {
     }
 
     @Override
-    public R<UserInfoDto> getUserByUsername(String username, String internalToken) {
+    public R<UserInfoResponse> getUserByUsername(String username, String internalToken) {
         log.info("内部服务根据用户名获取用户信息: username={}", username);
 
         try {
@@ -92,7 +93,7 @@ public class UserServiceController implements UserServiceApi {
             }
 
             // 使用MapStruct转换用户信息
-            UserInfoDto dto = serviceApiConverter.userToUserInfoDto(user);
+            UserInfoResponse dto = serviceApiConverter.userToUserInfoResponse(user);
 
             return R.success(dto);
         } catch (Exception e) {
@@ -102,7 +103,7 @@ public class UserServiceController implements UserServiceApi {
     }
 
     @Override
-    public R<UserInfoDto> getUserByEmail(String email, String internalToken) {
+    public R<UserInfoResponse> getUserByEmail(String email, String internalToken) {
         log.info("内部服务根据邮箱获取用户信息: email={}", email);
 
         try {
@@ -116,7 +117,7 @@ public class UserServiceController implements UserServiceApi {
             }
 
             // 使用MapStruct转换用户信息
-            UserInfoDto dto = serviceApiConverter.userToUserInfoDto(user);
+            UserInfoResponse dto = serviceApiConverter.userToUserInfoResponse(user);
 
             return R.success(dto);
         } catch (Exception e) {
@@ -126,7 +127,7 @@ public class UserServiceController implements UserServiceApi {
     }
 
     @Override
-    public R<List<UserInfoDto>> getBatchUsers(List<String> userIds, String internalToken) {
+    public R<List<UserInfoResponse>> getBatchUsers(List<String> userIds, String internalToken) {
         log.info("内部服务批量获取用户信息: userIds={}", userIds);
 
         try {
@@ -135,7 +136,7 @@ public class UserServiceController implements UserServiceApi {
             }
 
             // TODO: 实现批量获取用户信息逻辑
-            List<UserInfoDto> users = List.of(); // 暂时返回空列表
+            List<UserInfoResponse> users = List.of(); // 暂时返回空列表
 
             return R.success(users);
         } catch (Exception e) {
@@ -164,7 +165,7 @@ public class UserServiceController implements UserServiceApi {
     }
 
     @Override
-    public R<UserServiceApi.UserPaymentPermissionDto> getUserPaymentPermission(String userId, String internalToken) {
+    public R<UserPaymentPermissionResponse> getUserPaymentPermission(String userId, String internalToken) {
         log.info("内部服务获取用户支付权限: userId={}", userId);
 
         try {
@@ -173,7 +174,7 @@ public class UserServiceController implements UserServiceApi {
             }
 
             // TODO: 实现获取用户支付权限逻辑
-            var permission = new UserServiceApi.UserPaymentPermissionDto();
+            var permission = new UserPaymentPermissionResponse();
             permission.setPaymentEnabled(true);
             permission.setKycLevel("BASIC");
             // 其他字段设置...
@@ -195,23 +196,23 @@ public class UserServiceController implements UserServiceApi {
     }
 
     /**
-     * 转换TokenValidationResponse为TokenValidationDto
+     * 转换TokenValidationResponse为TokenValidationResponse
      */
-    private TokenValidationDto convertToTokenValidationDto(Object validationResponse) {
+    private TokenValidationResponse convertToTokenValidationResponse(Object validationResponse) {
         // 使用MapStruct转换，如果validationResponse是TokenValidationResponse类型
         if (validationResponse instanceof com.kawaiichainwallet.user.dto.TokenValidationResponse response) {
-            return serviceApiConverter.validationResponseToDto(response);
+            return serviceApiConverter.validationResponseToApiDto(response);
         }
         // 默认返回成功状态
-        return serviceApiConverter.createSuccessValidationDto(null, null, null);
+        return serviceApiConverter.createSuccessValidationResponse(null, null, null);
     }
 
     /**
-     * 转换UserInfoResponse为UserInfoDto
+     * 转换UserInfoResponse为UserInfoResponse
      */
-    private UserInfoDto convertToUserInfoDto(Object userInfoResponse) {
+    private UserInfoResponse convertToUserInfoResponse(Object userInfoResponse) {
         // TODO: 实现具体转换逻辑，这里可以使用MapStruct
-        UserInfoDto dto = new UserInfoDto();
+        UserInfoResponse dto = new UserInfoResponse();
         // 字段转换...
         return dto;
     }

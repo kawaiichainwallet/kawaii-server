@@ -1,10 +1,8 @@
 package com.kawaiichainwallet.user.converter;
 
-import com.kawaiichainwallet.api.dto.TokenValidationDto;
-import com.kawaiichainwallet.api.dto.UserInfoDto;
+import com.kawaiichainwallet.api.dto.UserInfoResponse;
 import com.kawaiichainwallet.user.entity.User;
 import com.kawaiichainwallet.user.entity.UserProfile;
-import com.kawaiichainwallet.user.dto.TokenValidationResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -25,7 +23,7 @@ public interface ServiceApiConverter {
     ServiceApiConverter INSTANCE = Mappers.getMapper(ServiceApiConverter.class);
 
     /**
-     * User实体转换为UserInfoDto（含脱敏处理）
+     * User实体转换为UserInfoResponse（含脱敏处理）
      */
     @Mapping(target = "phone", source = "phone", qualifiedByName = "maskPhone")
     @Mapping(target = "email", source = "email", qualifiedByName = "maskEmail")
@@ -39,10 +37,10 @@ public interface ServiceApiConverter {
     @Mapping(target = "paymentEnabled", ignore = true) // 需要从UserProfile获取
     @Mapping(target = "createdAt", source = "createdAt")
     @Mapping(target = "lastLoginAt", source = "lastLoginAt")
-    UserInfoDto userToUserInfoDto(User user);
+    UserInfoResponse userToUserInfoResponse(User user);
 
     /**
-     * User和UserProfile合并转换为UserInfoDto
+     * User和UserProfile合并转换为UserInfoResponse
      */
     @Mapping(target = "userId", source = "user.userId")
     @Mapping(target = "username", source = "user.username")
@@ -61,11 +59,12 @@ public interface ServiceApiConverter {
     @Mapping(target = "currency", source = "userProfile.currency")
     @Mapping(target = "kycLevel", ignore = true) // UserProfile中没有kycLevel字段，需要从其他地方获取
     @Mapping(target = "roles", ignore = true) // 需要单独设置
-    @Mapping(target = "paymentEnabled", ignore = true) // 需要单独设置
-    UserInfoDto userAndProfileToUserInfoDto(User user, UserProfile userProfile);
+    @Mapping(target = "paymentEnabled", ignore = true)
+    // 需要单独设置
+    UserInfoResponse userAndProfileToUserInfoResponse(User user, UserProfile userProfile);
 
     /**
-     * TokenValidationResponse转换为TokenValidationDto
+     * TokenValidationResponse转换为TokenValidationResponse (API层)
      */
     @Mapping(target = "valid", source = "valid")
     @Mapping(target = "userId", source = "userId")
@@ -74,14 +73,15 @@ public interface ServiceApiConverter {
     @Mapping(target = "tokenType", source = "tokenType")
     @Mapping(target = "expiresAt", source = "expiresAt", qualifiedByName = "timestampToLocalDateTime")
     @Mapping(target = "errorMessage", source = "errorMessage")
-    @Mapping(target = "errorCode", ignore = true) // TokenValidationResponse中没有errorCode字段
-    TokenValidationDto validationResponseToDto(TokenValidationResponse response);
+    @Mapping(target = "errorCode", ignore = true)
+    // TokenValidationResponse中没有errorCode字段
+    com.kawaiichainwallet.api.dto.TokenValidationResponse validationResponseToApiDto(com.kawaiichainwallet.user.dto.TokenValidationResponse response);
 
     /**
-     * 创建失败的TokenValidationDto
+     * 创建失败的TokenValidationResponse (API层)
      */
-    default TokenValidationDto createFailedValidationDto(String errorMessage, String errorCode) {
-        TokenValidationDto dto = new TokenValidationDto();
+    default com.kawaiichainwallet.api.dto.TokenValidationResponse createFailedValidationResponse(String errorMessage, String errorCode) {
+        com.kawaiichainwallet.api.dto.TokenValidationResponse dto = new com.kawaiichainwallet.api.dto.TokenValidationResponse();
         dto.setValid(false);
         dto.setErrorMessage(errorMessage);
         dto.setErrorCode(errorCode);
@@ -89,10 +89,10 @@ public interface ServiceApiConverter {
     }
 
     /**
-     * 创建成功的TokenValidationDto
+     * 创建成功的TokenValidationResponse (API层)
      */
-    default TokenValidationDto createSuccessValidationDto(String userId, String username, List<String> roles) {
-        TokenValidationDto dto = new TokenValidationDto();
+    default com.kawaiichainwallet.api.dto.TokenValidationResponse createSuccessValidationResponse(String userId, String username, List<String> roles) {
+        com.kawaiichainwallet.api.dto.TokenValidationResponse dto = new com.kawaiichainwallet.api.dto.TokenValidationResponse();
         dto.setValid(true);
         dto.setUserId(userId);
         dto.setUsername(username);

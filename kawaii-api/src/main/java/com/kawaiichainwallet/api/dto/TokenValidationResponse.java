@@ -5,10 +5,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Token验证结果DTO
+ * Token验证结果响应
  */
 @Data
-public class TokenValidationDto {
+public class TokenValidationResponse {
 
     /**
      * Token是否有效

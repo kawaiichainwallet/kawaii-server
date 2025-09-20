@@ -21,10 +21,14 @@ spring:
   # Gateway配置
   cloud:
     gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
       routes:
         # 用户服务路由（包含认证功能）- 最高优先级
         - id: kawaii-user-auth
-          uri: http://localhost:8082
+          uri: lb://kawaii-user
           predicates:
             - Path=/api/v1/login,/api/v1/login/otp,/api/v1/send-login-otp,/api/v1/refresh,/api/v1/logout,/api/v1/validate
           filters:
@@ -33,7 +37,7 @@ spring:
 
         # 用户管理相关路由
         - id: kawaii-user-management
-          uri: http://localhost:8082
+          uri: lb://kawaii-user
           predicates:
             - Path=/api/v1/users/**
           filters:
@@ -49,7 +53,7 @@ spring:
 
         # 钱包服务路由
         - id: kawaii-core
-          uri: http://localhost:8083
+          uri: lb://kawaii-core
           predicates:
             - Path=/api/v1/wallet/**
           filters:
@@ -59,7 +63,7 @@ spring:
 
         # 支付服务路由
         - id: kawaii-payment
-          uri: http://localhost:8084
+          uri: lb://kawaii-payment
           predicates:
             - Path=/api/v1/payment/**
           filters:

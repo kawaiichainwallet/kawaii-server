@@ -6,12 +6,14 @@ import com.kawaiichainwallet.user.dto.LoginResponse;
 import com.kawaiichainwallet.user.dto.OtpLoginRequest;
 import com.kawaiichainwallet.user.dto.RefreshTokenRequest;
 import com.kawaiichainwallet.user.dto.TokenValidationResponse;
+import com.kawaiichainwallet.user.dto.RegisterRequest;
+import com.kawaiichainwallet.user.dto.RegisterResponse;
 import com.kawaiichainwallet.user.entity.User;
 import com.kawaiichainwallet.user.mapper.UserMapper;
 import com.kawaiichainwallet.user.converter.AuthConverter;
 import com.kawaiichainwallet.common.enums.ApiCode;
 import com.kawaiichainwallet.common.exception.BusinessException;
-import com.kawaiichainwallet.common.utils.CryptoUtil;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import com.kawaiichainwallet.common.utils.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +37,8 @@ public class AuthService {
     private final OtpService otpService;
     private final JwtTokenService jwtTokenService;
     private final AuditService auditService;
+    private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${app.auth.max-login-attempts:5}")
     private int maxLoginAttempts;
@@ -65,7 +69,7 @@ public class AuthService {
         checkAccountStatus(user, clientIp, userAgent);
 
         // 验证密码
-        boolean passwordValid = CryptoUtil.verifyPassword(request.getPassword(), user.getPasswordHash(), user.getSalt());
+        boolean passwordValid = passwordEncoder.matches(request.getPassword(), user.getPasswordHash());
         if (!passwordValid) {
             // 增加登录失败次数
             handleLoginFailure(user, clientIp, userAgent, "密码错误");
@@ -245,6 +249,20 @@ public class AuthService {
         return response;
     }
 
+    /**
+     * 用户注册
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public RegisterResponse register(RegisterRequest request, String clientIp, String userAgent) {
+        return userService.register(request, clientIp, userAgent);
+    }
+
+    /**
+     * 发送注册验证码
+     */
+    public void sendRegisterOtp(String target, String type, String clientIp, String userAgent) {
+        userService.sendRegisterOtp(target, type, clientIp, userAgent);
+    }
 
     /**
      * 验证登录请求

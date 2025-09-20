@@ -103,6 +103,38 @@ public class AuthController {
     }
 
     /**
+     * 用户注册
+     */
+    @PostMapping("/register")
+    @Operation(summary = "用户注册", description = "通过邮箱或手机号注册新用户")
+    public R<RegisterResponse> register(
+            @Valid @RequestBody RegisterRequest request,
+            HttpServletRequest httpRequest) {
+
+        String clientIp = RequestUtil.getClientIpAddress(httpRequest);
+        String userAgent = httpRequest.getHeader("User-Agent");
+
+        RegisterResponse response = authService.register(request, clientIp, userAgent);
+        return R.success(response, "注册成功");
+    }
+
+    /**
+     * 发送注册验证码
+     */
+    @PostMapping("/send-register-otp")
+    @Operation(summary = "发送注册验证码", description = "向邮箱或手机号发送注册验证码")
+    public R<Void> sendRegisterOtp(
+            @Valid @RequestBody SendOtpRequest request,
+            HttpServletRequest httpRequest) {
+
+        String clientIp = RequestUtil.getClientIpAddress(httpRequest);
+        String userAgent = httpRequest.getHeader("User-Agent");
+
+        authService.sendRegisterOtp(request.getTarget(), request.getType(), clientIp, userAgent);
+        return R.success("验证码发送成功");
+    }
+
+    /**
      * 验证Token
      */
     @GetMapping("/validate")

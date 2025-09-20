@@ -3,8 +3,11 @@ package com.kawaiichainwallet.user.service;
 import com.kawaiichainwallet.common.enums.ApiCode;
 import com.kawaiichainwallet.common.exception.BusinessException;
 import com.kawaiichainwallet.common.utils.ValidationUtil;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import com.kawaiichainwallet.user.dto.UserInfoResponse;
 import com.kawaiichainwallet.user.dto.UpdateUserInfoRequest;
+import com.kawaiichainwallet.user.dto.RegisterRequest;
+import com.kawaiichainwallet.user.dto.RegisterResponse;
 import com.kawaiichainwallet.user.entity.User;
 import com.kawaiichainwallet.user.entity.UserProfile;
 import com.kawaiichainwallet.user.mapper.UserMapper;
@@ -18,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * 用户服务 - 专注用户信息管理
@@ -30,6 +34,9 @@ public class UserService {
     private final UserMapper userMapper;
     private final UserProfileMapper userProfileMapper;
     private final UserConverter userConverter;
+    private final OtpService otpService;
+    private final AuditService auditService;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * 根据用户ID获取用户基本信息
@@ -170,6 +177,201 @@ public class UserService {
         return users.stream()
                 .map(userConverter::userToUserInfoResponse)
                 .toList();
+    }
+
+    /**
+     * 用户注册
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public RegisterResponse register(RegisterRequest request, String clientIp, String userAgent) {
+        // 1. 验证请求参数
+        validateRegisterRequest(request);
+
+        // 2. 验证OTP验证码
+        boolean otpValid = otpService.verifyOtp(request.getTarget(), request.getType(), "register", request.getOtpCode());
+        if (!otpValid) {
+            auditService.logAction(null, "REGISTER_FAILED", "user", null,
+                    String.format("OTP验证失败: %s, IP: %s",
+                            ValidationUtil.maskSensitiveInfo(request.getTarget()), clientIp),
+                    clientIp, userAgent, false, "验证码错误");
+            throw new BusinessException(ApiCode.OTP_INVALID, "验证码错误或已过期");
+        }
+
+        // 3. 检查用户名是否已存在
+        if (isUsernameExists(request.getUsername())) {
+            auditService.logAction(null, "REGISTER_FAILED", "user", null,
+                    String.format("用户名已存在: %s, IP: %s", request.getUsername(), clientIp),
+                    clientIp, userAgent, false, "用户名已存在");
+            throw new BusinessException(ApiCode.USER_ALREADY_EXISTS, "用户名已被使用");
+        }
+
+        // 4. 检查邮箱或手机号是否已存在
+        if ("email".equals(request.getType())) {
+            if (isEmailExists(request.getTarget())) {
+                auditService.logAction(null, "REGISTER_FAILED", "user", null,
+                        String.format("邮箱已存在: %s, IP: %s",
+                                ValidationUtil.maskEmail(request.getTarget()), clientIp),
+                        clientIp, userAgent, false, "邮箱已被注册");
+                throw new BusinessException(ApiCode.EMAIL_ALREADY_EXISTS, "邮箱已被注册");
+            }
+        } else if ("phone".equals(request.getType())) {
+            if (isPhoneExists(request.getTarget())) {
+                auditService.logAction(null, "REGISTER_FAILED", "user", null,
+                        String.format("手机号已存在: %s, IP: %s",
+                                ValidationUtil.maskPhone(request.getTarget()), clientIp),
+                        clientIp, userAgent, false, "手机号已被注册");
+                throw new BusinessException(ApiCode.PHONE_ALREADY_EXISTS, "手机号已被注册");
+            }
+        }
+
+        // 5. 创建用户
+        User user = createUser(request, clientIp);
+        userMapper.insert(user);
+
+        // 6. 创建用户资料
+        createInitialUserProfile(user.getUserId());
+
+        // 7. 记录注册成功审计日志
+        auditService.logAction(user.getUserId(), "REGISTER_SUCCESS", "user", user.getUserId(),
+                String.format("用户注册成功: %s, IP: %s", request.getType(), clientIp),
+                clientIp, userAgent, true, null);
+
+        log.info("用户注册成功: userId={}, username={}, type={}, IP={}",
+                user.getUserId(), user.getUsername(), request.getType(), clientIp);
+
+        // 8. 使用MapStruct转换响应对象
+        return userConverter.userToRegisterResponse(user);
+    }
+
+    /**
+     * 发送注册验证码
+     */
+    public void sendRegisterOtp(String target, String type, String clientIp, String userAgent) {
+        // 验证目标格式
+        if ("email".equals(type)) {
+            if (!ValidationUtil.isValidEmail(target)) {
+                throw new BusinessException(ApiCode.INVALID_EMAIL_FORMAT);
+            }
+        } else if ("phone".equals(type)) {
+            if (!ValidationUtil.isValidPhone(target)) {
+                throw new BusinessException(ApiCode.INVALID_PHONE_FORMAT);
+            }
+        } else {
+            throw new BusinessException(ApiCode.VALIDATION_ERROR, "类型只能是phone或email");
+        }
+
+        // 检查是否已注册
+        boolean exists = false;
+        if ("email".equals(type)) {
+            exists = isEmailExists(target);
+        } else if ("phone".equals(type)) {
+            exists = isPhoneExists(target);
+        }
+
+        if (exists) {
+            auditService.logAction(null, "SEND_REGISTER_OTP_FAILED", "otp", null,
+                    String.format("目标已注册: %s, IP: %s",
+                            ValidationUtil.maskSensitiveInfo(target), clientIp),
+                    clientIp, userAgent, false, "目标已注册");
+            throw new BusinessException(ApiCode.USER_ALREADY_EXISTS,
+                    "email".equals(type) ? "邮箱已被注册" : "手机号已被注册");
+        }
+
+        // 发送验证码
+        otpService.sendOtp(target, type, "register");
+
+        // 记录审计日志
+        auditService.logAction(null, "SEND_REGISTER_OTP", "otp", null,
+                String.format("发送注册验证码: %s, IP: %s",
+                        ValidationUtil.maskSensitiveInfo(target), clientIp),
+                clientIp, userAgent, true, null);
+
+        log.info("发送注册验证码请求: target={}, type={}, IP={}",
+                ValidationUtil.maskSensitiveInfo(target), type, clientIp);
+    }
+
+    /**
+     * 验证注册请求
+     */
+    private void validateRegisterRequest(RegisterRequest request) {
+        // 验证密码和确认密码是否一致
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            throw new BusinessException(ApiCode.VALIDATION_ERROR, "密码和确认密码不一致");
+        }
+
+        // 验证用户是否同意条款
+        if (!Boolean.TRUE.equals(request.getAgreeToTerms())) {
+            throw new BusinessException(ApiCode.VALIDATION_ERROR, "请同意用户服务协议");
+        }
+
+        // 验证目标格式
+        if ("email".equals(request.getType())) {
+            if (!ValidationUtil.isValidEmail(request.getTarget())) {
+                throw new BusinessException(ApiCode.INVALID_EMAIL_FORMAT);
+            }
+        } else if ("phone".equals(request.getType())) {
+            if (!ValidationUtil.isValidPhone(request.getTarget())) {
+                throw new BusinessException(ApiCode.INVALID_PHONE_FORMAT);
+            }
+        }
+
+        // 验证用户名格式
+        if (!ValidationUtil.isValidUsername(request.getUsername())) {
+            throw new BusinessException(ApiCode.VALIDATION_ERROR, "用户名格式不正确");
+        }
+
+        // 验证密码强度
+        if (!ValidationUtil.isValidPassword(request.getPassword())) {
+            throw new BusinessException(ApiCode.VALIDATION_ERROR, "密码强度不足");
+        }
+    }
+
+    /**
+     * 创建用户对象
+     */
+    private User createUser(RegisterRequest request, String clientIp) {
+        User user = new User();
+        user.setUserId(UUID.randomUUID().toString());
+        user.setUsername(request.getUsername());
+
+        // 根据注册类型设置邮箱或手机号
+        if ("email".equals(request.getType())) {
+            user.setEmail(request.getTarget());
+            user.setEmailVerified(true); // OTP验证通过即认为已验证
+        } else if ("phone".equals(request.getType())) {
+            user.setPhone(request.getTarget());
+            user.setPhoneVerified(true); // OTP验证通过即认为已验证
+        }
+
+        // 使用Spring Security的BCryptPasswordEncoder加密密码
+        String passwordHash = passwordEncoder.encode(request.getPassword());
+        user.setPasswordHash(passwordHash);
+
+        // 设置默认状态
+        user.setStatus("active");
+        user.setTwoFactorEnabled(false);
+        user.setLoginAttempts(0);
+        user.setLastLoginIp(clientIp);
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
+
+        return user;
+    }
+
+    /**
+     * 创建初始用户资料
+     */
+    private void createInitialUserProfile(String userId) {
+        UserProfile userProfile = new UserProfile();
+        userProfile.setUserId(userId);
+        userProfile.setLanguage("zh-CN");
+        userProfile.setTimezone("Asia/Shanghai");
+        userProfile.setCurrency("CNY");
+        userProfile.setNotificationsEnabled(true);
+        userProfile.setCreatedAt(LocalDateTime.now());
+        userProfile.setUpdatedAt(LocalDateTime.now());
+
+        userProfileMapper.insert(userProfile);
     }
 
     /**

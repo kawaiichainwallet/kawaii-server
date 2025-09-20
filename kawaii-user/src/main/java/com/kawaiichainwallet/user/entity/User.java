@@ -44,15 +44,10 @@ public class User extends BaseEntity {
     private String phone;
 
     /**
-     * 密码哈希
+     * 密码哈希 (BCrypt加密，包含内置盐值)
      */
     @TableField("password_hash")
     private String passwordHash;
-
-    /**
-     * 盐值
-     */
-    private String salt;
 
     /**
      * 用户状态 (active, inactive, suspended, deleted)

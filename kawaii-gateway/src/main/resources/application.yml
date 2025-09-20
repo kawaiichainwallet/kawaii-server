@@ -74,9 +74,6 @@ spring:
       # 全局过滤器配置
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-        - AddResponseHeader=Access-Control-Allow-Origin, *
-        - AddResponseHeader=Access-Control-Allow-Methods, GET,POST,PUT,DELETE,OPTIONS
-        - AddResponseHeader=Access-Control-Allow-Headers, *
 
       # 全局CORS配置
       globalcors:

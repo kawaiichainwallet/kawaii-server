@@ -1,33 +1,32 @@
 package com.kawaiichainwallet.user.dto;
 
-import lombok.Data;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import lombok.Data;
 
 /**
- * 发送OTP验证码请求
+ * 发送OTP请求DTO
  */
 @Data
 public class SendOtpRequest {
 
     /**
-     * 接收验证码的目标（手机号或邮箱）
+     * 目标 - 手机号或邮箱
      */
-    @NotBlank(message = "接收目标不能为空")
+    @NotBlank(message = "请输入手机号或邮箱")
     private String target;
 
     /**
-     * 验证码类型 (phone, email)
+     * 类型 - phone或email
      */
-    @NotBlank(message = "验证码类型不能为空")
-    @Pattern(regexp = "^(phone|email)$", message = "验证码类型只能是phone或email")
+    @NotBlank(message = "类型不能为空")
+    @Pattern(regexp = "^(phone|email)$", message = "类型只能是phone或email")
     private String type;
 
     /**
-     * 业务类型 (register, login, reset_password)
+     * 用途 - register, login, reset_password
      */
-    @NotBlank(message = "业务类型不能为空")
-    @Pattern(regexp = "^(register|login|reset_password)$", message = "业务类型无效")
+    @NotBlank(message = "用途不能为空")
+    @Pattern(regexp = "^(register|login|reset_password)$", message = "用途不正确")
     private String purpose;
 }

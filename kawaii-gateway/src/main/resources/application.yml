@@ -1,5 +1,5 @@
 server:
-  port: 8090
+  port: 8080
 
 spring:
   application:
@@ -22,13 +22,22 @@ spring:
   cloud:
     gateway:
       routes:
-        # 用户服务路由
-        - id: kawaii-user
+        # 用户服务路由（包含认证功能）- 最高优先级
+        - id: kawaii-user-auth
           uri: http://localhost:8082
           predicates:
-            - Path=/api/v1/user/**
+            - Path=/api/v1/login,/api/v1/login/otp,/api/v1/send-login-otp,/api/v1/refresh,/api/v1/logout,/api/v1/validate
           filters:
-            - RewritePath=/api/v1/user/(?<segment>.*), /user/$\{segment}
+            - name: Authentication
+          order: 1
+
+        # 用户管理相关路由
+        - id: kawaii-user-management
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/v1/users/**
+          filters:
+            - name: Authentication
             - name: RequestRateLimiter
               args:
                 key-resolver: "#{@ipKeyResolver}"
@@ -36,6 +45,7 @@ spring:
                   replenish-rate: 10
                   burst-capacity: 20
                   requested-tokens: 1
+          order: 2
 
         # 钱包服务路由
         - id: kawaii-core
@@ -43,7 +53,9 @@ spring:
           predicates:
             - Path=/api/v1/wallet/**
           filters:
+            - name: Authentication
             - RewritePath=/api/v1/wallet/(?<segment>.*), /wallet/$\{segment}
+          order: 3
 
         # 支付服务路由
         - id: kawaii-payment
@@ -51,7 +63,9 @@ spring:
           predicates:
             - Path=/api/v1/payment/**
           filters:
+            - name: Authentication
             - RewritePath=/api/v1/payment/(?<segment>.*), /payment/$\{segment}
+          order: 4
 
       # 全局过滤器配置
       default-filters:
@@ -94,27 +108,44 @@ management:
 
 # 应用安全配置
 app:
+  jwt:
+    secret: kawaii-chain-wallet-secret-key-2025
+    access-token-expiration: 900000  # 15分钟
+    refresh-token-expiration: 604800000  # 7天
+  services:
+    user:
+      url: http://localhost:8082
+    core:
+      url: http://localhost:8083
+    payment:
+      url: http://localhost:8084
   security:
     routes:
       # 公开路径 - 无需认证
       public-paths:
-        - "/api/v1/user/register/**"
-        - "/api/v1/user/health"
-        - "/api/v1/user/login/**"
-        - "/api/v1/user/forgot-password/**"
+        - "/api/v1/users/register/**"
+        - "/api/v1/users/health"
+        - "/api/v1/login"
+        - "/api/v1/login/otp"
+        - "/api/v1/send-login-otp"
+        - "/api/v1/refresh"
+        - "/api/v1/users/check-**"
         - "/actuator/health"
         - "/swagger-ui/**"
         - "/v3/api-docs/**"
 
       # 受保护路径 - 需要认证
       protected-paths:
-        - "/api/v1/user/profile/**"
+        - "/api/v1/users/profile/**"
+        - "/api/v1/logout"
+        - "/api/v1/validate"
         - "/api/v1/wallet/**"
         - "/api/v1/payment/**"
 
       # 角色路径映射 - 需要特定角色
       role-paths:
-        "/api/v1/user/admin/**": ["ADMIN"]
+        "/api/v1/users/admin/**": ["ADMIN"]
+        "/api/v1/users": ["ADMIN"]  # 获取用户列表
         "/api/v1/wallet/admin/**": ["ADMIN", "WALLET_ADMIN"]
         "/api/v1/payment/merchant/**": ["MERCHANT"]
 

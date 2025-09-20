@@ -1,7 +1,7 @@
 package com.kawaiichainwallet.common.exception;
 
 import com.kawaiichainwallet.common.enums.ApiCode;
-import com.kawaiichainwallet.common.response.ApiResponse;
+import com.kawaiichainwallet.common.response.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
@@ -33,9 +33,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BusinessException.class)
     @ResponseStatus(HttpStatus.OK)
-    public ApiResponse<?> handleBusinessException(BusinessException e) {
+    public R<?> handleBusinessException(BusinessException e) {
         log.warn("Business exception: {}", e.getMessage(), e);
-        return ApiResponse.error(e.getCode(), e.getMessage());
+        return R.error(e.getCode(), e.getMessage());
     }
 
     /**
@@ -43,14 +43,14 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiResponse<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public R<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         log.warn("Validation failed: {}", e.getMessage());
         List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
         StringBuilder sb = new StringBuilder();
         for (FieldError error : fieldErrors) {
             sb.append(error.getField()).append(": ").append(error.getDefaultMessage()).append("; ");
         }
-        return ApiResponse.error(ApiCode.VALIDATION_ERROR, sb.toString());
+        return R.error(ApiCode.VALIDATION_ERROR, sb.toString());
     }
 
     /**
@@ -58,14 +58,14 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiResponse<?> handleBindException(BindException e) {
+    public R<?> handleBindException(BindException e) {
         log.warn("Bind failed: {}", e.getMessage());
         List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
         StringBuilder sb = new StringBuilder();
         for (FieldError error : fieldErrors) {
             sb.append(error.getField()).append(": ").append(error.getDefaultMessage()).append("; ");
         }
-        return ApiResponse.error(ApiCode.VALIDATION_ERROR, sb.toString());
+        return R.error(ApiCode.VALIDATION_ERROR, sb.toString());
     }
 
     /**
@@ -73,14 +73,14 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiResponse<?> handleConstraintViolationException(ConstraintViolationException e) {
+    public R<?> handleConstraintViolationException(ConstraintViolationException e) {
         log.warn("Constraint violation: {}", e.getMessage());
         Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
         StringBuilder sb = new StringBuilder();
         for (ConstraintViolation<?> violation : violations) {
             sb.append(violation.getPropertyPath()).append(": ").append(violation.getMessage()).append("; ");
         }
-        return ApiResponse.error(ApiCode.VALIDATION_ERROR, sb.toString());
+        return R.error(ApiCode.VALIDATION_ERROR, sb.toString());
     }
 
     /**
@@ -88,11 +88,11 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiResponse<?> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
+    public R<?> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
         log.warn("Method argument type mismatch: {}", e.getMessage());
         String message = String.format("参数 '%s' 类型错误，期望类型: %s",
                 e.getName(), e.getRequiredType() != null ? e.getRequiredType().getSimpleName() : "unknown");
-        return ApiResponse.error(ApiCode.BAD_REQUEST, message);
+        return R.error(ApiCode.BAD_REQUEST, message);
     }
 
     /**
@@ -100,9 +100,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
-    public ApiResponse<?> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
+    public R<?> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
         log.warn("HTTP method not supported: {}", e.getMessage());
-        return ApiResponse.error(ApiCode.METHOD_NOT_ALLOWED, "请求方法不支持: " + e.getMethod());
+        return R.error(ApiCode.METHOD_NOT_ALLOWED, "请求方法不支持: " + e.getMethod());
     }
 
     /**
@@ -110,9 +110,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler({BadCredentialsException.class, AuthenticationCredentialsNotFoundException.class})
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ApiResponse<?> handleAuthenticationException(Exception e) {
+    public R<?> handleAuthenticationException(Exception e) {
         log.warn("Authentication failed: {}", e.getMessage());
-        return ApiResponse.error(ApiCode.UNAUTHORIZED, "认证失败");
+        return R.error(ApiCode.UNAUTHORIZED, "认证失败");
     }
 
     /**
@@ -120,9 +120,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ApiResponse<?> handleAccessDeniedException(AccessDeniedException e) {
+    public R<?> handleAccessDeniedException(AccessDeniedException e) {
         log.warn("Access denied: {}", e.getMessage());
-        return ApiResponse.error(ApiCode.FORBIDDEN, "权限不足");
+        return R.error(ApiCode.FORBIDDEN, "权限不足");
     }
 
     /**
@@ -130,9 +130,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiResponse<?> handleIllegalArgumentException(IllegalArgumentException e) {
+    public R<?> handleIllegalArgumentException(IllegalArgumentException e) {
         log.warn("Illegal argument: {}", e.getMessage());
-        return ApiResponse.error(ApiCode.BAD_REQUEST, e.getMessage());
+        return R.error(ApiCode.BAD_REQUEST, e.getMessage());
     }
 
     /**
@@ -140,8 +140,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ApiResponse<?> handleException(Exception e) {
+    public R<?> handleException(Exception e) {
         log.error("Unexpected error occurred", e);
-        return ApiResponse.error(ApiCode.INTERNAL_SERVER_ERROR, "系统内部错误，请稍后重试");
+        return R.error(ApiCode.INTERNAL_SERVER_ERROR, "系统内部错误，请稍后重试");
     }
 }

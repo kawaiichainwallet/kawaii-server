@@ -46,11 +46,44 @@ public class AuditService {
                 auditLog.setRequestMethod(request.getMethod());
             }
 
-            auditLogMapper.insertAuditLog(auditLog);
+            auditLogMapper.insert(auditLog);
             log.debug("记录审计日志: userId={}, action={}, resourceType={}", userId, action, resourceType);
         } catch (Exception e) {
             log.error("记录审计日志失败", e);
             // 不抛出异常，避免影响主业务流程
+        }
+    }
+
+    /**
+     * 记录操作日志（支持自定义IP和UserAgent）
+     */
+    public void logAction(String userId, String action, String resourceType, String resourceId,
+                         String metadata, String clientIp, String userAgent, boolean success, String errorMessage) {
+        try {
+            AuditLog auditLog = new AuditLog();
+            auditLog.setLogId(UUID.randomUUID().toString());
+            auditLog.setUserId(userId);
+            auditLog.setAction(action);
+            auditLog.setResourceType(resourceType);
+            auditLog.setResourceId(resourceId);
+            auditLog.setMetadata(metadata);
+            auditLog.setSuccess(success);
+            auditLog.setErrorMessage(errorMessage);
+            auditLog.setIpAddress(clientIp);
+            auditLog.setUserAgent(userAgent);
+            auditLog.setCreatedAt(LocalDateTime.now());
+
+            // 获取请求信息
+            HttpServletRequest request = getCurrentRequest();
+            if (request != null) {
+                auditLog.setRequestPath(request.getRequestURI());
+                auditLog.setRequestMethod(request.getMethod());
+            }
+
+            auditLogMapper.insert(auditLog);
+            log.debug("记录审计日志: userId={}, action={}, success={}", userId, action, success);
+        } catch (Exception e) {
+            log.error("记录审计日志失败", e);
         }
     }
 
@@ -80,7 +113,7 @@ public class AuditService {
                 auditLog.setRequestMethod(request.getMethod());
             }
 
-            auditLogMapper.insertAuditLog(auditLog);
+            auditLogMapper.insert(auditLog);
             log.debug("记录失败审计日志: userId={}, action={}, error={}", userId, action, errorMessage);
         } catch (Exception e) {
             log.error("记录失败审计日志失败", e);

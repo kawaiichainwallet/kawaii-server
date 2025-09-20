@@ -2,9 +2,10 @@ package com.kawaiichainwallet.gateway.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.kawaiichainwallet.common.response.ApiResponse;
+import com.kawaiichainwallet.common.response.R;
 import com.kawaiichainwallet.gateway.config.RouteSecurityConfig;
 import com.kawaiichainwallet.gateway.dto.UserContext;
+import com.kawaiichainwallet.gateway.service.JwtValidationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
@@ -36,6 +37,9 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
     @Autowired
     private RouteSecurityConfig routeSecurityConfig;
 
+    @Autowired
+    private JwtValidationService jwtValidationService;
+
     public AuthenticationFilter() {
         super(Config.class);
     }
@@ -66,13 +70,16 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
             }
 
             // 4. 提取并验证 JWT Token
-            String token = authHeader.substring(7);
-            if (!isValidToken(token)) {
+            String token = jwtValidationService.extractTokenFromHeader(authHeader);
+            if (token == null || !jwtValidationService.validateAccessToken(token)) {
                 return unauthorized(exchange.getResponse(), "Invalid or expired token");
             }
 
             // 5. 解析用户信息
             UserContext userContext = extractUserContextFromToken(token);
+            if (userContext == null) {
+                return unauthorized(exchange.getResponse(), "Failed to parse user information from token");
+            }
 
             // 6. 检查管理员路径权限
             if (routeSecurityConfig.isAdminPath(path)) {
@@ -115,24 +122,23 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
     }
 
 
-    private boolean isValidToken(String token) {
-        // TODO: 实现 JWT Token 验证逻辑
-        // 1. 验证签名
-        // 2. 检查过期时间
-        // 3. 验证 issuer 等
-
-        // 临时实现：简单验证非空
-        return token != null && !token.trim().isEmpty();
-    }
-
     private UserContext extractUserContextFromToken(String token) {
-        // TODO: 实现从 JWT Token 中提取完整用户信息
-        // 临时实现：返回模拟用户上下文
-        return UserContext.builder()
-                .userId("mock-user-123")
-                .email("user@example.com")
-                .roles(Arrays.asList("USER", "VERIFIED"))
-                .build();
+        try {
+            String userId = jwtValidationService.getUserIdFromToken(token);
+            String username = jwtValidationService.getUsernameFromToken(token);
+
+            // 根据用户信息构建用户上下文
+            // 这里可以调用用户服务获取完整的用户信息，包括角色
+            // 暂时使用基础信息和默认角色
+            return UserContext.builder()
+                    .userId(userId)
+                    .email(username) // 如果username是邮箱格式
+                    .roles(Arrays.asList("USER", "VERIFIED")) // 默认角色，实际应从用户服务获取
+                    .build();
+        } catch (Exception e) {
+            log.error("Failed to extract user context from token", e);
+            return null;
+        }
     }
 
     private String createInternalToken(UserContext userContext) {
@@ -165,7 +171,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
         response.getHeaders().add("Content-Type", MediaType.APPLICATION_JSON_VALUE);
 
         try {
-            ApiResponse<?> apiResponse = ApiResponse.error(status.value(), message);
+            R<?> apiResponse = R.error(status.value(), message);
             String body = objectMapper.writeValueAsString(apiResponse);
             DataBuffer buffer = response.bufferFactory().wrap(body.getBytes(StandardCharsets.UTF_8));
             return response.writeWith(Mono.just(buffer));

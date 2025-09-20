@@ -1,7 +1,7 @@
 package com.kawaiichainwallet.gateway.exception;
 
 import com.kawaiichainwallet.common.enums.ApiCode;
-import com.kawaiichainwallet.common.response.ApiResponse;
+import com.kawaiichainwallet.common.response.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
 import org.springframework.core.annotation.Order;
@@ -38,18 +38,18 @@ public class GatewayExceptionHandler implements ErrorWebExceptionHandler {
         // 设置响应头
         response.getHeaders().add("Content-Type", MediaType.APPLICATION_JSON_VALUE);
 
-        ApiResponse<?> apiResponse;
+        R<?> apiResponse;
         HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
 
         if (ex instanceof ResponseStatusException statusException) {
             httpStatus = HttpStatus.valueOf(statusException.getStatusCode().value());
-            apiResponse = ApiResponse.error(ApiCode.BAD_REQUEST, statusException.getReason());
+            apiResponse = R.error(ApiCode.BAD_REQUEST, statusException.getReason());
         } else if (ex instanceof IllegalArgumentException) {
             httpStatus = HttpStatus.BAD_REQUEST;
-            apiResponse = ApiResponse.error(ApiCode.BAD_REQUEST, ex.getMessage());
+            apiResponse = R.error(ApiCode.BAD_REQUEST, ex.getMessage());
         } else {
             log.error("Gateway unexpected error occurred", ex);
-            apiResponse = ApiResponse.error(ApiCode.INTERNAL_SERVER_ERROR, "网关内部错误");
+            apiResponse = R.error(ApiCode.INTERNAL_SERVER_ERROR, "网关内部错误");
         }
 
         response.setStatusCode(httpStatus);

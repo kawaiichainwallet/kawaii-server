@@ -136,6 +136,27 @@ public class ValidationUtil {
     }
 
     /**
+     * 脱敏敏感信息（通用方法）
+     */
+    public static String maskSensitiveInfo(String info) {
+        if (!StringUtils.hasText(info)) {
+            return info;
+        }
+
+        if (info.contains("@")) {
+            return maskEmail(info);
+        } else if (isValidPhone(info)) {
+            return maskPhone(info);
+        } else {
+            // 对于其他信息，保留前2位和后2位
+            if (info.length() <= 4) {
+                return "****";
+            }
+            return info.substring(0, 2) + "****" + info.substring(info.length() - 2);
+        }
+    }
+
+    /**
      * 检查是否为有效的UUID格式
      */
     public static boolean isValidUUID(String uuid) {

@@ -1,32 +1,18 @@
 package com.kawaiichainwallet.user.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.kawaiichainwallet.user.entity.AuditLog;
-import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
 /**
- * 审计日志数据访问接口
+ * 审计日志数据访问接口 - 认证服务专用
  */
 @Mapper
-public interface AuditLogMapper {
-
-    /**
-     * 插入审计日志
-     */
-    @Insert("""
-        INSERT INTO audit_logs (log_id, user_id, action, resource_type, resource_id,
-                               ip_address, user_agent, request_path, request_method,
-                               old_values, new_values, metadata, success, error_message,
-                               created_at)
-        VALUES (#{logId}, #{userId}, #{action}, #{resourceType}, #{resourceId},
-                #{ipAddress}, #{userAgent}, #{requestPath}, #{requestMethod},
-                #{oldValues}, #{newValues}, #{metadata}, #{success}, #{errorMessage},
-                #{createdAt})
-        """)
-    int insertAuditLog(AuditLog auditLog);
+public interface AuditLogMapper extends BaseMapper<AuditLog> {
 
     /**
      * 根据用户ID查询审计日志
@@ -37,7 +23,9 @@ public interface AuditLogMapper {
         ORDER BY created_at DESC
         LIMIT #{limit} OFFSET #{offset}
         """)
-    List<AuditLog> findByUserId(String userId, int limit, int offset);
+    List<AuditLog> findByUserId(@Param("userId") String userId,
+                               @Param("limit") int limit,
+                               @Param("offset") int offset);
 
     /**
      * 根据操作动作查询审计日志
@@ -48,27 +36,19 @@ public interface AuditLogMapper {
         ORDER BY created_at DESC
         LIMIT #{limit} OFFSET #{offset}
         """)
-    List<AuditLog> findByAction(String action, int limit, int offset);
-
-    /**
-     * 根据资源类型查询审计日志
-     */
-    @Select("""
-        SELECT * FROM audit_logs
-        WHERE resource_type = #{resourceType}
-        ORDER BY created_at DESC
-        LIMIT #{limit} OFFSET #{offset}
-        """)
-    List<AuditLog> findByResourceType(String resourceType, int limit, int offset);
+    List<AuditLog> findByAction(@Param("action") String action,
+                               @Param("limit") int limit,
+                               @Param("offset") int offset);
 
     /**
      * 查询用户的最近登录记录
      */
     @Select("""
         SELECT * FROM audit_logs
-        WHERE user_id = #{userId} AND action = 'LOGIN'
+        WHERE user_id = #{userId} AND action IN ('LOGIN_SUCCESS', 'LOGIN_FAILED')
         ORDER BY created_at DESC
         LIMIT #{limit}
         """)
-    List<AuditLog> findUserLoginHistory(String userId, int limit);
+    List<AuditLog> findUserLoginHistory(@Param("userId") String userId,
+                                       @Param("limit") int limit);
 }

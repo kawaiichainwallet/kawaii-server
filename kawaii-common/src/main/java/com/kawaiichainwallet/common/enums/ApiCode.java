@@ -51,6 +51,7 @@ public enum ApiCode {
 
     // Token相关错误 4xxx
     TOKEN_INVALID(4001, "Token无效"),
+    INVALID_TOKEN(4001, "Token无效"), // 别名，保持兼容性
     TOKEN_EXPIRED(4002, "Token已过期"),
     TOKEN_MALFORMED(4003, "Token格式错误"),
     REFRESH_TOKEN_INVALID(4004, "刷新Token无效"),

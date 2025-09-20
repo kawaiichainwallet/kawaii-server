@@ -1,3 +1,3 @@
-# wallet-backend
+# 服务端
 
-功能：API服务、数据库集成、用户认证、交易处理。用途：支持钱包功能与外部交互。
+[请查看项目文档](https://github.com/kawaiichainwallet/kawaii-docs)

@@ -1,5 +1,9 @@
 package com.kawaiichainwallet.user.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.io.Serial;
@@ -10,6 +14,7 @@ import java.time.LocalDateTime;
  * 审计日志实体类 - 对应 audit_logs 表
  */
 @Data
+@TableName("audit_logs")
 public class AuditLog implements Serializable {
 
     @Serial
@@ -18,11 +23,13 @@ public class AuditLog implements Serializable {
     /**
      * 日志ID
      */
+    @TableId(value = "log_id", type = IdType.ASSIGN_UUID)
     private String logId;
 
     /**
      * 用户ID
      */
+    @TableField("user_id")
     private String userId;
 
     /**

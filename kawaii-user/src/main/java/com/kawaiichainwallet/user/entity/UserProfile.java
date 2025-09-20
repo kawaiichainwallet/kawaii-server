@@ -1,5 +1,9 @@
 package com.kawaiichainwallet.user.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.kawaiichainwallet.common.entity.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -12,6 +16,7 @@ import java.time.LocalDate;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
+@TableName("user_profiles")
 public class UserProfile extends BaseEntity {
 
     @Serial
@@ -20,11 +25,13 @@ public class UserProfile extends BaseEntity {
     /**
      * 资料ID
      */
+    @TableId(value = "profile_id", type = IdType.ASSIGN_UUID)
     private String profileId;
 
     /**
      * 用户ID
      */
+    @TableField("user_id")
     private String userId;
 
     /**
@@ -45,7 +52,12 @@ public class UserProfile extends BaseEntity {
     /**
      * 头像URL
      */
-    private String avatarUrl;
+    private String avatar;
+
+    /**
+     * 个人简介
+     */
+    private String bio;
 
     /**
      * 出生日期

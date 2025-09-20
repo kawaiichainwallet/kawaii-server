@@ -1,4 +1,4 @@
-package com.kawaiichainwallet.core;
+package com.kawaiichainwallet.payment;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -8,13 +8,12 @@ import org.springframework.context.annotation.ComponentScan;
 @SpringBootApplication
 @EnableFeignClients
 @ComponentScan(basePackages = {
-        "com.kawaiichainwallet.core",
-        "com.kawaiichainwallet.common"
+    "com.kawaiichainwallet.payment",
+    "com.kawaiichainwallet.common"
 })
-public class CoreStarter {
+public class PaymentApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(CoreStarter.class, args);
+        SpringApplication.run(PaymentApplication.class, args);
     }
-
 }

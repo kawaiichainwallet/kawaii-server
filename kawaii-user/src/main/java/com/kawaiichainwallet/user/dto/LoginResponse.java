@@ -3,10 +3,10 @@ package com.kawaiichainwallet.user.dto;
 import lombok.Data;
 
 /**
- * 注册响应DTO
+ * 登录响应DTO
  */
 @Data
-public class RegisterResponse {
+public class LoginResponse {
 
     /**
      * 用户ID

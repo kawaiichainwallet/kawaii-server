@@ -42,19 +42,30 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
 
-# MyBatis配置
-mybatis:
+# MyBatis-Plus配置
+mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
   type-aliases-package: com.kawaiichainwallet.user.entity
 
 # 应用自定义配置
 app:
+  # JWT配置 (使用Spring Security OAuth2)
   jwt:
-    secret: kawaii-chain-wallet-secret-key-2025
-    access-token-expiration: 900000  # 15分钟
-    refresh-token-expiration: 604800000  # 7天
+    issuer: kawaii-wallet
+    access-token-expiration: 900      # 15分钟(秒)
+    refresh-token-expiration: 2592000 # 30天(秒)
+
+  # 认证配置
+  auth:
+    max-login-attempts: 5
+    account-lock-duration: 30  # 分钟
 
   otp:
     length: 6

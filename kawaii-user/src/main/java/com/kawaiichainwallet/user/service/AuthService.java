@@ -178,14 +178,11 @@ public class AuthService {
             auditService.logAction(userId, "REFRESH_TOKEN", "auth", null,
                     "刷新Token成功", clientIp, userAgent, true, null);
 
-            // 构建响应
-            LoginResponse response = new LoginResponse();
-            response.setUserId(userId);
-            response.setUsername(username);
+            // 使用MapStruct构建响应
+            LoginResponse response = authConverter.createLoginResponse(userId, username);
             response.setAccessToken(newAccessToken);
             response.setRefreshToken(newRefreshToken);
             response.setExpiresIn((int) jwtTokenService.getAccessTokenExpiration());
-            response.setTokenType("Bearer");
 
             return response;
         } catch (Exception e) {

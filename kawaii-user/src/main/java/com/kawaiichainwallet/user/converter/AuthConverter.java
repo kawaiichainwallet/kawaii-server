@@ -63,6 +63,17 @@ public interface AuthConverter {
     }
 
     /**
+     * 创建基础LoginResponse（用于refreshToken场景）
+     */
+    default LoginResponse createLoginResponse(String userId, String username) {
+        LoginResponse response = new LoginResponse();
+        response.setUserId(userId);
+        response.setUsername(username);
+        response.setTokenType("Bearer");
+        return response;
+    }
+
+    /**
      * 手机号脱敏
      */
     @Named("maskPhone")

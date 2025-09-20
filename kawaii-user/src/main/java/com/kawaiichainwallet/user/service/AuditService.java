@@ -2,15 +2,13 @@ package com.kawaiichainwallet.user.service;
 
 import com.kawaiichainwallet.user.entity.AuditLog;
 import com.kawaiichainwallet.user.mapper.AuditLogMapper;
+import com.kawaiichainwallet.user.converter.AuditLogConverter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
  * 审计服务
@@ -21,30 +19,17 @@ import java.util.UUID;
 public class AuditService {
 
     private final AuditLogMapper auditLogMapper;
+    private final AuditLogConverter auditLogConverter;
 
     /**
      * 记录操作日志
      */
     public void logAction(String userId, String action, String resourceType, String resourceId, String metadata) {
         try {
-            AuditLog auditLog = new AuditLog();
-            auditLog.setLogId(UUID.randomUUID().toString());
-            auditLog.setUserId(userId);
-            auditLog.setAction(action);
-            auditLog.setResourceType(resourceType);
-            auditLog.setResourceId(resourceId);
-            auditLog.setMetadata(metadata);
-            auditLog.setSuccess(true);
-            auditLog.setCreatedAt(LocalDateTime.now());
-
-            // 获取请求信息
+            // 使用MapStruct converter创建审计日志
             HttpServletRequest request = getCurrentRequest();
-            if (request != null) {
-                auditLog.setIpAddress(getClientIpAddress(request));
-                auditLog.setUserAgent(request.getHeader("User-Agent"));
-                auditLog.setRequestPath(request.getRequestURI());
-                auditLog.setRequestMethod(request.getMethod());
-            }
+            AuditLog auditLog = auditLogConverter.createAuditLogWithRequest(
+                userId, action, resourceType, resourceId, metadata, request);
 
             auditLogMapper.insert(auditLog);
             log.debug("记录审计日志: userId={}, action={}, resourceType={}", userId, action, resourceType);
@@ -60,18 +45,9 @@ public class AuditService {
     public void logAction(String userId, String action, String resourceType, String resourceId,
                          String metadata, String clientIp, String userAgent, boolean success, String errorMessage) {
         try {
-            AuditLog auditLog = new AuditLog();
-            auditLog.setLogId(UUID.randomUUID().toString());
-            auditLog.setUserId(userId);
-            auditLog.setAction(action);
-            auditLog.setResourceType(resourceType);
-            auditLog.setResourceId(resourceId);
-            auditLog.setMetadata(metadata);
-            auditLog.setSuccess(success);
-            auditLog.setErrorMessage(errorMessage);
-            auditLog.setIpAddress(clientIp);
-            auditLog.setUserAgent(userAgent);
-            auditLog.setCreatedAt(LocalDateTime.now());
+            // 使用MapStruct converter创建详细审计日志
+            AuditLog auditLog = auditLogConverter.createDetailedAuditLog(
+                userId, action, resourceType, resourceId, metadata, clientIp, userAgent, success, errorMessage);
 
             // 获取请求信息
             HttpServletRequest request = getCurrentRequest();
@@ -93,25 +69,10 @@ public class AuditService {
     public void logFailedAction(String userId, String action, String resourceType, String resourceId,
                                String errorMessage, String metadata) {
         try {
-            AuditLog auditLog = new AuditLog();
-            auditLog.setLogId(UUID.randomUUID().toString());
-            auditLog.setUserId(userId);
-            auditLog.setAction(action);
-            auditLog.setResourceType(resourceType);
-            auditLog.setResourceId(resourceId);
-            auditLog.setMetadata(metadata);
-            auditLog.setSuccess(false);
-            auditLog.setErrorMessage(errorMessage);
-            auditLog.setCreatedAt(LocalDateTime.now());
-
-            // 获取请求信息
+            // 使用MapStruct converter创建失败审计日志
             HttpServletRequest request = getCurrentRequest();
-            if (request != null) {
-                auditLog.setIpAddress(getClientIpAddress(request));
-                auditLog.setUserAgent(request.getHeader("User-Agent"));
-                auditLog.setRequestPath(request.getRequestURI());
-                auditLog.setRequestMethod(request.getMethod());
-            }
+            AuditLog auditLog = auditLogConverter.createFailedAuditLog(
+                userId, action, resourceType, resourceId, metadata, errorMessage, request);
 
             auditLogMapper.insert(auditLog);
             log.debug("记录失败审计日志: userId={}, action={}, error={}", userId, action, errorMessage);
@@ -132,32 +93,4 @@ public class AuditService {
         }
     }
 
-    /**
-     * 获取客户端IP地址
-     */
-    private String getClientIpAddress(HttpServletRequest request) {
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("Proxy-Client-IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("WL-Proxy-Client-IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("HTTP_CLIENT_IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("HTTP_X_FORWARDED_FOR");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getRemoteAddr();
-        }
-
-        // 处理多个IP的情况，取第一个
-        if (ip != null && ip.contains(",")) {
-            ip = ip.split(",")[0].trim();
-        }
-
-        return ip;
-    }
 }

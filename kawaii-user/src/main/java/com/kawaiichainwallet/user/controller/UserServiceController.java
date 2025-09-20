@@ -7,6 +7,7 @@ import com.kawaiichainwallet.common.response.R;
 import com.kawaiichainwallet.user.service.UserService;
 import com.kawaiichainwallet.user.service.AuthService;
 import com.kawaiichainwallet.user.converter.UserConverter;
+import com.kawaiichainwallet.user.converter.ServiceApiConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +26,7 @@ public class UserServiceController implements UserServiceApi {
     private final UserService userService;
     private final AuthService authService;
     private final UserConverter userConverter;
+    private final ServiceApiConverter serviceApiConverter;
 
     @Override
     public R<TokenValidationDto> validateToken(String authHeader, String internalToken) {
@@ -46,10 +48,8 @@ public class UserServiceController implements UserServiceApi {
             return R.success(dto);
         } catch (Exception e) {
             log.error("Token验证失败: {}", e.getMessage());
-            TokenValidationDto errorDto = new TokenValidationDto();
-            errorDto.setValid(false);
-            errorDto.setErrorMessage(e.getMessage());
-            errorDto.setErrorCode("VALIDATION_ERROR");
+            TokenValidationDto errorDto = serviceApiConverter.createFailedValidationDto(
+                e.getMessage(), "VALIDATION_ERROR");
             return R.success(errorDto);
         }
     }
@@ -91,11 +91,8 @@ public class UserServiceController implements UserServiceApi {
                 return R.error(404, "用户不存在");
             }
 
-            // TODO: 实现用户信息转换逻辑
-            UserInfoDto dto = new UserInfoDto();
-            dto.setUserId(user.getUserId());
-            dto.setUsername(user.getUsername());
-            // 其他字段转换...
+            // 使用MapStruct转换用户信息
+            UserInfoDto dto = serviceApiConverter.userToUserInfoDto(user);
 
             return R.success(dto);
         } catch (Exception e) {
@@ -118,12 +115,8 @@ public class UserServiceController implements UserServiceApi {
                 return R.error(404, "用户不存在");
             }
 
-            // TODO: 实现用户信息转换逻辑
-            UserInfoDto dto = new UserInfoDto();
-            dto.setUserId(user.getUserId());
-            dto.setUsername(user.getUsername());
-            dto.setEmail(user.getEmail());
-            // 其他字段转换...
+            // 使用MapStruct转换用户信息
+            UserInfoDto dto = serviceApiConverter.userToUserInfoDto(user);
 
             return R.success(dto);
         } catch (Exception e) {
@@ -205,11 +198,12 @@ public class UserServiceController implements UserServiceApi {
      * 转换TokenValidationResponse为TokenValidationDto
      */
     private TokenValidationDto convertToTokenValidationDto(Object validationResponse) {
-        // TODO: 实现具体转换逻辑
-        TokenValidationDto dto = new TokenValidationDto();
-        dto.setValid(true);
-        // 其他字段转换...
-        return dto;
+        // 使用MapStruct转换，如果validationResponse是TokenValidationResponse类型
+        if (validationResponse instanceof com.kawaiichainwallet.user.dto.TokenValidationResponse response) {
+            return serviceApiConverter.validationResponseToDto(response);
+        }
+        // 默认返回成功状态
+        return serviceApiConverter.createSuccessValidationDto(null, null, null);
     }
 
     /**

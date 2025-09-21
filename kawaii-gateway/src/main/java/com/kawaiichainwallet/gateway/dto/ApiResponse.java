@@ -1,7 +1,7 @@
 package com.kawaiichainwallet.gateway.dto;
 
-import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Data;
 
 /**
  * 网关API响应包装类

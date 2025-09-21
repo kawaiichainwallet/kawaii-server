@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 
 /**
  * 统一响应结果封装
+ *
  * @param <T> 响应数据类型
  */
 @Data
@@ -52,6 +53,20 @@ public class R<T> {
         this.msg = msg;
         this.data = data;
         this.success = code == 200;
+    }
+
+    /**
+     * 成功响应（无数据）
+     */
+    public static <T> R<T> ok() {
+        return new R<>(200, "操作成功", null);
+    }
+
+    /**
+     * 成功响应（带数据）
+     */
+    public static <T> R<T> ok(T data) {
+        return new R<>(200, "操作成功", data);
     }
 
     /**

@@ -10,8 +10,8 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- 1. 通知表 (notifications)
 -- ================================================================
 CREATE TABLE notifications (
-    notification_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL, -- 注意：不再是外键，而是引用用户服务的用户ID
+    notification_id BIGINT PRIMARY KEY,
+    user_id BIGINT NOT NULL, -- 注意：不再是外键，而是引用用户服务的用户ID
 
     -- 通知内容
     title VARCHAR(200) NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE notifications (
     channels TEXT[] DEFAULT ARRAY['in_app'], -- in_app, email, sms, push
 
     -- 关联信息
-    related_id UUID, -- 关联的交易ID、订单ID等（跨服务引用）
+    related_id BIGINT, -- 关联的交易ID、订单ID等（跨服务引用）
     related_type VARCHAR(50), -- transaction, payment_order, bill_payment
 
     -- 状态管理

@@ -10,8 +10,8 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- 1. 支付订单表 (payment_orders)
 -- ================================================================
 CREATE TABLE payment_orders (
-    order_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    merchant_id UUID NOT NULL, -- 注意：不再是外键，而是引用商户服务的商户ID
+    order_id BIGINT PRIMARY KEY,
+    merchant_id BIGINT NOT NULL, -- 注意：不再是外键，而是引用商户服务的商户ID
 
     -- 订单信息
     merchant_order_id VARCHAR(100) NOT NULL, -- 商户方订单号
@@ -21,7 +21,7 @@ CREATE TABLE payment_orders (
 
     -- 支付信息
     payment_address VARCHAR(100),
-    token_id UUID, -- 注意：不再是外键，而是引用核心服务的代币ID
+    token_id BIGINT, -- 注意：不再是外键，而是引用核心服务的代币ID
     exchange_rate DECIMAL(20, 8), -- 法币汇率
     actual_amount DECIMAL(20, 8), -- 实际支付金额
 
@@ -40,8 +40,8 @@ CREATE TABLE payment_orders (
     callback_success BOOLEAN DEFAULT FALSE,
 
     -- 关联交易
-    payment_tx_id UUID, -- 注意：不再是外键，而是引用核心服务的交易ID
-    refund_tx_id UUID, -- 注意：不再是外键，而是引用核心服务的交易ID
+    payment_tx_id BIGINT, -- 注意：不再是外键，而是引用核心服务的交易ID
+    refund_tx_id BIGINT, -- 注意：不再是外键，而是引用核心服务的交易ID
 
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -56,7 +56,7 @@ CREATE UNIQUE INDEX idx_payment_orders_merchant_order ON payment_orders(merchant
 -- 2. 缴费服务商表 (bill_providers)
 -- ================================================================
 CREATE TABLE bill_providers (
-    provider_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    provider_id BIGINT PRIMARY KEY,
 
     -- 服务商信息
     provider_name VARCHAR(200) NOT NULL,
@@ -90,9 +90,9 @@ CREATE INDEX idx_bill_providers_active ON bill_providers(is_active);
 -- 3. 缴费记录表 (bill_payments)
 -- ================================================================
 CREATE TABLE bill_payments (
-    payment_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL, -- 注意：不再是外键，而是引用用户服务的用户ID
-    provider_id UUID NOT NULL REFERENCES bill_providers(provider_id),
+    payment_id BIGINT PRIMARY KEY,
+    user_id BIGINT NOT NULL, -- 注意：不再是外键，而是引用用户服务的用户ID
+    provider_id BIGINT NOT NULL REFERENCES bill_providers(provider_id),
 
     -- 账单信息
     account_number VARCHAR(100) NOT NULL, -- 用户在服务商的账号
@@ -102,7 +102,7 @@ CREATE TABLE bill_payments (
 
     -- 支付信息
     payment_method VARCHAR(20) DEFAULT 'crypto', -- crypto, balance
-    transaction_id UUID, -- 注意：不再是外键，而是引用核心服务的交易ID
+    transaction_id BIGINT, -- 注意：不再是外键，而是引用核心服务的交易ID
 
     -- 账单详情
     billing_period VARCHAR(20), -- 账单周期

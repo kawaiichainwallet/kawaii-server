@@ -10,7 +10,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- 1. 用户基础表 (users)
 -- ================================================================
 CREATE TABLE users (
-    user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id BIGINT PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     phone VARCHAR(20),
@@ -32,8 +32,8 @@ CREATE TABLE users (
     -- 元数据
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    created_by UUID,
-    updated_by UUID
+    created_by BIGINT,
+    updated_by BIGINT
 );
 
 -- 索引
@@ -46,8 +46,8 @@ CREATE INDEX idx_users_created_at ON users(created_at);
 -- 2. 用户资料表 (user_profiles)
 -- ================================================================
 CREATE TABLE user_profiles (
-    profile_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    profile_id BIGINT PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
 
     -- 个人信息
     first_name VARCHAR(50),
@@ -81,8 +81,8 @@ CREATE UNIQUE INDEX idx_user_profiles_user_id ON user_profiles(user_id);
 -- 3. KYC认证表 (user_kyc)
 -- ================================================================
 CREATE TABLE user_kyc (
-    kyc_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    kyc_id BIGINT PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
 
     -- 认证级别
     kyc_level INTEGER DEFAULT 0 CHECK (kyc_level >= 0 AND kyc_level <= 3),
@@ -98,7 +98,7 @@ CREATE TABLE user_kyc (
     -- 审核信息
     submitted_at TIMESTAMP WITH TIME ZONE,
     reviewed_at TIMESTAMP WITH TIME ZONE,
-    reviewed_by UUID, -- 注意：这里不再是外键，而是引用其他服务的用户ID
+    reviewed_by BIGINT, -- 注意：这里不再是外键，而是引用其他服务的用户ID
     rejection_reason TEXT,
     expires_at TIMESTAMP WITH TIME ZONE,
 
@@ -119,7 +119,7 @@ CREATE INDEX idx_user_kyc_level ON user_kyc(kyc_level);
 CREATE TABLE jwt_blacklist (
     id BIGSERIAL PRIMARY KEY,
     token_id VARCHAR(100) NOT NULL UNIQUE, -- JWT的jti claim
-    user_id UUID NOT NULL REFERENCES users(user_id),
+    user_id BIGINT NOT NULL REFERENCES users(user_id),
     token_type VARCHAR(20) DEFAULT 'access' CHECK (token_type IN ('access', 'refresh')),
     expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
     blacklisted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -149,6 +149,31 @@ CREATE TRIGGER update_user_profiles_updated_at BEFORE UPDATE ON user_profiles
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_user_kyc_updated_at BEFORE UPDATE ON user_kyc
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ================================================================
+-- 5. Leaf分布式ID分配表 (leaf_alloc)
+-- ================================================================
+CREATE TABLE leaf_alloc (
+    biz_tag VARCHAR(128) NOT NULL DEFAULT '',
+    max_id BIGINT NOT NULL DEFAULT 1,
+    step INT NOT NULL,
+    description VARCHAR(256) DEFAULT NULL,
+    update_time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (biz_tag)
+);
+
+-- 初始化各业务线ID分配策略
+INSERT INTO leaf_alloc(biz_tag, max_id, step, description) VALUES
+('user-id', 100000, 1000, '用户相关ID'),
+('wallet-id', 200000, 1000, '钱包相关ID'),
+('transaction-id', 300000, 5000, '交易相关ID'),
+('payment-id', 400000, 3000, '支付订单ID'),
+('merchant-id', 500000, 500, '商户相关ID'),
+('notification-id', 600000, 2000, '通知相关ID');
+
+-- 创建更新时间触发器
+CREATE TRIGGER update_leaf_alloc_updated_at BEFORE UPDATE ON leaf_alloc
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ================================================================

@@ -10,8 +10,8 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- 1. 商户表 (merchants)
 -- ================================================================
 CREATE TABLE merchants (
-    merchant_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL, -- 注意：不再是外键，而是引用用户服务的用户ID
+    merchant_id BIGINT PRIMARY KEY,
+    user_id BIGINT NOT NULL, -- 注意：不再是外键，而是引用用户服务的用户ID
 
     -- 商户信息
     merchant_name VARCHAR(200) NOT NULL,

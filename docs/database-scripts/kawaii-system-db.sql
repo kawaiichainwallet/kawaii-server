@@ -10,7 +10,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- 1. 系统配置表 (system_configs)
 -- ================================================================
 CREATE TABLE system_configs (
-    config_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    config_id BIGINT PRIMARY KEY,
 
     -- 配置信息
     config_key VARCHAR(100) UNIQUE NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE system_configs (
 
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_by UUID -- 注意：不再是外键，而是引用用户服务的用户ID
+    updated_by BIGINT -- 注意：不再是外键，而是引用用户服务的用户ID
 );
 
 CREATE INDEX idx_system_configs_group ON system_configs(config_group);
@@ -37,13 +37,13 @@ CREATE INDEX idx_system_configs_public ON system_configs(is_public);
 -- 2. 审计日志表 (audit_logs)
 -- ================================================================
 CREATE TABLE audit_logs (
-    log_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    log_id BIGINT PRIMARY KEY,
 
     -- 操作信息
-    user_id UUID, -- 注意：不再是外键，而是引用用户服务的用户ID
+    user_id BIGINT, -- 注意：不再是外键，而是引用用户服务的用户ID
     action VARCHAR(100) NOT NULL, -- CREATE, UPDATE, DELETE, LOGIN, LOGOUT等
     resource_type VARCHAR(50) NOT NULL, -- user, wallet, transaction等
-    resource_id UUID,
+    resource_id BIGINT,
 
     -- 请求信息
     ip_address INET,

@@ -47,3 +47,20 @@ mybatis-plus:
       logic-delete-value: 1
       logic-not-delete-value: 0
   type-aliases-package: com.kawaiichainwallet.user.entity
+
+# Leaf分布式ID生成器配置
+leaf:
+  segment:
+    enable: true
+    jdbc:
+      # 使用当前数据源配置，在Nacos中会覆盖
+      url: ${spring.datasource.url:jdbc:postgresql://localhost:5433/kawaii_user_db}
+      username: ${spring.datasource.username:kawaii_user}
+      password: ${spring.datasource.password:password}
+      driver: ${spring.datasource.driver-class-name:org.postgresql.Driver}
+  snowflake:
+    enable: true
+    port: ${server.port:8091}
+    use-nacos: true
+    # Nacos服务发现地址，用于分布式协调
+    zk-address: ${spring.cloud.nacos.discovery.server-addr:localhost:8848}

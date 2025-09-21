@@ -10,7 +10,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- 1. 支持的区块链网络表 (supported_chains)
 -- ================================================================
 CREATE TABLE supported_chains (
-    chain_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    chain_id BIGINT PRIMARY KEY,
     chain_name VARCHAR(50) NOT NULL UNIQUE, -- ethereum, bitcoin, bsc
     chain_symbol VARCHAR(10) NOT NULL, -- ETH, BTC, BNB
     network_id INTEGER, -- 网络ID，如以太坊主网是1
@@ -40,8 +40,8 @@ CREATE INDEX idx_supported_chains_active ON supported_chains(is_active);
 -- 2. 钱包表 (wallets)
 -- ================================================================
 CREATE TABLE wallets (
-    wallet_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL, -- 注意：不再是外键，而是引用用户服务的用户ID
+    wallet_id BIGINT PRIMARY KEY,
+    user_id BIGINT NOT NULL, -- 注意：不再是外键，而是引用用户服务的用户ID
 
     -- 钱包基本信息
     wallet_name VARCHAR(100) NOT NULL,
@@ -73,9 +73,9 @@ CREATE UNIQUE INDEX idx_wallets_user_default ON wallets(user_id) WHERE is_defaul
 -- 3. 钱包地址表 (wallet_addresses)
 -- ================================================================
 CREATE TABLE wallet_addresses (
-    address_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    wallet_id UUID NOT NULL REFERENCES wallets(wallet_id) ON DELETE CASCADE,
-    chain_id UUID NOT NULL REFERENCES supported_chains(chain_id),
+    address_id BIGINT PRIMARY KEY,
+    wallet_id BIGINT NOT NULL REFERENCES wallets(wallet_id) ON DELETE CASCADE,
+    chain_id BIGINT NOT NULL REFERENCES supported_chains(chain_id),
 
     -- 地址信息
     address VARCHAR(100) NOT NULL,
@@ -103,8 +103,8 @@ CREATE INDEX idx_wallet_addresses_active ON wallet_addresses(is_active);
 -- 4. 代币配置表 (tokens)
 -- ================================================================
 CREATE TABLE tokens (
-    token_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    chain_id UUID NOT NULL REFERENCES supported_chains(chain_id),
+    token_id BIGINT PRIMARY KEY,
+    chain_id BIGINT NOT NULL REFERENCES supported_chains(chain_id),
 
     -- 代币基本信息
     contract_address VARCHAR(100),
@@ -138,10 +138,10 @@ CREATE INDEX idx_tokens_active ON tokens(is_active);
 -- 5. 交易记录表 (transactions)
 -- ================================================================
 CREATE TABLE transactions (
-    transaction_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL, -- 注意：不再是外键，而是引用用户服务的用户ID
-    wallet_id UUID NOT NULL REFERENCES wallets(wallet_id),
-    chain_id UUID NOT NULL REFERENCES supported_chains(chain_id),
+    transaction_id BIGINT PRIMARY KEY,
+    user_id BIGINT NOT NULL, -- 注意：不再是外键，而是引用用户服务的用户ID
+    wallet_id BIGINT NOT NULL REFERENCES wallets(wallet_id),
+    chain_id BIGINT NOT NULL REFERENCES supported_chains(chain_id),
 
     -- 交易基本信息
     tx_hash VARCHAR(100) UNIQUE,
@@ -158,7 +158,7 @@ CREATE TABLE transactions (
     to_address VARCHAR(100) NOT NULL,
 
     -- 金额信息
-    token_id UUID REFERENCES tokens(token_id),
+    token_id BIGINT REFERENCES tokens(token_id),
     amount DECIMAL(36, 18) NOT NULL,
     fee_amount DECIMAL(36, 18) DEFAULT 0,
     gas_used BIGINT,
@@ -193,8 +193,8 @@ CREATE INDEX idx_transactions_addresses ON transactions(from_address, to_address
 -- 6. 交易日志表 (transaction_logs)
 -- ================================================================
 CREATE TABLE transaction_logs (
-    log_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    transaction_id UUID NOT NULL REFERENCES transactions(transaction_id) ON DELETE CASCADE,
+    log_id BIGINT PRIMARY KEY,
+    transaction_id BIGINT NOT NULL REFERENCES transactions(transaction_id) ON DELETE CASCADE,
 
     -- 日志信息
     log_index INTEGER,

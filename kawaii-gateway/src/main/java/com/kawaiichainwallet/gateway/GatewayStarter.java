@@ -14,7 +14,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
     "com.kawaiichainwallet.common"
 })
 @EnableDiscoveryClient
-@EnableFeignClients(basePackages = {"com.kawaiichainwallet.api.client"})
+@EnableFeignClients(basePackages = {"com.kawaiichainwallet.api"})
 public class GatewayStarter {
 
     public static void main(String[] args) {

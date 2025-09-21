@@ -1,4 +1,18 @@
 spring:
+  # Redis配置 - 用于限流
+  redis:
+    host: localhost
+    port: 6379
+    database: 0
+    password:
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: -1ms
+
   # Gateway通用配置
   cloud:
     gateway:
@@ -10,7 +24,7 @@ spring:
             - Path=/api/v1/user/**
           filters:
             - name: Authentication
-            - RewritePath=/api/v1/user/(?<segment>.*), /$\{segment}
+            - RewritePath=/api/v1/user/(?<segment>.*), /user/$\{segment}
             - name: RequestRateLimiter
               args:
                 key-resolver: "#{@ipKeyResolver}"
@@ -27,7 +41,7 @@ spring:
             - Path=/api/v1/core/**
           filters:
             - name: Authentication
-            - RewritePath=/api/v1/core/(?<segment>.*), /$\{segment}
+            - RewritePath=/api/v1/core/(?<segment>.*), /core/$\{segment}
           order: 2
 
         # 支付服务路由 - 统一规范为 /api/v1/payment/**
@@ -37,7 +51,7 @@ spring:
             - Path=/api/v1/payment/**
           filters:
             - name: Authentication
-            - RewritePath=/api/v1/payment/(?<segment>.*), /$\{segment}
+            - RewritePath=/api/v1/payment/(?<segment>.*), /payment/$\{segment}
           order: 3
 
       # 全局过滤器配置
@@ -57,3 +71,47 @@ spring:
               - OPTIONS
             allowedHeaders: "*"
             allowCredentials: true
+
+# 应用配置
+app:
+  # JWT配置
+  jwt:
+    secret: "your-256-bit-secret-key-here-must-be-at-least-32-characters-long"
+
+  # 服务地址配置
+  services:
+    user:
+      url: "http://localhost:8081"
+
+  # 路由安全配置
+  security:
+    routes:
+      # 公开路径 - 无需认证
+      public-paths:
+        - "/api/v1/user/auth/login"
+        - "/api/v1/user/auth/register"
+        - "/api/v1/user/auth/send-login-otp"
+        - "/api/v1/user/auth/send-register-otp"
+        - "/api/v1/user/auth/validate"
+        - "/actuator/**"
+        - "/health"
+
+      # 受保护路径 - 需要认证
+      protected-paths:
+        - "/api/v1/user/users/**"
+        - "/api/v1/core/**"
+        - "/api/v1/payment/**"
+
+      # 管理员路径 - 仅管理员可访问
+      admin-paths:
+        - "/api/v1/user/users"
+        - "/api/v1/*/admin/**"
+
+      # 内部路径 - 仅服务间调用
+      internal-paths:
+        - "/api/v1/*/internal/**"
+
+      # 角色路径映射
+      role-paths:
+        "/api/v1/payment/admin/**": ["ADMIN", "PAYMENT_ADMIN"]
+        "/api/v1/core/admin/**": ["ADMIN", "CORE_ADMIN"]

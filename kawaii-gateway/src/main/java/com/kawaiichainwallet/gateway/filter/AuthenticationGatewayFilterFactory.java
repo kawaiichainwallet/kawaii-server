@@ -25,11 +25,11 @@ import java.util.Base64;
 import java.util.List;
 
 /**
- * Gateway 认证过滤器
+ * Gateway 认证过滤器工厂
  */
 @Slf4j
 @Component
-public class AuthenticationFilter extends AbstractGatewayFilterFactory<AuthenticationFilter.Config> {
+public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFactory<AuthenticationGatewayFilterFactory.Config> {
 
     private final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule());
@@ -40,7 +40,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
     @Autowired
     private JwtValidationService jwtValidationService;
 
-    public AuthenticationFilter() {
+    public AuthenticationGatewayFilterFactory() {
         super(Config.class);
     }
 

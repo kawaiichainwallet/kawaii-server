@@ -18,7 +18,7 @@ public interface UserServiceClient {
     /**
      * 获取用户基本信息（用于钱包操作验证）
      */
-    @GetMapping("/api/v1/users/{userId}")
+    @GetMapping("/users/{userId}")
     R<UserBasicInfo> getUserBasicInfo(@PathVariable("userId") String userId,
                                       @RequestHeader("X-Internal-Token") String internalToken);
 

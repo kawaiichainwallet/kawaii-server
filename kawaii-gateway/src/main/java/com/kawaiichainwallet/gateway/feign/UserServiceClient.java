@@ -20,13 +20,13 @@ public interface UserServiceClient {
     /**
      * 验证Token并获取用户信息
      */
-    @GetMapping("/api/v1/validate")
+    @GetMapping("/validate")
     R<Map<String, Object>> validateToken(@RequestHeader("Authorization") String authHeader);
 
     /**
      * 根据用户ID获取用户详细信息（包括角色）
      */
-    @GetMapping("/api/v1/users/{userId}")
+    @GetMapping("/users/{userId}")
     R<UserInfo> getUserInfo(@PathVariable("userId") String userId,
                             @RequestHeader("X-Internal-Token") String internalToken);
 

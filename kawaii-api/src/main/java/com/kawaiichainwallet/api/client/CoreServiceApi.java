@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
  */
 @FeignClient(
     name = "kawaii-core",
-    path = "/api/v1",
     contextId = "coreServiceApi"
 )
 public interface CoreServiceApi {

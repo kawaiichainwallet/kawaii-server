@@ -22,14 +22,14 @@ public interface CoreServiceClient {
     /**
      * 获取用户钱包余额
      */
-    @GetMapping("/api/v1/wallet/{userId}/balance")
+    @GetMapping("/wallet/{userId}/balance")
     R<WalletBalance> getWalletBalance(@PathVariable("userId") String userId,
                                       @RequestHeader("X-Internal-Token") String internalToken);
 
     /**
      * 执行钱包转账
      */
-    @PostMapping("/api/v1/wallet/transfer")
+    @PostMapping("/wallet/transfer")
     R<TransferResult> executeTransfer(@RequestBody TransferRequest request,
                                       @RequestHeader("X-Internal-Token") String internalToken);
 

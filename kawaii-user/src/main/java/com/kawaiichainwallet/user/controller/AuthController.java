@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("")
 @RequiredArgsConstructor
 @Tag(name = "认证接口", description = "用户认证相关接口")
 public class AuthController {

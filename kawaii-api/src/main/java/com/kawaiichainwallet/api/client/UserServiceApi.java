@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
  */
 @FeignClient(
     name = "kawaii-user",
-    path = "/api/v1",
     contextId = "userServiceApi",
     fallbackFactory = com.kawaiichainwallet.api.fallback.UserServiceApiFallbackFactory.class
 )

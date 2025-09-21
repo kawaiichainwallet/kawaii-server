@@ -26,22 +26,14 @@ spring:
           enabled: true
           lower-case-service-id: true
       routes:
-        # 用户服务路由（包含认证功能）- 最高优先级
-        - id: kawaii-user-auth
+        # 用户服务路由 - 统一规范为 /api/v1/user/**
+        - id: kawaii-user
           uri: lb://kawaii-user
           predicates:
-            - Path=/api/v1/login,/api/v1/login/otp,/api/v1/send-login-otp,/api/v1/refresh,/api/v1/logout,/api/v1/validate
+            - Path=/api/v1/user/**
           filters:
             - name: Authentication
-          order: 1
-
-        # 用户管理相关路由
-        - id: kawaii-user-management
-          uri: lb://kawaii-user
-          predicates:
-            - Path=/api/v1/users/**
-          filters:
-            - name: Authentication
+            - RewritePath=/api/v1/user/(?<segment>.*), /$\{segment}
             - name: RequestRateLimiter
               args:
                 key-resolver: "#{@ipKeyResolver}"
@@ -49,27 +41,27 @@ spring:
                   replenish-rate: 10
                   burst-capacity: 20
                   requested-tokens: 1
-          order: 2
+          order: 1
 
-        # 钱包服务路由
+        # 钱包核心服务路由 - 统一规范为 /api/v1/core/**
         - id: kawaii-core
           uri: lb://kawaii-core
           predicates:
-            - Path=/api/v1/wallet/**
+            - Path=/api/v1/core/**
           filters:
             - name: Authentication
-            - RewritePath=/api/v1/wallet/(?<segment>.*), /wallet/$\{segment}
-          order: 3
+            - RewritePath=/api/v1/core/(?<segment>.*), /$\{segment}
+          order: 2
 
-        # 支付服务路由
+        # 支付服务路由 - 统一规范为 /api/v1/payment/**
         - id: kawaii-payment
           uri: lb://kawaii-payment
           predicates:
             - Path=/api/v1/payment/**
           filters:
             - name: Authentication
-            - RewritePath=/api/v1/payment/(?<segment>.*), /payment/$\{segment}
-          order: 4
+            - RewritePath=/api/v1/payment/(?<segment>.*), /$\{segment}
+          order: 3
 
       # 全局过滤器配置
       default-filters:
@@ -124,30 +116,30 @@ app:
     routes:
       # 公开路径 - 无需认证
       public-paths:
-        - "/api/v1/users/register/**"
-        - "/api/v1/users/health"
-        - "/api/v1/login"
-        - "/api/v1/login/otp"
-        - "/api/v1/send-login-otp"
-        - "/api/v1/refresh"
-        - "/api/v1/users/check-**"
+        - "/api/v1/user/register/**"
+        - "/api/v1/user/health"
+        - "/api/v1/user/login"
+        - "/api/v1/user/login/otp"
+        - "/api/v1/user/send-login-otp"
+        - "/api/v1/user/refresh"
+        - "/api/v1/user/check-**"
         - "/actuator/health"
         - "/swagger-ui/**"
         - "/v3/api-docs/**"
 
       # 受保护路径 - 需要认证
       protected-paths:
-        - "/api/v1/users/profile/**"
-        - "/api/v1/logout"
-        - "/api/v1/validate"
-        - "/api/v1/wallet/**"
+        - "/api/v1/user/profile/**"
+        - "/api/v1/user/logout"
+        - "/api/v1/user/validate"
+        - "/api/v1/core/**"
         - "/api/v1/payment/**"
 
       # 角色路径映射 - 需要特定角色
       role-paths:
-        "/api/v1/users/admin/**": ["ADMIN"]
-        "/api/v1/users": ["ADMIN"]  # 获取用户列表
-        "/api/v1/wallet/admin/**": ["ADMIN", "WALLET_ADMIN"]
+        "/api/v1/user/admin/**": ["ADMIN"]
+        "/api/v1/user/users": ["ADMIN"]  # 获取用户列表
+        "/api/v1/core/admin/**": ["ADMIN", "WALLET_ADMIN"]
         "/api/v1/payment/merchant/**": ["MERCHANT"]
 
       # 管理员路径 - 仅管理员可访问

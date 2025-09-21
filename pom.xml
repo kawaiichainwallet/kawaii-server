@@ -48,7 +48,7 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-cloud.version>2025.0.0</spring-cloud.version>
-        <spring-cloud-alibaba.version>2023.0.3.3</spring-cloud-alibaba.version>
+        <spring-cloud-alibaba.version>2025.0.0.0-preview</spring-cloud-alibaba.version>
         <mybatis-plus.version>3.5.8</mybatis-plus.version>
         <hutool.version>5.8.28</hutool.version>
         <springdoc.version>2.2.0</springdoc.version>

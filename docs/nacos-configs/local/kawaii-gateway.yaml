@@ -1,76 +1,78 @@
 spring:
-  # Redis配置 - 用于限流
-  redis:
-    host: localhost
-    port: 6379
-    database: 0
-    password:
-    timeout: 2000ms
-    lettuce:
-      pool:
-        max-active: 8
-        max-idle: 8
-        min-idle: 0
-        max-wait: -1ms
+  data:
+    # Redis配置 - 用于限流
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+      password:
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
 
   # Gateway通用配置
   cloud:
     gateway:
-      routes:
-        # 用户服务路由 - 统一规范为 /api/v1/user/**
-        - id: kawaii-user
-          uri: lb://kawaii-user
-          predicates:
-            - Path=/api/v1/user/**
-          filters:
-            - name: Authentication
-            - RewritePath=/api/v1/user/(?<segment>.*), /user/$\{segment}
-            - name: RequestRateLimiter
-              args:
-                key-resolver: "#{@ipKeyResolver}"
-                redis-rate-limiter:
-                  replenish-rate: 10
-                  burst-capacity: 20
-                  requested-tokens: 1
-          order: 1
+      server:
+        webflux:
+          routes:
+            # 用户服务路由 - 统一规范为 /api/v1/user/**
+            - id: kawaii-user
+              uri: lb://kawaii-user
+              predicates:
+                - Path=/api/v1/user/**
+              filters:
+                - name: Authentication
+                - RewritePath=/api/v1/user/(?<segment>.*), /user/$\{segment}
+                - name: RequestRateLimiter
+                  args:
+                    key-resolver: "#{@ipKeyResolver}"
+                    redis-rate-limiter:
+                      replenish-rate: 10
+                      burst-capacity: 20
+                      requested-tokens: 1
+              order: 1
 
-        # 钱包核心服务路由 - 统一规范为 /api/v1/core/**
-        - id: kawaii-core
-          uri: lb://kawaii-core
-          predicates:
-            - Path=/api/v1/core/**
-          filters:
-            - name: Authentication
-            - RewritePath=/api/v1/core/(?<segment>.*), /core/$\{segment}
-          order: 2
+            # 钱包核心服务路由 - 统一规范为 /api/v1/core/**
+            - id: kawaii-core
+              uri: lb://kawaii-core
+              predicates:
+                - Path=/api/v1/core/**
+              filters:
+                - name: Authentication
+                - RewritePath=/api/v1/core/(?<segment>.*), /core/$\{segment}
+              order: 2
 
-        # 支付服务路由 - 统一规范为 /api/v1/payment/**
-        - id: kawaii-payment
-          uri: lb://kawaii-payment
-          predicates:
-            - Path=/api/v1/payment/**
-          filters:
-            - name: Authentication
-            - RewritePath=/api/v1/payment/(?<segment>.*), /payment/$\{segment}
-          order: 3
+            # 支付服务路由 - 统一规范为 /api/v1/payment/**
+            - id: kawaii-payment
+              uri: lb://kawaii-payment
+              predicates:
+                - Path=/api/v1/payment/**
+              filters:
+                - name: Authentication
+                - RewritePath=/api/v1/payment/(?<segment>.*), /payment/$\{segment}
+              order: 3
+          # 全局CORS配置
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOriginPatterns: "*"
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - OPTIONS
+                allowedHeaders: "*"
+                allowCredentials: true
 
       # 全局过滤器配置
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-
-      # 全局CORS配置
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowedOriginPatterns: "*"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
-            allowedHeaders: "*"
-            allowCredentials: true
 
 # 应用配置
 app:
@@ -113,5 +115,5 @@ app:
 
       # 角色路径映射
       role-paths:
-        "/api/v1/payment/admin/**": ["ADMIN", "PAYMENT_ADMIN"]
-        "/api/v1/core/admin/**": ["ADMIN", "CORE_ADMIN"]
+        "/api/v1/payment/admin/**": [ "ADMIN", "PAYMENT_ADMIN" ]
+        "/api/v1/core/admin/**": [ "ADMIN", "CORE_ADMIN" ]

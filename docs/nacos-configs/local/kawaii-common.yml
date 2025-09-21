@@ -1,0 +1,148 @@
+# ===========================================
+# KawaiiChain Wallet 本地开发环境公共配置
+# 命名空间: kawaii-local
+# 文件名: kawaii-common.yml
+# ===========================================
+
+spring:
+  # 数据库配置 - 本地PostgreSQL
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/kawaii_wallet?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC
+    username: rw
+    password: Admin!123
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+      validation-timeout: 3000
+      leak-detection-threshold: 60000
+
+  # Redis配置 - 本地Redis
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: 123456
+      database: 0
+      timeout: 5000ms
+      lettuce:
+        pool:
+          max-active: 200
+          max-wait: -1ms
+          max-idle: 10
+          min-idle: 0
+
+# Feign配置 - 本地开发
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 10000
+        loggerLevel: full  # 本地开发使用详细日志
+  hystrix:
+    enabled: false
+  okhttp:
+    enabled: true
+
+# 日志配置 - 本地开发使用DEBUG级别
+logging:
+  level:
+    root: INFO
+    com.kawaiichainwallet: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.security: DEBUG
+    feign: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# 管理端点配置 - 本地开发暴露所有端点
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+# 应用业务配置 - 本地开发
+app:
+  # JWT配置
+  jwt:
+    secret: kawaii-chain-wallet-local-secret-key-2025
+    access-token-expiration: 3600      # 本地开发延长到1小时
+    refresh-token-expiration: 604800   # 7天
+    issuer: kawaii-wallet
+
+  # 认证配置
+  auth:
+    max-login-attempts: 10  # 本地开发放宽限制
+    account-lock-duration: 5  # 5分钟
+
+  # OTP配置
+  otp:
+    length: 6
+    expiration: 600  # 本地开发延长到10分钟
+    rate-limit: 30   # 30秒内只能发送1次
+    max-attempts: 10  # 本地开发放宽限制
+
+  # 短信服务配置 (本地开发使用测试配置)
+  sms:
+    provider: mock  # 本地使用模拟短信
+    access-key-id: test-access-key
+    access-key-secret: test-secret
+    sign-name: KawaiiWallet
+    template-code: SMS_TEST
+
+  # 邮件服务配置 (本地开发)
+  email:
+    host: localhost
+    port: 1025  # MailHog端口
+    username: test
+    password: test
+    from: noreply@localhost
+
+  # 微服务地址配置 (本地环境)
+  services:
+    user:
+      url: http://localhost:8082
+    core:
+      url: http://localhost:8083
+    payment:
+      url: http://localhost:8084
+
+  # 安全配置
+  security:
+    # 内部服务调用Token (本地开发)
+    internal-token: kawaii-local-internal-token-2025
+
+    # CORS配置 - 本地开发允许所有来源
+    cors:
+      allowed-origins:
+        - "http://localhost:3000"
+        - "http://localhost:8080"
+        - "http://127.0.0.1:3000"
+      allowed-methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+      allowed-headers: "*"
+      allow-credentials: true
+
+  # 业务配置
+  business:
+    # 钱包配置
+    wallet:
+      default-currency: ETH
+      min-transfer-amount: 0.0001  # 本地测试使用小金额
+      max-transfer-amount: 100
+
+    # 支付配置
+    payment:
+      timeout: 600  # 本地开发延长超时时间
+      retry-times: 5

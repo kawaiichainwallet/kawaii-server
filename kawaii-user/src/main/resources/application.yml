@@ -1,40 +1,31 @@
 server:
   port: 8082
-  servlet:
-    context-path: /user
 
 spring:
   application:
     name: kawaii-user
 
-  # 数据库配置
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/kawaii_wallet?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC
-    username: rw
-    password: Admin!123
-    hikari:
-      maximum-pool-size: 20
-      minimum-idle: 5
-      idle-timeout: 300000
-      connection-timeout: 20000
-      validation-timeout: 3000
-      leak-detection-threshold: 60000
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
 
-  # Redis配置
-  data:
-    redis:
-      host: localhost
-      port: 6379
-      password: 123456
-      database: 0
-      timeout: 5000ms
-      lettuce:
-        pool:
-          max-active: 200
-          max-wait: -1ms
-          max-idle: 10
-          min-idle: 0
+  # 从Nacos配置中心加载配置
+  config:
+    import:
+      - nacos:kawaii-common.yml
+
+  # Nacos配置
+  cloud:
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
+      discovery:
+        namespace: ${NACOS_NAMESPACE:kawaii-local}
+        group: ${NACOS_GROUP:DEFAULT_GROUP}
+      config:
+        namespace: ${NACOS_NAMESPACE:kawaii-local}
+        group: ${NACOS_GROUP:DEFAULT_GROUP}
+        file-extension: yml
 
   # Jackson配置
   jackson:
@@ -42,7 +33,7 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
 
-# MyBatis-Plus配置
+# MyBatis-Plus通用配置
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
@@ -53,54 +44,3 @@ mybatis-plus:
       logic-delete-value: 1
       logic-not-delete-value: 0
   type-aliases-package: com.kawaiichainwallet.user.entity
-
-# 应用自定义配置
-app:
-  # JWT配置 (使用Spring Security OAuth2)
-  jwt:
-    issuer: kawaii-wallet
-    access-token-expiration: 900      # 15分钟(秒)
-    refresh-token-expiration: 2592000 # 30天(秒)
-
-  # 认证配置
-  auth:
-    max-login-attempts: 5
-    account-lock-duration: 30  # 分钟
-
-  otp:
-    length: 6
-    expiration: 300  # 5分钟
-    rate-limit: 60   # 1分钟内只能发送1次
-    max-attempts: 5  # 最大验证次数
-
-  sms:
-    provider: aliyun
-    access-key-id: ${SMS_ACCESS_KEY_ID:}
-    access-key-secret: ${SMS_ACCESS_KEY_SECRET:}
-    sign-name: ${SMS_SIGN_NAME:}
-    template-code: ${SMS_TEMPLATE_CODE:}
-
-  email:
-    host: smtp.gmail.com
-    port: 587
-    username: ${EMAIL_USERNAME:}
-    password: ${EMAIL_PASSWORD:}
-    from: ${EMAIL_FROM:noreply@kawaiichainwallet.com}
-
-# 日志配置
-logging:
-  level:
-    com.kawaiichainwallet: DEBUG
-    org.springframework.security: DEBUG
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-
-# 管理端点配置
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics
-  endpoint:
-    health:
-      show-details: when_authorized

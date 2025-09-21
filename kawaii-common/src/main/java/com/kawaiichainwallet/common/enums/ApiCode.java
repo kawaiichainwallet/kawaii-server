@@ -59,6 +59,7 @@ public enum ApiCode {
     TOKEN_MALFORMED(4003, "Token格式错误"),
     REFRESH_TOKEN_INVALID(4004, "刷新Token无效"),
     INTERNAL_TOKEN_INVALID(4005, "无效的内部调用Token"),
+    TOKEN_REVOKE_FAILED(4006, "Token撤销失败"),
 
     // 钱包相关错误 5xxx
     WALLET_NOT_FOUND(5001, "钱包不存在"),

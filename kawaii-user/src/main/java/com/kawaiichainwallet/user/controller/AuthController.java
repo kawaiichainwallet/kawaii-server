@@ -13,11 +13,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 认证控制器 - 集成在用户服务中
+ * 认证控制器 - 提供外部认证API
  */
 @Slf4j
 @RestController
-@RequestMapping("auth")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 @Tag(name = "认证接口", description = "用户认证相关接口")
 public class AuthController {

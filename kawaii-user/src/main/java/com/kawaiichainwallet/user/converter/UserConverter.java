@@ -2,7 +2,7 @@ package com.kawaiichainwallet.user.converter;
 
 import com.kawaiichainwallet.user.dto.LoginResponse;
 import com.kawaiichainwallet.user.dto.RegisterResponse;
-import com.kawaiichainwallet.user.dto.UserInfoResponse;
+import com.kawaiichainwallet.user.dto.UserDetailsDto;
 import com.kawaiichainwallet.user.entity.User;
 import com.kawaiichainwallet.user.entity.UserProfile;
 import org.mapstruct.*;
@@ -18,14 +18,14 @@ import org.mapstruct.*;
 public interface UserConverter {
 
     /**
-     * User实体转换为UserInfoResponse
+     * User实体转换为UserDetailsDto
      */
     @Mapping(target = "phone", ignore = true)  // 手机号需要脱敏处理
     @Mapping(target = "email", ignore = true)  // 邮箱需要脱敏处理
-    UserInfoResponse userToUserInfoResponse(User user);
+    UserDetailsDto userToUserDetailsDto(User user);
 
     /**
-     * 合并User和UserProfile到UserInfoResponse
+     * 合并User和UserProfile到UserDetailsDto
      */
     @Mapping(source = "user.userId", target = "userId")
     @Mapping(source = "user.username", target = "username")
@@ -41,7 +41,7 @@ public interface UserConverter {
     @Mapping(source = "userProfile.currency", target = "currency")
     @Mapping(target = "phone", ignore = true)  // 手机号需要脱敏处理
     @Mapping(target = "email", ignore = true)  // 邮箱需要脱敏处理
-    UserInfoResponse userAndProfileToUserInfoResponse(User user, UserProfile userProfile);
+    UserDetailsDto userAndProfileToUserDetailsDto(User user, UserProfile userProfile);
 
     /**
      * User实体转换为LoginResponse
@@ -65,10 +65,10 @@ public interface UserConverter {
     RegisterResponse userToRegisterResponse(User user);
 
     /**
-     * 更新UserInfoResponse后处理脱敏
+     * 更新UserDetailsDto后处理脱敏
      */
     @AfterMapping
-    default void maskSensitiveInfo(@MappingTarget UserInfoResponse target, User user) {
+    default void maskSensitiveInfo(@MappingTarget UserDetailsDto target, User user) {
         if (user.getPhone() != null) {
             target.setPhone(maskPhone(user.getPhone()));
         }

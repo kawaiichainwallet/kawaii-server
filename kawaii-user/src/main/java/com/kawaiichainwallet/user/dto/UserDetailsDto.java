@@ -1,14 +1,14 @@
-package com.kawaiichainwallet.api.dto;
+package com.kawaiichainwallet.user.dto;
 
 import lombok.Data;
+
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
- * 用户信息响应 - 服务间调用统一数据传输对象
+ * 用户详细信息DTO - 用于用户服务内部业务逻辑
  */
 @Data
-public class UserInfoResponse {
+public class UserDetailsDto {
 
     /**
      * 用户ID
@@ -21,29 +21,19 @@ public class UserInfoResponse {
     private String username;
 
     /**
-     * 邮箱（已脱敏）
+     * 邮箱（脱敏）
      */
     private String email;
 
     /**
-     * 手机号（已脱敏）
+     * 手机号（脱敏）
      */
     private String phone;
 
     /**
-     * 用户状态 (active, inactive, suspended, deleted)
+     * 用户状态
      */
     private String status;
-
-    /**
-     * 用户角色列表
-     */
-    private List<String> roles;
-
-    /**
-     * KYC认证级别
-     */
-    private String kycLevel;
 
     /**
      * 邮箱是否已验证
@@ -84,11 +74,6 @@ public class UserInfoResponse {
      * 货币偏好
      */
     private String currency;
-
-    /**
-     * 是否启用支付功能
-     */
-    private Boolean paymentEnabled;
 
     /**
      * 创建时间

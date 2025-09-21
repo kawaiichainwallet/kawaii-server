@@ -1,4 +1,4 @@
-package com.kawaiichainwallet.api.client;
+package com.kawaiichainwallet.api.core.client;
 
 import com.kawaiichainwallet.common.response.R;
 import org.springframework.cloud.openfeign.FeignClient;

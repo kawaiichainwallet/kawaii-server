@@ -4,7 +4,7 @@ import com.kawaiichainwallet.common.enums.ApiCode;
 import com.kawaiichainwallet.common.exception.BusinessException;
 import com.kawaiichainwallet.common.utils.ValidationUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import com.kawaiichainwallet.user.dto.UserInfoResponse;
+import com.kawaiichainwallet.user.dto.UserDetailsDto;
 import com.kawaiichainwallet.user.dto.UpdateUserInfoRequest;
 import com.kawaiichainwallet.user.dto.RegisterRequest;
 import com.kawaiichainwallet.user.dto.RegisterResponse;
@@ -94,7 +94,7 @@ public class UserService {
     /**
      * 获取用户详细信息（包含用户资料）
      */
-    public UserInfoResponse getUserInfo(String userId) {
+    public UserDetailsDto getUserInfo(String userId) {
         User user = getUserById(userId);
 
         UserProfile userProfile = userProfileMapper.selectOne(
@@ -102,11 +102,11 @@ public class UserService {
                         .eq(UserProfile::getUserId, userId));
 
         // 使用MapStruct进行对象转换和脱敏处理
-        UserInfoResponse response;
+        UserDetailsDto response;
         if (userProfile != null) {
-            response = userConverter.userAndProfileToUserInfoResponse(user, userProfile);
+            response = userConverter.userAndProfileToUserDetailsDto(user, userProfile);
         } else {
-            response = userConverter.userToUserInfoResponse(user);
+            response = userConverter.userToUserDetailsDto(user);
         }
 
         return response;
@@ -116,7 +116,7 @@ public class UserService {
      * 更新用户信息
      */
     @Transactional(rollbackFor = Exception.class)
-    public UserInfoResponse updateUserInfo(String userId, UpdateUserInfoRequest request) {
+    public UserDetailsDto updateUserInfo(String userId, UpdateUserInfoRequest request) {
         User user = getUserById(userId);
 
         // 更新用户基本信息
@@ -165,7 +165,7 @@ public class UserService {
     /**
      * 获取用户列表（管理员功能）
      */
-    public List<UserInfoResponse> getUserList(int page, int size, String status) {
+    public List<UserDetailsDto> getUserList(int page, int size, String status) {
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<User>()
                 .ne(User::getStatus, "deleted");
 
@@ -175,7 +175,7 @@ public class UserService {
 
         List<User> users = userMapper.selectList(wrapper);
         return users.stream()
-                .map(userConverter::userToUserInfoResponse)
+                .map(userConverter::userToUserDetailsDto)
                 .toList();
     }
 

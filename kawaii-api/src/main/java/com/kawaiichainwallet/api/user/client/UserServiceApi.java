@@ -1,8 +1,8 @@
-package com.kawaiichainwallet.api.client;
+package com.kawaiichainwallet.api.user.client;
 
-import com.kawaiichainwallet.api.dto.UserInfoResponse;
-import com.kawaiichainwallet.api.dto.TokenValidationResponse;
-import com.kawaiichainwallet.api.dto.UserPaymentPermissionResponse;
+import com.kawaiichainwallet.api.user.dto.UserInfoResponse;
+import com.kawaiichainwallet.api.user.dto.TokenValidationResponse;
+import com.kawaiichainwallet.api.user.dto.UserPaymentPermissionResponse;
 import com.kawaiichainwallet.common.response.R;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @FeignClient(
     name = "kawaii-user",
     contextId = "userServiceApi",
-    fallbackFactory = com.kawaiichainwallet.api.fallback.UserServiceApiFallbackFactory.class
+    fallbackFactory = com.kawaiichainwallet.api.user.fallback.UserServiceApiFallbackFactory.class
 )
 public interface UserServiceApi {
 

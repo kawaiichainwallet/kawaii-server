@@ -1,4 +1,4 @@
-package com.kawaiichainwallet.api.dto;
+package com.kawaiichainwallet.api.user.dto;
 
 import lombok.Data;
 import java.math.BigDecimal;

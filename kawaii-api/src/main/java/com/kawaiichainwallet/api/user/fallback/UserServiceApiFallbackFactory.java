@@ -1,9 +1,9 @@
-package com.kawaiichainwallet.api.fallback;
+package com.kawaiichainwallet.api.user.fallback;
 
-import com.kawaiichainwallet.api.client.UserServiceApi;
-import com.kawaiichainwallet.api.dto.TokenValidationResponse;
-import com.kawaiichainwallet.api.dto.UserInfoResponse;
-import com.kawaiichainwallet.api.dto.UserPaymentPermissionResponse;
+import com.kawaiichainwallet.api.user.client.UserServiceApi;
+import com.kawaiichainwallet.api.user.dto.TokenValidationResponse;
+import com.kawaiichainwallet.api.user.dto.UserInfoResponse;
+import com.kawaiichainwallet.api.user.dto.UserPaymentPermissionResponse;
 import com.kawaiichainwallet.common.response.R;
 import com.kawaiichainwallet.common.enums.ApiCode;
 import lombok.extern.slf4j.Slf4j;

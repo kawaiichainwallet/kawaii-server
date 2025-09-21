@@ -2,7 +2,7 @@ package com.kawaiichainwallet.gateway.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.kawaiichainwallet.common.response.R;
+import com.kawaiichainwallet.gateway.dto.ApiResponse;
 import com.kawaiichainwallet.gateway.config.RouteSecurityConfig;
 import com.kawaiichainwallet.gateway.dto.UserContext;
 import com.kawaiichainwallet.gateway.service.JwtValidationService;
@@ -171,7 +171,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
         response.getHeaders().add("Content-Type", MediaType.APPLICATION_JSON_VALUE);
 
         try {
-            R<?> apiResponse = R.error(status.value(), message);
+            ApiResponse<?> apiResponse = ApiResponse.error(status.value(), message);
             String body = objectMapper.writeValueAsString(apiResponse);
             DataBuffer buffer = response.bufferFactory().wrap(body.getBytes(StandardCharsets.UTF_8));
             return response.writeWith(Mono.just(buffer));

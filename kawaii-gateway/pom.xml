@@ -14,10 +14,16 @@
     <description>kawaii-gateway</description>
 
     <dependencies>
-        <!-- Gateway依赖 -->
+        <!-- Gateway依赖 - 排除Servlet相关的validation依赖 -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-gateway</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-validation</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
@@ -28,34 +34,7 @@
             <artifactId>spring-cloud-starter-loadbalancer</artifactId>
         </dependency>
 
-        <!-- 通用模块 - 排除Spring Web依赖 -->
-        <dependency>
-            <groupId>${project.parent.groupId}</groupId>
-            <artifactId>kawaii-common</artifactId>
-            <version>${project.parent.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-web</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.springframework</groupId>
-                    <artifactId>spring-webmvc</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-validation</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-security</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+        <!-- 网关不依赖公共模块，保持独立和轻量 -->
 
         <!-- Web支持 -->
         <dependency>
@@ -81,18 +60,33 @@
             <artifactId>nimbus-jose-jwt</artifactId>
         </dependency>
 
-        <!-- Spring Cloud OpenFeign -->
+        <!-- 手动添加WebFlux兼容的Validation -->
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
+
+        <!-- Spring Cloud OpenFeign - 网关使用WebClient，暂时移除 -->
+        <!--
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
+        -->
 
-        <!-- API接口模块 -->
+        <!-- API接口模块 - 暂时移除以避免Servlet依赖冲突 -->
+        <!-- 网关将使用WebClient直接调用，不使用Feign接口 -->
+        <!--
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
             <artifactId>kawaii-api</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        -->
 
         <!-- Nacos服务发现 -->
         <dependency>

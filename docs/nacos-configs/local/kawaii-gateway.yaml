@@ -81,7 +81,7 @@ app:
   # 服务地址配置
   services:
     user:
-      url: "http://localhost:8081"
+      url: "http://localhost:8091"
 
   # 路由安全配置
   security:

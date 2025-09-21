@@ -1,38 +1,36 @@
 package com.kawaiichainwallet.gateway.service;
 
-import com.nimbusds.jose.jwk.source.ImmutableSecret;
-import com.nimbusds.jose.proc.SecurityContext;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtException;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 
 /**
- * JWT验证服务 - 使用Spring Security标准组件
+ * JWT验证服务 - 使用Nimbus JOSE + JWT库
  */
 @Slf4j
 @Service
 public class JwtValidationService {
 
-    private final JwtDecoder jwtDecoder;
+    private final JWSVerifier jwtVerifier;
 
     public JwtValidationService(@Value("${app.jwt.secret}") String jwtSecret) {
-        // 使用与user服务相同的密钥创建JWT解码器
-        SecretKeySpec secretKey = new SecretKeySpec(
-            jwtSecret.getBytes(StandardCharsets.UTF_8),
-            "HmacSHA256"
-        );
-
-        this.jwtDecoder = NimbusJwtDecoder
-            .withSecretKey(secretKey)
-            .macAlgorithm(MacAlgorithm.HS256)
-            .build();
+        try {
+            // 使用与user服务相同的密钥创建JWT验证器
+            byte[] secretBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
+            this.jwtVerifier = new MACVerifier(secretBytes);
+        } catch (JOSEException e) {
+            throw new RuntimeException("Failed to initialize JWT verifier", e);
+        }
     }
 
     /**
@@ -40,9 +38,9 @@ public class JwtValidationService {
      */
     public boolean validateToken(String token) {
         try {
-            jwtDecoder.decode(token);
-            return true;
-        } catch (JwtException e) {
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            return signedJWT.verify(jwtVerifier);
+        } catch (ParseException | JOSEException e) {
             log.debug("JWT validation failed: {}", e.getMessage());
             return false;
         }
@@ -53,9 +51,10 @@ public class JwtValidationService {
      */
     public String getUserIdFromToken(String token) {
         try {
-            var jwt = jwtDecoder.decode(token);
-            return jwt.getClaimAsString("userId");
-        } catch (JwtException e) {
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
+            return claims.getStringClaim("userId");
+        } catch (ParseException e) {
             log.debug("Failed to extract userId from token: {}", e.getMessage());
             return null;
         }
@@ -66,9 +65,10 @@ public class JwtValidationService {
      */
     public String getUsernameFromToken(String token) {
         try {
-            var jwt = jwtDecoder.decode(token);
-            return jwt.getClaimAsString("username");
-        } catch (JwtException e) {
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
+            return claims.getStringClaim("username");
+        } catch (ParseException e) {
             log.debug("Failed to extract username from token: {}", e.getMessage());
             return null;
         }
@@ -79,9 +79,10 @@ public class JwtValidationService {
      */
     public String getTokenTypeFromToken(String token) {
         try {
-            var jwt = jwtDecoder.decode(token);
-            return jwt.getClaimAsString("tokenType");
-        } catch (JwtException e) {
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
+            return claims.getStringClaim("tokenType");
+        } catch (ParseException e) {
             log.debug("Failed to extract tokenType from token: {}", e.getMessage());
             return null;
         }

@@ -11,7 +11,8 @@ spring:
   # 从Nacos配置中心加载配置
   config:
     import:
-      - nacos:kawaii-common.yml
+      - nacos:${spring.application.name}.yaml
+      - nacos:kawaii-common.yaml
 
   # 明确指定为 Reactive Web 应用
   main:
@@ -24,12 +25,12 @@ spring:
       username: ${NACOS_USERNAME:nacos}
       password: ${NACOS_PASSWORD:nacos}
       discovery:
-        namespace: ${NACOS_NAMESPACE:kawaii-local}
+        namespace: ${NACOS_NAMESPACE:public}
         group: ${NACOS_GROUP:DEFAULT_GROUP}
       config:
-        namespace: ${NACOS_NAMESPACE:kawaii-local}
+        namespace: ${NACOS_NAMESPACE:public}
         group: ${NACOS_GROUP:DEFAULT_GROUP}
-        file-extension: yml
+        file-extension: yaml
 
     # Gateway基础配置
     gateway:

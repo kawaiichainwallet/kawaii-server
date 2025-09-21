@@ -58,7 +58,7 @@ src/main/resources/
 
 1. **统一配置文件**: 每个微服务只有一个 `application.yml`
 2. **环境变量控制**: 通过 `NACOS_NAMESPACE` 等环境变量切换环境
-3. **Nacos配置导入**: 统一从 `kawaii-common.yml` 导入公共配置
+3. **Nacos配置导入**: 统一从 `kawaii-common.yaml` 导入公共配置
 4. **命名空间隔离**: 不同环境配置完全隔离，避免误操作
 
 ## 🚀 快速开始
@@ -197,19 +197,6 @@ java -jar kawaii-gateway.jar
 - JWT配置
 - 业务配置
 
-### 配置示例文件
-
-项目提供了完整的配置示例文件：
-
-```
-docs/nacos-configs/
-├── local/kawaii-common.yml      # 本地开发环境配置
-├── dev/kawaii-common.yml        # 开发环境配置
-├── test/kawaii-common.yml       # 测试环境配置
-├── staging/kawaii-common.yml    # 预发布环境配置
-└── prod/kawaii-common.yml       # 生产环境配置
-```
-
 ### 配置部署步骤
 
 1. 登录对应环境的Nacos控制台
@@ -328,112 +315,6 @@ POST /api/v1/payment/orders
 
 每个微服务的 `application.yml` 统一配置格式：
 
-```yaml
-server:
-  port: 8080  # 各服务端口不同
-
-spring:
-  application:
-    name: kawaii-gateway  # 各服务名称不同
-
-  profiles:
-    active: ${SPRING_PROFILES_ACTIVE:local}
-
-  # 从Nacos配置中心加载配置
-  config:
-    import:
-      - nacos:kawaii-common.yml
-
-  # Nacos配置
-  cloud:
-    nacos:
-      server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
-      username: ${NACOS_USERNAME:nacos}
-      password: ${NACOS_PASSWORD:nacos}
-      discovery:
-        namespace: ${NACOS_NAMESPACE:kawaii-local}
-        group: ${NACOS_GROUP:DEFAULT_GROUP}
-      config:
-        namespace: ${NACOS_NAMESPACE:kawaii-local}
-        group: ${NACOS_GROUP:DEFAULT_GROUP}
-        file-extension: yml
-```
-
-# Nacos配置中心示例
-
-## 本地开发环境 (kawaii-local)
-
-```yaml
-# ===========================================
-# KawaiiChain Wallet 本地开发环境公共配置
-# 命名空间: kawaii-local
-# 文件名: kawaii-common.yml
-# ===========================================
-
-spring:
-  # 数据库配置 - 本地PostgreSQL
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/kawaii_wallet?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC
-    username: rw
-    password: Admin!123
-
-  # Redis配置 - 本地Redis
-  data:
-    redis:
-      host: localhost
-      port: 6379
-      password: 123456
-
-# 应用业务配置 - 本地开发
-app:
-  jwt:
-    secret: kawaii-chain-wallet-local-secret-key-2025
-    access-token-expiration: 3600      # 本地开发延长到1小时
-
-  # 短信服务配置 (本地开发使用模拟短信)
-  sms:
-    provider: mock  # 本地使用模拟短信
-```
-
-## 生产环境 (kawaii-prod)
-
-```yaml
-# ===========================================
-# KawaiiChain Wallet 生产环境公共配置
-# 命名空间: kawaii-prod
-# 文件名: kawaii-common.yml
-# ===========================================
-
-spring:
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/kawaii_wallet?useUnicode=true&characterEncoding=utf8&useSSL=true&serverTimezone=UTC
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD}
-
-# 日志配置 - 生产环境严格日志级别
-logging:
-  level:
-    root: WARN
-    com.kawaiichainwallet: INFO
-
-app:
-  jwt:
-    secret: ${JWT_SECRET}  # 必须通过环境变量注入
-    access-token-expiration: 900       # 15分钟
-
-  sms:
-    provider: aliyun
-    access-key-id: ${SMS_ACCESS_KEY_ID}
-    access-key-secret: ${SMS_ACCESS_KEY_SECRET}
-```
 
 ## 📋 配置说明
 
@@ -468,7 +349,7 @@ export SMS_ACCESS_KEY_SECRET=your-secret
 ### 配置优先级
 
 1. **环境变量** (最高优先级)
-2. **Nacos配置中心 kawaii-common.yml**
+2. **Nacos配置中心 kawaii-common.yaml**
 3. **application.yml** (最低优先级)
 
 ### 配置管理策略

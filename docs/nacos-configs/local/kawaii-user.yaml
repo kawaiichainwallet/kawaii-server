@@ -1,72 +1,7 @@
-# ===========================================
-# KawaiiChain Wallet 本地开发环境公共配置
-# 命名空间: kawaii-local
-# 文件名: kawaii-common.yml
-# ===========================================
-
 spring:
   # 数据库配置 - 本地PostgreSQL
   datasource:
-    driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/kawaii_wallet?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC
-    username: rw
-    password: Admin!123
-    hikari:
-      maximum-pool-size: 20
-      minimum-idle: 5
-      idle-timeout: 300000
-      connection-timeout: 20000
-      validation-timeout: 3000
-      leak-detection-threshold: 60000
-
-  # Redis配置 - 本地Redis
-  data:
-    redis:
-      host: localhost
-      port: 6379
-      password: 123456
-      database: 0
-      timeout: 5000ms
-      lettuce:
-        pool:
-          max-active: 200
-          max-wait: -1ms
-          max-idle: 10
-          min-idle: 0
-
-# Feign配置 - 本地开发
-feign:
-  client:
-    config:
-      default:
-        connectTimeout: 5000
-        readTimeout: 10000
-        loggerLevel: full  # 本地开发使用详细日志
-  hystrix:
-    enabled: false
-  okhttp:
-    enabled: true
-
-# 日志配置 - 本地开发使用DEBUG级别
-logging:
-  level:
-    root: INFO
-    com.kawaiichainwallet: DEBUG
-    org.springframework.cloud.gateway: DEBUG
-    org.springframework.security: DEBUG
-    feign: DEBUG
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-
-# 管理端点配置 - 本地开发暴露所有端点
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  endpoint:
-    health:
-      show-details: always
 
 # 应用业务配置 - 本地开发
 app:

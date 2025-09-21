@@ -4,8 +4,8 @@ import com.kawaiichainwallet.common.enums.ApiCode;
 import com.kawaiichainwallet.common.response.R;
 import com.kawaiichainwallet.common.utils.ValidationUtil;
 import com.kawaiichainwallet.user.context.UserContextHolder;
-import com.kawaiichainwallet.user.dto.UserInfoResponse;
 import com.kawaiichainwallet.user.dto.UpdateUserInfoRequest;
+import com.kawaiichainwallet.user.dto.UserInfoResponse;
 import com.kawaiichainwallet.user.entity.User;
 import com.kawaiichainwallet.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -159,12 +159,4 @@ public class UserController {
         return R.success(users);
     }
 
-    /**
-     * 健康检查
-     */
-    @GetMapping("/health")
-    @Operation(summary = "健康检查", description = "用户服务健康检查")
-    public R<String> health() {
-        return R.success("用户服务运行正常", "OK");
-    }
 }

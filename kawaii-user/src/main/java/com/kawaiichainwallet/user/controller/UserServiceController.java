@@ -1,15 +1,14 @@
 package com.kawaiichainwallet.user.controller;
 
 import com.kawaiichainwallet.api.client.UserServiceApi;
-import com.kawaiichainwallet.api.dto.UserInfoResponse;
 import com.kawaiichainwallet.api.dto.TokenValidationResponse;
+import com.kawaiichainwallet.api.dto.UserInfoResponse;
 import com.kawaiichainwallet.api.dto.UserPaymentPermissionResponse;
-import com.kawaiichainwallet.common.response.R;
 import com.kawaiichainwallet.common.enums.ApiCode;
-import com.kawaiichainwallet.user.service.UserService;
-import com.kawaiichainwallet.user.service.AuthService;
-import com.kawaiichainwallet.user.converter.UserConverter;
+import com.kawaiichainwallet.common.response.R;
 import com.kawaiichainwallet.user.converter.ServiceApiConverter;
+import com.kawaiichainwallet.user.service.AuthService;
+import com.kawaiichainwallet.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,7 +26,6 @@ public class UserServiceController implements UserServiceApi {
 
     private final UserService userService;
     private final AuthService authService;
-    private final UserConverter userConverter;
     private final ServiceApiConverter serviceApiConverter;
 
     @Override
@@ -51,7 +49,7 @@ public class UserServiceController implements UserServiceApi {
         } catch (Exception e) {
             log.error("Token验证失败: {}", e.getMessage());
             TokenValidationResponse errorDto = serviceApiConverter.createFailedValidationResponse(
-                e.getMessage(), "VALIDATION_ERROR");
+                    e.getMessage(), "VALIDATION_ERROR");
             return R.success(errorDto);
         }
     }

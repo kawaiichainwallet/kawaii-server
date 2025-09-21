@@ -1,0 +1,59 @@
+spring:
+  # Gateway通用配置
+  cloud:
+    gateway:
+      routes:
+        # 用户服务路由 - 统一规范为 /api/v1/user/**
+        - id: kawaii-user
+          uri: lb://kawaii-user
+          predicates:
+            - Path=/api/v1/user/**
+          filters:
+            - name: Authentication
+            - RewritePath=/api/v1/user/(?<segment>.*), /$\{segment}
+            - name: RequestRateLimiter
+              args:
+                key-resolver: "#{@ipKeyResolver}"
+                redis-rate-limiter:
+                  replenish-rate: 10
+                  burst-capacity: 20
+                  requested-tokens: 1
+          order: 1
+
+        # 钱包核心服务路由 - 统一规范为 /api/v1/core/**
+        - id: kawaii-core
+          uri: lb://kawaii-core
+          predicates:
+            - Path=/api/v1/core/**
+          filters:
+            - name: Authentication
+            - RewritePath=/api/v1/core/(?<segment>.*), /$\{segment}
+          order: 2
+
+        # 支付服务路由 - 统一规范为 /api/v1/payment/**
+        - id: kawaii-payment
+          uri: lb://kawaii-payment
+          predicates:
+            - Path=/api/v1/payment/**
+          filters:
+            - name: Authentication
+            - RewritePath=/api/v1/payment/(?<segment>.*), /$\{segment}
+          order: 3
+
+      # 全局过滤器配置
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+
+      # 全局CORS配置
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true

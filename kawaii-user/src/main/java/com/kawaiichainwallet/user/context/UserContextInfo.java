@@ -32,16 +32,12 @@ public class UserContextInfo {
      */
     private boolean fromGateway;
 
-    /**
-     * 内部token是否有效
-     */
-    private boolean validInternalToken;
 
     /**
      * 检查用户是否已认证
      */
     public boolean isAuthenticated() {
-        return userId != null && !userId.trim().isEmpty() && fromGateway && validInternalToken;
+        return userId != null && !userId.trim().isEmpty() && fromGateway;
     }
 
     /**

@@ -21,7 +21,6 @@ public class UserContextHolder {
     private static final String HEADER_USER_ID = "X-User-Id";
     private static final String HEADER_USER_EMAIL = "X-User-Email";
     private static final String HEADER_USER_ROLES = "X-User-Roles";
-    private static final String HEADER_INTERNAL_TOKEN = "X-Internal-Token";
     private static final String HEADER_REQUEST_SOURCE = "X-Request-Source";
 
     /**
@@ -74,39 +73,6 @@ public class UserContextHolder {
         return false;
     }
 
-    /**
-     * 获取内部认证token
-     */
-    public static String getInternalToken() {
-        HttpServletRequest request = getCurrentRequest();
-        if (request != null) {
-            return request.getHeader(HEADER_INTERNAL_TOKEN);
-        }
-        return null;
-    }
-
-    /**
-     * 验证内部token的有效性
-     */
-    public static boolean isValidInternalToken() {
-        String token = getInternalToken();
-        if (token == null || token.trim().isEmpty()) {
-            return false;
-        }
-
-        try {
-            // 解码Base64
-            String decoded = new String(Base64.getDecoder().decode(token), StandardCharsets.UTF_8);
-
-            // 简单验证：检查是否包含必要字段和来源
-            return decoded.contains("\"source\":\"gateway\"") &&
-                   decoded.contains("\"userId\":") &&
-                   decoded.contains("\"iat\":");
-        } catch (Exception e) {
-            log.warn("Invalid internal token format: {}", e.getMessage());
-            return false;
-        }
-    }
 
     /**
      * 检查当前用户是否具有指定角色
@@ -133,7 +99,6 @@ public class UserContextHolder {
             .email(getCurrentUserEmail())
             .roles(getCurrentUserRoles())
             .fromGateway(isFromGateway())
-            .validInternalToken(isValidInternalToken())
             .build();
     }
 

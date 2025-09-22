@@ -106,8 +106,6 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
                     .header("X-User-Email", userContext.getEmail())
                     .header("X-User-Roles", String.join(",", userContext.getRoles()))
 
-                    // 内部服务间认证token
-                    .header("X-Internal-Token", createInternalToken(userContext))
 
                     // 请求追踪
                     .header("X-Request-Source", "gateway")
@@ -141,22 +139,6 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
         }
     }
 
-    private String createInternalToken(UserContext userContext) {
-        // 创建内部服务间的简化认证token
-        try {
-            String payload = String.format(
-                    "{\"userId\":\"%s\",\"email\":\"%s\",\"roles\":\"%s\",\"iat\":%d,\"source\":\"gateway\"}",
-                    userContext.getUserId(),
-                    userContext.getEmail(),
-                    String.join(",", userContext.getRoles()),
-                    Instant.now().getEpochSecond()
-            );
-            return Base64.getEncoder().encodeToString(payload.getBytes(StandardCharsets.UTF_8));
-        } catch (Exception e) {
-            log.error("Failed to create internal token", e);
-            return "";
-        }
-    }
 
     private Mono<Void> unauthorized(ServerHttpResponse response, String message) {
         return writeErrorResponse(response, HttpStatus.UNAUTHORIZED, message);

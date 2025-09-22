@@ -23,7 +23,7 @@ public class JwtValidationService {
 
     private final JWSVerifier jwtVerifier;
 
-    public JwtValidationService(@Value("${app.jwt.secret}") String jwtSecret) {
+    public JwtValidationService(@Value("${app.security.jwt.secret}") String jwtSecret) {
         try {
             // 使用与user服务相同的密钥创建JWT验证器
             byte[] secretBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);

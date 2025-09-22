@@ -73,6 +73,10 @@ management:
 app:
   # 安全配置
   security:
-    # 预留安全配置项
-    # 可以在此添加需要的安全相关配置
-    placeholder: reserved
+    # JWT统一配置 - 所有微服务共享
+    jwt:
+      secret: kawaii-chain-wallet-local-secret-key-2025
+      access-token-expiration: 3600      # 1小时 (本地开发)
+      refresh-token-expiration: 604800   # 7天
+      issuer: kawaii-wallet
+      algorithm: HS256                   # 使用HMAC SHA256算法

@@ -76,10 +76,6 @@ spring:
 
 # 应用配置
 app:
-  # JWT配置
-  jwt:
-    secret: "your-256-bit-secret-key-here-must-be-at-least-32-characters-long"
-
   # 服务地址配置
   services:
     user:

@@ -23,15 +23,13 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Spring Security配置
@@ -46,8 +44,11 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
-    @Value("${app.jwt.issuer:kawaii-wallet}")
+    @Value("${app.security.jwt.issuer:kawaii-wallet}")
     private String issuer;
+
+    @Value("${app.security.jwt.secret}")
+    private String jwtSecret;
 
     /**
      * 密码编码器
@@ -117,52 +118,24 @@ public class SecurityConfig {
     }
 
     /**
-     * JWT解码器
+     * JWT解码器 - 使用HMAC算法
      */
     @Bean
     public JwtDecoder jwtDecoder() {
-        try {
-            return NimbusJwtDecoder.withPublicKey(rsaKey().toRSAPublicKey()).build();
-        } catch (com.nimbusds.jose.JOSEException e) {
-            throw new RuntimeException("Failed to create JWT decoder", e);
-        }
+        byte[] secretBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
+        return NimbusJwtDecoder.withSecretKey(new SecretKeySpec(secretBytes, "HmacSHA256")).build();
     }
 
     /**
-     * JWT编码器
+     * JWT编码器 - 使用HMAC算法
      */
     @Bean
     public JwtEncoder jwtEncoder() {
-        JWK jwk = rsaKey();
+        byte[] secretBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
+        SecretKeySpec secretKey = new SecretKeySpec(secretBytes, "HmacSHA256");
+        JWK jwk = new OctetSequenceKey.Builder(secretBytes).build();
         JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
         return new NimbusJwtEncoder(jwks);
     }
 
-    /**
-     * RSA密钥对
-     * 生产环境中应该从配置文件或密钥管理服务中加载
-     */
-    @Bean
-    public RSAKey rsaKey() {
-        KeyPair keyPair = generateRsaKey();
-        RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
-        RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
-        return new RSAKey.Builder(publicKey)
-                .privateKey(privateKey)
-                .keyID("kawaii-jwt-key")
-                .build();
-    }
-
-    /**
-     * 生成RSA密钥对
-     */
-    private static KeyPair generateRsaKey() {
-        try {
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(2048);
-            return keyPairGenerator.generateKeyPair();
-        } catch (Exception ex) {
-            throw new IllegalStateException("无法生成RSA密钥对", ex);
-        }
-    }
 }

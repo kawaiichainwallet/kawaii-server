@@ -22,13 +22,13 @@ public class JwtTokenService {
     private final JwtEncoder jwtEncoder;
     private final JwtDecoder jwtDecoder;
 
-    @Value("${app.jwt.issuer:kawaii-wallet-auth}")
+    @Value("${app.security.jwt.issuer:kawaii-wallet-auth}")
     private String issuer;
 
-    @Value("${app.jwt.access-token-expiration:900}") // 15分钟
+    @Value("${app.security.jwt.access-token-expiration:900}") // 15分钟
     private long accessTokenExpiration;
 
-    @Value("${app.jwt.refresh-token-expiration:2592000}") // 30天
+    @Value("${app.security.jwt.refresh-token-expiration:2592000}") // 30天
     private long refreshTokenExpiration;
 
     /**

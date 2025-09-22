@@ -1,6 +1,7 @@
 package com.kawaiichainwallet.common.response;
 
 import com.kawaiichainwallet.common.enums.ApiCode;
+import com.kawaiichainwallet.common.utils.TimeUtil;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -44,7 +45,7 @@ public class R<T> {
     private Boolean success;
 
     public R() {
-        this.timestamp = LocalDateTime.now();
+        this.timestamp = TimeUtil.nowUtc();
     }
 
     public R(Integer code, String msg, T data) {

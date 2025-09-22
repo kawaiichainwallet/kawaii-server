@@ -1,5 +1,6 @@
 package com.kawaiichainwallet.user.service;
 
+import com.kawaiichainwallet.common.utils.TimeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,8 +36,8 @@ public class JwtTokenService {
      * 生成访问令牌
      */
     public String generateAccessToken(String userId, String username) {
-        Instant now = Instant.now();
-        Instant expiresAt = now.plus(accessTokenExpiration, ChronoUnit.SECONDS);
+        Instant now = TimeUtil.nowInstant();
+        Instant expiresAt = TimeUtil.plusSeconds(now, accessTokenExpiration);
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer(issuer)
@@ -58,8 +59,8 @@ public class JwtTokenService {
      * 生成刷新令牌
      */
     public String generateRefreshToken(String userId, String username) {
-        Instant now = Instant.now();
-        Instant expiresAt = now.plus(refreshTokenExpiration, ChronoUnit.SECONDS);
+        Instant now = TimeUtil.nowInstant();
+        Instant expiresAt = TimeUtil.plusSeconds(now, refreshTokenExpiration);
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer(issuer)
@@ -87,7 +88,7 @@ public class JwtTokenService {
             // 检查是否为访问令牌且未过期
             return "access".equals(tokenType) &&
                    jwt.getExpiresAt() != null &&
-                   jwt.getExpiresAt().isAfter(Instant.now());
+                   jwt.getExpiresAt().isAfter(TimeUtil.nowInstant());
         } catch (JwtException e) {
             log.debug("访问令牌验证失败: {}", e.getMessage());
             return false;
@@ -105,7 +106,7 @@ public class JwtTokenService {
             // 检查是否为刷新令牌且未过期
             return "refresh".equals(tokenType) &&
                    jwt.getExpiresAt() != null &&
-                   jwt.getExpiresAt().isAfter(Instant.now());
+                   jwt.getExpiresAt().isAfter(TimeUtil.nowInstant());
         } catch (JwtException e) {
             log.debug("刷新令牌验证失败: {}", e.getMessage());
             return false;

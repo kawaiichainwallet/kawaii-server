@@ -1,6 +1,7 @@
 package com.kawaiichainwallet.user.converter;
 
 import com.kawaiichainwallet.user.entity.AuditLog;
+import com.kawaiichainwallet.common.utils.TimeUtil;
 import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +27,7 @@ public class AuditLogConverter {
         auditLog.setResourceId(resourceId);
         auditLog.setMetadata(metadata);
         auditLog.setSuccess(true);
-        auditLog.setCreatedAt(LocalDateTime.now());
+        auditLog.setCreatedAt(TimeUtil.nowUtc());
         return auditLog;
     }
 

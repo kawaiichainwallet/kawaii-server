@@ -33,6 +33,12 @@ spring:
           max-idle: 10
           min-idle: 0
 
+  # Jackson统一配置 - 所有微服务共享
+  jackson:
+    default-property-inclusion: non_null
+    date-format: yyyy-MM-dd'T'HH:mm:ss.SSSZ
+    time-zone: UTC
+
 # Feign配置 - 本地开发
 feign:
   client:
@@ -71,6 +77,11 @@ management:
 # 应用公共配置
 # ===========================================
 app:
+  # 时区配置
+  timezone:
+    default: UTC                          # 应用默认时区
+    jvm-timezone: UTC                     # JVM时区设置
+
   # 安全配置
   security:
     # JWT统一配置 - 所有微服务共享

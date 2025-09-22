@@ -30,11 +30,6 @@ spring:
         group: ${NACOS_GROUP:DEFAULT_GROUP}
         file-extension: yaml
 
-  # Jackson配置
-  jackson:
-    default-property-inclusion: non_null
-    date-format: yyyy-MM-dd HH:mm:ss
-    time-zone: GMT+8
 
 # MyBatis-Plus通用配置
 mybatis-plus:

@@ -6,6 +6,7 @@ import com.kawaiichainwallet.api.user.dto.IdGenerationResponse;
 import com.kawaiichainwallet.common.enums.ApiCode;
 import com.kawaiichainwallet.common.response.R;
 import com.kawaiichainwallet.user.service.DistributedIdService;
+import com.kawaiichainwallet.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -101,7 +102,7 @@ public class IdGeneratorInternalController implements IdGeneratorServiceApi {
 
             Map<String, Object> status = new HashMap<>();
             status.put("status", "RUNNING");
-            status.put("timestamp", LocalDateTime.now());
+            status.put("timestamp", TimeUtil.nowUtc());
             status.put("segment_enabled", true);
             status.put("snowflake_enabled", true);
             status.put("healthy", distributedIdService.isHealthy());

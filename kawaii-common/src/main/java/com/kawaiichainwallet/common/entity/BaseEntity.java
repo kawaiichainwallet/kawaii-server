@@ -1,5 +1,6 @@
 package com.kawaiichainwallet.common.entity;
 
+import com.kawaiichainwallet.common.utils.TimeUtil;
 import lombok.Data;
 
 import java.io.Serial;
@@ -36,17 +37,17 @@ public abstract class BaseEntity implements Serializable {
     private String updatedBy;
 
     /**
-     * 设置创建时间
+     * 设置创建时间（UTC）
      */
     public void setCreateTime() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        this.createdAt = TimeUtil.nowUtc();
+        this.updatedAt = TimeUtil.nowUtc();
     }
 
     /**
-     * 设置更新时间
+     * 设置更新时间（UTC）
      */
     public void setUpdateTime() {
-        this.updatedAt = LocalDateTime.now();
+        this.updatedAt = TimeUtil.nowUtc();
     }
 }

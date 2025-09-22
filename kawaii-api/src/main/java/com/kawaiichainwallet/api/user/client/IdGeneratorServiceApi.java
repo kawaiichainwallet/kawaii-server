@@ -26,49 +26,40 @@ public interface IdGeneratorServiceApi {
      */
     @PostMapping("/segment/{bizTag}")
     R<IdGenerationResponse> generateSegmentId(
-        @PathVariable("bizTag") String bizTag,
-        @RequestHeader("X-Internal-Token") String internalToken
+        @PathVariable("bizTag") String bizTag
     );
 
     /**
      * 生成Snowflake模式ID
      */
     @PostMapping("/snowflake")
-    R<IdGenerationResponse> generateSnowflakeId(
-        @RequestHeader("X-Internal-Token") String internalToken
-    );
+    R<IdGenerationResponse> generateSnowflakeId();
 
     /**
      * 批量生成Segment模式ID
      */
     @PostMapping("/batch/segment")
     R<IdGenerationResponse> generateBatchSegmentIds(
-        @RequestBody IdGenerationRequest request,
-        @RequestHeader("X-Internal-Token") String internalToken
+        @RequestBody IdGenerationRequest request
     );
 
     /**
      * 获取ID生成器状态信息
      */
     @GetMapping("/status")
-    R<Map<String, Object>> getGeneratorStatus(
-        @RequestHeader("X-Internal-Token") String internalToken
-    );
+    R<Map<String, Object>> getGeneratorStatus();
 
     /**
      * 根据业务标识获取当前最大ID
      */
     @GetMapping("/max-id/{bizTag}")
     R<Long> getMaxId(
-        @PathVariable("bizTag") String bizTag,
-        @RequestHeader("X-Internal-Token") String internalToken
+        @PathVariable("bizTag") String bizTag
     );
 
     /**
      * 预热ID生成器（在系统启动时调用）
      */
     @PostMapping("/warmup")
-    R<String> warmupGenerator(
-        @RequestHeader("X-Internal-Token") String internalToken
-    );
+    R<String> warmupGenerator();
 }

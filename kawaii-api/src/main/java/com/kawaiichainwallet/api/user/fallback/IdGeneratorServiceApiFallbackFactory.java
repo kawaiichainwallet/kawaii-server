@@ -28,7 +28,7 @@ public class IdGeneratorServiceApiFallbackFactory implements FallbackFactory<IdG
         return new IdGeneratorServiceApi() {
 
             @Override
-            public R<IdGenerationResponse> generateSegmentId(String bizTag, String internalToken) {
+            public R<IdGenerationResponse> generateSegmentId(String bizTag) {
                 log.error("生成Segment ID失败: bizTag={}", bizTag, cause);
                 // 降级策略：生成基于时间戳的临时ID
                 IdGenerationResponse response = new IdGenerationResponse();
@@ -41,7 +41,7 @@ public class IdGeneratorServiceApiFallbackFactory implements FallbackFactory<IdG
             }
 
             @Override
-            public R<IdGenerationResponse> generateSnowflakeId(String internalToken) {
+            public R<IdGenerationResponse> generateSnowflakeId() {
                 log.error("生成Snowflake ID失败", cause);
                 IdGenerationResponse response = new IdGenerationResponse();
                 response.setId(generateFallbackId());
@@ -52,7 +52,7 @@ public class IdGeneratorServiceApiFallbackFactory implements FallbackFactory<IdG
             }
 
             @Override
-            public R<IdGenerationResponse> generateBatchSegmentIds(IdGenerationRequest request, String internalToken) {
+            public R<IdGenerationResponse> generateBatchSegmentIds(IdGenerationRequest request) {
                 log.error("批量生成Segment ID失败: request={}", request, cause);
                 IdGenerationResponse response = new IdGenerationResponse();
                 List<Long> fallbackIds = new ArrayList<>();
@@ -70,7 +70,7 @@ public class IdGeneratorServiceApiFallbackFactory implements FallbackFactory<IdG
             }
 
             @Override
-            public R<Map<String, Object>> getGeneratorStatus(String internalToken) {
+            public R<Map<String, Object>> getGeneratorStatus() {
                 log.error("获取ID生成器状态失败", cause);
                 Map<String, Object> status = new HashMap<>();
                 status.put("status", "DEGRADED");
@@ -81,7 +81,7 @@ public class IdGeneratorServiceApiFallbackFactory implements FallbackFactory<IdG
             }
 
             @Override
-            public R<Long> getMaxId(String bizTag, String internalToken) {
+            public R<Long> getMaxId(String bizTag) {
                 log.error("获取最大ID失败: bizTag={}", bizTag, cause);
                 // 返回一个基于当前时间的大概值
                 Long fallbackMaxId = System.currentTimeMillis() / 1000;
@@ -89,7 +89,7 @@ public class IdGeneratorServiceApiFallbackFactory implements FallbackFactory<IdG
             }
 
             @Override
-            public R<String> warmupGenerator(String internalToken) {
+            public R<String> warmupGenerator() {
                 log.error("预热ID生成器失败", cause);
                 return R.error(ApiCode.SERVICE_UNAVAILABLE, "ID生成器预热失败，使用降级模式");
             }

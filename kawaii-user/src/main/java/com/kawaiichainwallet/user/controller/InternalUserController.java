@@ -31,15 +31,11 @@ public class InternalUserController implements UserServiceApi {
     private final ServiceApiConverter serviceApiConverter;
 
     @Override
-    public R<TokenValidationResponse> validateToken(String authHeader, String internalToken) {
+    public R<TokenValidationResponse> validateToken(String authHeader) {
         log.info("内部服务Token验证请求");
 
         try {
             // 验证内部调用Token
-            if (!isValidInternalToken(internalToken)) {
-                log.warn("无效的内部调用Token");
-                return R.error(ApiCode.INTERNAL_TOKEN_INVALID);
-            }
 
             // 调用认证服务验证Token
             var validationResponse = authService.validateToken(authHeader);
@@ -57,14 +53,11 @@ public class InternalUserController implements UserServiceApi {
     }
 
     @Override
-    public R<UserInfoResponse> getUserInfo(String userId, String internalToken) {
+    public R<UserInfoResponse> getUserInfo(String userId) {
         log.info("内部服务获取用户信息请求: userId={}", userId);
 
         try {
             // 验证内部调用Token
-            if (!isValidInternalToken(internalToken)) {
-                return R.error(ApiCode.INTERNAL_TOKEN_INVALID);
-            }
 
             // 获取用户信息
             var userDetailsDto = userService.getUserInfo(userId);
@@ -80,13 +73,10 @@ public class InternalUserController implements UserServiceApi {
     }
 
     @Override
-    public R<UserInfoResponse> getUserByUsername(String username, String internalToken) {
+    public R<UserInfoResponse> getUserByUsername(String username) {
         log.info("内部服务根据用户名获取用户信息: username={}", username);
 
         try {
-            if (!isValidInternalToken(internalToken)) {
-                return R.error(ApiCode.INTERNAL_TOKEN_INVALID);
-            }
 
             var user = userService.getUserByUsername(username);
             if (user == null) {
@@ -104,13 +94,10 @@ public class InternalUserController implements UserServiceApi {
     }
 
     @Override
-    public R<UserInfoResponse> getUserByEmail(String email, String internalToken) {
+    public R<UserInfoResponse> getUserByEmail(String email) {
         log.info("内部服务根据邮箱获取用户信息: email={}", email);
 
         try {
-            if (!isValidInternalToken(internalToken)) {
-                return R.error(ApiCode.INTERNAL_TOKEN_INVALID);
-            }
 
             var user = userService.getUserByEmail(email);
             if (user == null) {
@@ -128,13 +115,10 @@ public class InternalUserController implements UserServiceApi {
     }
 
     @Override
-    public R<List<UserInfoResponse>> getBatchUsers(List<String> userIds, String internalToken) {
+    public R<List<UserInfoResponse>> getBatchUsers(List<String> userIds) {
         log.info("内部服务批量获取用户信息: userIds={}", userIds);
 
         try {
-            if (!isValidInternalToken(internalToken)) {
-                return R.error(ApiCode.INTERNAL_TOKEN_INVALID);
-            }
 
             // TODO: 实现批量获取用户信息逻辑
             List<UserInfoResponse> users = List.of(); // 暂时返回空列表
@@ -147,13 +131,10 @@ public class InternalUserController implements UserServiceApi {
     }
 
     @Override
-    public R<Boolean> userExists(String userId, String internalToken) {
+    public R<Boolean> userExists(String userId) {
         log.info("内部服务检查用户是否存在: userId={}", userId);
 
         try {
-            if (!isValidInternalToken(internalToken)) {
-                return R.error(ApiCode.INTERNAL_TOKEN_INVALID);
-            }
 
             var user = userService.getUserById(userId);
             boolean exists = user != null;
@@ -166,13 +147,10 @@ public class InternalUserController implements UserServiceApi {
     }
 
     @Override
-    public R<UserPaymentPermissionResponse> getUserPaymentPermission(String userId, String internalToken) {
+    public R<UserPaymentPermissionResponse> getUserPaymentPermission(String userId) {
         log.info("内部服务获取用户支付权限: userId={}", userId);
 
         try {
-            if (!isValidInternalToken(internalToken)) {
-                return R.error(ApiCode.INTERNAL_TOKEN_INVALID);
-            }
 
             // TODO: 实现获取用户支付权限逻辑
             var permission = new UserPaymentPermissionResponse();
@@ -194,11 +172,6 @@ public class InternalUserController implements UserServiceApi {
     /**
      * 验证内部调用Token
      */
-    private boolean isValidInternalToken(String internalToken) {
-        // TODO: 实现内部Token验证逻辑
-        // 这里可以验证Token格式、签名、时间戳等
-        return internalToken != null && !internalToken.trim().isEmpty();
-    }
 
     /**
      * 转换TokenValidationResponse为TokenValidationResponse

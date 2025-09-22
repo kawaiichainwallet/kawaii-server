@@ -30,15 +30,10 @@ public class IdGeneratorInternalController implements IdGeneratorServiceApi {
      * 生成Segment模式ID
      */
     @Override
-    public R<IdGenerationResponse> generateSegmentId(String bizTag, String internalToken) {
+    public R<IdGenerationResponse> generateSegmentId(String bizTag) {
         log.info("内部服务生成Segment ID请求: bizTag={}", bizTag);
 
         try {
-            // 验证内部调用Token
-            if (!isValidInternalToken(internalToken)) {
-                log.warn("无效的内部调用Token");
-                return R.error(ApiCode.INTERNAL_TOKEN_INVALID);
-            }
 
             IdGenerationResponse response = distributedIdService.generateSegmentId(bizTag);
             return R.success(response);
@@ -52,15 +47,10 @@ public class IdGeneratorInternalController implements IdGeneratorServiceApi {
      * 生成Snowflake模式ID
      */
     @Override
-    public R<IdGenerationResponse> generateSnowflakeId(String internalToken) {
+    public R<IdGenerationResponse> generateSnowflakeId() {
         log.info("内部服务生成Snowflake ID请求");
 
         try {
-            // 验证内部调用Token
-            if (!isValidInternalToken(internalToken)) {
-                log.warn("无效的内部调用Token");
-                return R.error(ApiCode.INTERNAL_TOKEN_INVALID);
-            }
 
             IdGenerationResponse response = distributedIdService.generateSnowflakeId();
             return R.success(response);
@@ -74,15 +64,10 @@ public class IdGeneratorInternalController implements IdGeneratorServiceApi {
      * 批量生成Segment模式ID
      */
     @Override
-    public R<IdGenerationResponse> generateBatchSegmentIds(IdGenerationRequest request, String internalToken) {
+    public R<IdGenerationResponse> generateBatchSegmentIds(IdGenerationRequest request) {
         log.info("内部服务批量生成Segment ID请求: {}", request);
 
         try {
-            // 验证内部调用Token
-            if (!isValidInternalToken(internalToken)) {
-                log.warn("无效的内部调用Token");
-                return R.error(ApiCode.INTERNAL_TOKEN_INVALID);
-            }
 
             // 参数验证
             if (request.getBizTag() == null || request.getBizTag().trim().isEmpty()) {
@@ -109,15 +94,10 @@ public class IdGeneratorInternalController implements IdGeneratorServiceApi {
      * 获取ID生成器状态信息
      */
     @Override
-    public R<Map<String, Object>> getGeneratorStatus(String internalToken) {
+    public R<Map<String, Object>> getGeneratorStatus() {
         log.info("内部服务获取ID生成器状态请求");
 
         try {
-            // 验证内部调用Token
-            if (!isValidInternalToken(internalToken)) {
-                log.warn("无效的内部调用Token");
-                return R.error(ApiCode.INTERNAL_TOKEN_INVALID);
-            }
 
             Map<String, Object> status = new HashMap<>();
             status.put("status", "RUNNING");
@@ -143,15 +123,10 @@ public class IdGeneratorInternalController implements IdGeneratorServiceApi {
      * 根据业务标识获取当前最大ID
      */
     @Override
-    public R<Long> getMaxId(String bizTag, String internalToken) {
+    public R<Long> getMaxId(String bizTag) {
         log.info("内部服务获取最大ID请求: bizTag={}", bizTag);
 
         try {
-            // 验证内部调用Token
-            if (!isValidInternalToken(internalToken)) {
-                log.warn("无效的内部调用Token");
-                return R.error(ApiCode.INTERNAL_TOKEN_INVALID);
-            }
 
             Long maxId = distributedIdService.getMaxId(bizTag);
             return R.success(maxId);
@@ -165,15 +140,10 @@ public class IdGeneratorInternalController implements IdGeneratorServiceApi {
      * 预热ID生成器（在系统启动时调用）
      */
     @Override
-    public R<String> warmupGenerator(String internalToken) {
+    public R<String> warmupGenerator() {
         log.info("内部服务预热ID生成器请求");
 
         try {
-            // 验证内部调用Token
-            if (!isValidInternalToken(internalToken)) {
-                log.warn("无效的内部调用Token");
-                return R.error(ApiCode.INTERNAL_TOKEN_INVALID);
-            }
 
             String result = distributedIdService.warmupGenerator();
             return R.success(result);
@@ -187,13 +157,5 @@ public class IdGeneratorInternalController implements IdGeneratorServiceApi {
     // 私有辅助方法
     // ===========================================
 
-    /**
-     * 验证内部调用Token
-     */
-    private boolean isValidInternalToken(String internalToken) {
-        // TODO: 实现内部Token验证逻辑
-        // 这里可以验证Token格式、签名、时间戳等
-        return internalToken != null && !internalToken.trim().isEmpty();
-    }
 
 }

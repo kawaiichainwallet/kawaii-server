@@ -22,29 +22,25 @@ public interface AuthServiceApi {
      * 验证Token（内部调用）
      */
     @PostMapping("/validate-token")
-    R<TokenValidationResponse> validateToken(@RequestHeader("Authorization") String authHeader,
-                                           @RequestHeader("X-Internal-Token") String internalToken);
+    R<TokenValidationResponse> validateToken(@RequestHeader("Authorization") String authHeader);
 
     /**
      * 验证用户是否已认证（内部调用）
      */
     @GetMapping("/check-authentication/{userId}")
-    R<Boolean> checkAuthentication(@PathVariable("userId") String userId,
-                                 @RequestHeader("X-Internal-Token") String internalToken);
+    R<Boolean> checkAuthentication(@PathVariable("userId") String userId);
 
     /**
      * 撤销用户的所有Token（内部调用，用于安全事件响应）
      */
     @PostMapping("/revoke-tokens/{userId}")
     R<Void> revokeUserTokens(@PathVariable("userId") String userId,
-                           @RequestParam("reason") String reason,
-                           @RequestHeader("X-Internal-Token") String internalToken);
+                           @RequestParam("reason") String reason);
 
     /**
      * 检查用户密码是否正确（内部调用，用于敏感操作验证）
      */
     @PostMapping("/verify-password")
     R<Boolean> verifyPassword(@RequestParam("userId") String userId,
-                            @RequestParam("password") String password,
-                            @RequestHeader("X-Internal-Token") String internalToken);
+                            @RequestParam("password") String password);
 }

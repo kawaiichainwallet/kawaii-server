@@ -24,49 +24,42 @@ public interface UserServiceApi {
      * 验证Token并获取用户信息
      */
     @PostMapping("/validate-token")
-    R<TokenValidationResponse> validateToken(@RequestHeader("Authorization") String authHeader,
-                                           @RequestHeader("X-Internal-Token") String internalToken);
+    R<TokenValidationResponse> validateToken(@RequestHeader("Authorization") String authHeader);
 
     /**
      * 根据用户ID获取用户信息（内部调用）
      */
     @GetMapping("/{userId}")
-    R<UserInfoResponse> getUserInfo(@PathVariable("userId") String userId,
-                                  @RequestHeader("X-Internal-Token") String internalToken);
+    R<UserInfoResponse> getUserInfo(@PathVariable("userId") String userId);
 
     /**
      * 根据用户名获取用户信息（内部调用）
      */
     @GetMapping("/username/{username}")
-    R<UserInfoResponse> getUserByUsername(@PathVariable("username") String username,
-                                        @RequestHeader("X-Internal-Token") String internalToken);
+    R<UserInfoResponse> getUserByUsername(@PathVariable("username") String username);
 
     /**
      * 根据邮箱获取用户信息（内部调用）
      */
     @GetMapping("/email/{email}")
-    R<UserInfoResponse> getUserByEmail(@PathVariable("email") String email,
-                                     @RequestHeader("X-Internal-Token") String internalToken);
+    R<UserInfoResponse> getUserByEmail(@PathVariable("email") String email);
 
     /**
      * 批量获取用户信息（内部调用）
      */
     @PostMapping("/batch")
-    R<java.util.List<UserInfoResponse>> getBatchUsers(@RequestBody java.util.List<String> userIds,
-                                                     @RequestHeader("X-Internal-Token") String internalToken);
+    R<java.util.List<UserInfoResponse>> getBatchUsers(@RequestBody java.util.List<String> userIds);
 
     /**
      * 检查用户是否存在
      */
     @GetMapping("/exists/{userId}")
-    R<Boolean> userExists(@PathVariable("userId") String userId,
-                         @RequestHeader("X-Internal-Token") String internalToken);
+    R<Boolean> userExists(@PathVariable("userId") String userId);
 
     /**
      * 获取用户的支付权限信息
      */
     @GetMapping("/{userId}/payment-permission")
-    R<UserPaymentPermissionResponse> getUserPaymentPermission(@PathVariable("userId") String userId,
-                                                             @RequestHeader("X-Internal-Token") String internalToken);
+    R<UserPaymentPermissionResponse> getUserPaymentPermission(@PathVariable("userId") String userId);
 
 }

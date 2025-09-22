@@ -27,15 +27,10 @@ public class InternalAuthController implements AuthServiceApi {
     private final ServiceApiConverter serviceApiConverter;
 
     @Override
-    public R<TokenValidationResponse> validateToken(String authHeader, String internalToken) {
+    public R<TokenValidationResponse> validateToken(String authHeader) {
         log.info("内部服务Token验证请求");
 
         try {
-            // 验证内部调用Token
-            if (!isValidInternalToken(internalToken)) {
-                log.warn("无效的内部调用Token");
-                return R.error(ApiCode.INTERNAL_TOKEN_INVALID);
-            }
 
             // 调用认证服务验证Token
             String token = extractTokenFromAuthHeader(authHeader);
@@ -59,14 +54,10 @@ public class InternalAuthController implements AuthServiceApi {
     }
 
     @Override
-    public R<Boolean> checkAuthentication(String userId, String internalToken) {
+    public R<Boolean> checkAuthentication(String userId) {
         log.info("内部服务检查用户认证状态: userId={}", userId);
 
         try {
-            // 验证内部调用Token
-            if (!isValidInternalToken(internalToken)) {
-                return R.error(ApiCode.INTERNAL_TOKEN_INVALID);
-            }
 
             // TODO: 实现检查用户认证状态逻辑
             // 这里可以检查用户是否存在有效的登录会话等
@@ -81,14 +72,10 @@ public class InternalAuthController implements AuthServiceApi {
     }
 
     @Override
-    public R<Void> revokeUserTokens(String userId, String reason, String internalToken) {
+    public R<Void> revokeUserTokens(String userId, String reason) {
         log.info("内部服务撤销用户Token: userId={}, reason={}", userId, reason);
 
         try {
-            // 验证内部调用Token
-            if (!isValidInternalToken(internalToken)) {
-                return R.error(ApiCode.INTERNAL_TOKEN_INVALID);
-            }
 
             // TODO: 实现撤销用户Token逻辑
             // 这里可以调用认证服务来撤销用户的所有有效Token
@@ -103,14 +90,10 @@ public class InternalAuthController implements AuthServiceApi {
     }
 
     @Override
-    public R<Boolean> verifyPassword(String userId, String password, String internalToken) {
+    public R<Boolean> verifyPassword(String userId, String password) {
         log.info("内部服务验证用户密码: userId={}", userId);
 
         try {
-            // 验证内部调用Token
-            if (!isValidInternalToken(internalToken)) {
-                return R.error(ApiCode.INTERNAL_TOKEN_INVALID);
-            }
 
             // TODO: 实现密码验证逻辑
             // 这里可以调用认证服务来验证用户密码
@@ -130,14 +113,6 @@ public class InternalAuthController implements AuthServiceApi {
     // 私有辅助方法
     // ===========================================
 
-    /**
-     * 验证内部调用Token
-     */
-    private boolean isValidInternalToken(String internalToken) {
-        // TODO: 实现内部Token验证逻辑
-        // 这里可以验证Token格式、签名、时间戳等
-        return internalToken != null && !internalToken.trim().isEmpty();
-    }
 
     /**
      * 从Authorization header中提取Token

@@ -23,7 +23,7 @@ public class UserServiceApiFallbackFactory implements FallbackFactory<UserServic
     public UserServiceApi create(Throwable cause) {
         return new UserServiceApi() {
             @Override
-            public R<TokenValidationResponse> validateToken(String authHeader, String internalToken) {
+            public R<TokenValidationResponse> validateToken(String authHeader) {
                 log.error("用户服务Token验证失败", cause);
                 TokenValidationResponse dto = new TokenValidationResponse();
                 dto.setValid(false);
@@ -33,37 +33,37 @@ public class UserServiceApiFallbackFactory implements FallbackFactory<UserServic
             }
 
             @Override
-            public R<UserInfoResponse> getUserInfo(String userId, String internalToken) {
+            public R<UserInfoResponse> getUserInfo(String userId) {
                 log.error("获取用户信息失败: userId={}", userId, cause);
                 return R.error(ApiCode.SERVICE_UNAVAILABLE);
             }
 
             @Override
-            public R<UserInfoResponse> getUserByUsername(String username, String internalToken) {
+            public R<UserInfoResponse> getUserByUsername(String username) {
                 log.error("根据用户名获取用户信息失败: username={}", username, cause);
                 return R.error(ApiCode.SERVICE_UNAVAILABLE);
             }
 
             @Override
-            public R<UserInfoResponse> getUserByEmail(String email, String internalToken) {
+            public R<UserInfoResponse> getUserByEmail(String email) {
                 log.error("根据邮箱获取用户信息失败: email={}", email, cause);
                 return R.error(ApiCode.SERVICE_UNAVAILABLE);
             }
 
             @Override
-            public R<List<UserInfoResponse>> getBatchUsers(List<String> userIds, String internalToken) {
+            public R<List<UserInfoResponse>> getBatchUsers(List<String> userIds) {
                 log.error("批量获取用户信息失败: userIds={}", userIds, cause);
                 return R.error(ApiCode.SERVICE_UNAVAILABLE);
             }
 
             @Override
-            public R<Boolean> userExists(String userId, String internalToken) {
+            public R<Boolean> userExists(String userId) {
                 log.error("检查用户是否存在失败: userId={}", userId, cause);
                 return R.error(ApiCode.SERVICE_UNAVAILABLE);
             }
 
             @Override
-            public R<UserPaymentPermissionResponse> getUserPaymentPermission(String userId, String internalToken) {
+            public R<UserPaymentPermissionResponse> getUserPaymentPermission(String userId) {
                 log.error("获取用户支付权限失败: userId={}", userId, cause);
                 return R.error(ApiCode.SERVICE_UNAVAILABLE);
             }

@@ -10,8 +10,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Base64;
-import java.nio.charset.StandardCharsets;
 
 /**
  * Feign客户端通用配置
@@ -29,17 +27,17 @@ public class FeignConfig {
     }
 
     /**
-     * 请求拦截器 - 添加内部服务间认证
+     * 请求拦截器 - 添加内部服务间标识和用户上下文传递
      */
     @Bean
     public RequestInterceptor requestInterceptor() {
-        return new InternalAuthRequestInterceptor();
+        return new InternalServiceRequestInterceptor();
     }
 
     /**
-     * 内部认证请求拦截器
+     * 内部服务请求拦截器 - 传递服务标识和用户上下文
      */
-    public static class InternalAuthRequestInterceptor implements RequestInterceptor {
+    public static class InternalServiceRequestInterceptor implements RequestInterceptor {
 
         @Override
         public void apply(RequestTemplate template) {
@@ -73,27 +71,8 @@ public class FeignConfig {
                     }
                 }
             } catch (Exception e) {
-                log.warn("Failed to get request context: {}", e.getMessage());
-            }
-
-            // 3. 添加内部服务间认证Token
-            String internalToken = createInternalToken();
-            template.header("X-Internal-Token", internalToken);
-        }
-
-        /**
-         * 创建内部服务间认证Token
-         */
-        private String createInternalToken() {
-            try {
-                String payload = String.format(
-                    "{\"source\":\"feign-client\",\"timestamp\":%d,\"service\":\"kawaii-internal\"}",
-                    System.currentTimeMillis()
-                );
-                return Base64.getEncoder().encodeToString(payload.getBytes(StandardCharsets.UTF_8));
-            } catch (Exception e) {
-                log.error("Failed to create internal token", e);
-                return "";
+                // 静默处理获取请求上下文失败的情况
+                // 在微服务内部调用时，这种情况是正常的
             }
         }
     }

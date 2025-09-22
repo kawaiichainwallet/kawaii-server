@@ -19,8 +19,7 @@ public interface UserServiceClient {
      * 获取用户支付信息（用于支付验证）
      */
     @GetMapping("/users/{userId}")
-    R<UserPaymentInfo> getUserPaymentInfo(@PathVariable("userId") String userId,
-                                          @RequestHeader("X-Internal-Token") String internalToken);
+    R<UserPaymentInfo> getUserPaymentInfo(@PathVariable("userId") String userId);
 
     /**
      * 用户支付信息DTO

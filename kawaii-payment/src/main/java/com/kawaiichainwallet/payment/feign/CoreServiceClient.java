@@ -23,15 +23,13 @@ public interface CoreServiceClient {
      * 获取用户钱包余额
      */
     @GetMapping("/wallet/{userId}/balance")
-    R<WalletBalance> getWalletBalance(@PathVariable("userId") String userId,
-                                      @RequestHeader("X-Internal-Token") String internalToken);
+    R<WalletBalance> getWalletBalance(@PathVariable("userId") String userId);
 
     /**
      * 执行钱包转账
      */
     @PostMapping("/wallet/transfer")
-    R<TransferResult> executeTransfer(@RequestBody TransferRequest request,
-                                      @RequestHeader("X-Internal-Token") String internalToken);
+    R<TransferResult> executeTransfer(@RequestBody TransferRequest request);
 
     /**
      * 钱包余额DTO

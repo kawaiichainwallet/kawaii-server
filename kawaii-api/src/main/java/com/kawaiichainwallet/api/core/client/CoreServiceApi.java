@@ -22,22 +22,19 @@ public interface CoreServiceApi {
      */
     @GetMapping("/internal/wallets/{userId}/balance")
     R<WalletBalanceDto> getWalletBalance(@PathVariable("userId") String userId,
-                                        @RequestParam(required = false) String coinType,
-                                        @RequestHeader("X-Internal-Token") String internalToken);
+                                        @RequestParam(required = false) String coinType);
 
     /**
      * 检查用户钱包是否存在
      */
     @GetMapping("/internal/wallets/{userId}/exists")
-    R<Boolean> walletExists(@PathVariable("userId") String userId,
-                           @RequestHeader("X-Internal-Token") String internalToken);
+    R<Boolean> walletExists(@PathVariable("userId") String userId);
 
     /**
      * 创建用户钱包
      */
     @PostMapping("/internal/wallets")
-    R<WalletDto> createWallet(@RequestBody CreateWalletRequest request,
-                             @RequestHeader("X-Internal-Token") String internalToken);
+    R<WalletDto> createWallet(@RequestBody CreateWalletRequest request);
 
     /**
      * 冻结/解冻钱包
@@ -45,8 +42,7 @@ public interface CoreServiceApi {
     @PutMapping("/internal/wallets/{userId}/freeze")
     R<Void> freezeWallet(@PathVariable("userId") String userId,
                         @RequestParam Boolean freeze,
-                        @RequestParam String reason,
-                        @RequestHeader("X-Internal-Token") String internalToken);
+                        @RequestParam String reason);
 
     /**
      * 获取交易历史
@@ -56,8 +52,7 @@ public interface CoreServiceApi {
             @PathVariable("userId") String userId,
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "20") Integer size,
-            @RequestParam(required = false) String coinType,
-            @RequestHeader("X-Internal-Token") String internalToken);
+            @RequestParam(required = false) String coinType);
 
     /**
      * 钱包余额DTO

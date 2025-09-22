@@ -66,3 +66,13 @@ management:
   endpoint:
     health:
       show-details: always
+
+# ===========================================
+# 应用公共配置
+# ===========================================
+app:
+  # 安全配置
+  security:
+    # 预留安全配置项
+    # 可以在此添加需要的安全相关配置
+    placeholder: reserved

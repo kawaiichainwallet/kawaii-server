@@ -39,7 +39,6 @@ CREATE TABLE users (
 -- 索引
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_username ON users(username);
-CREATE INDEX idx_users_status ON users(status);
 CREATE INDEX idx_users_created_at ON users(created_at);
 
 -- ================================================================
@@ -110,8 +109,6 @@ CREATE TABLE user_kyc (
 );
 
 CREATE UNIQUE INDEX idx_user_kyc_user_id ON user_kyc(user_id);
-CREATE INDEX idx_user_kyc_status ON user_kyc(status);
-CREATE INDEX idx_user_kyc_level ON user_kyc(kyc_level);
 
 -- ================================================================
 -- 4. JWT黑名单表 (jwt_blacklist)
@@ -129,7 +126,6 @@ CREATE TABLE jwt_blacklist (
 -- 索引
 CREATE INDEX idx_jwt_blacklist_token_id ON jwt_blacklist(token_id);
 CREATE INDEX idx_jwt_blacklist_user_id ON jwt_blacklist(user_id);
-CREATE INDEX idx_jwt_blacklist_expires_at ON jwt_blacklist(expires_at);
 
 -- ================================================================
 -- 自动更新时间戳触发器

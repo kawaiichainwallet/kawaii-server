@@ -1,7 +1,7 @@
 spring:
   # 数据库配置 - 本地PostgreSQL
   datasource:
-    url: jdbc:postgresql://localhost:5432/kawaii_wallet?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC
+    url: jdbc:postgresql://localhost:5432/kawaii-user-db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC
 
 # 应用业务配置 - 本地开发
 app:

@@ -37,6 +37,7 @@ public class UserService {
     private final OtpService otpService;
     private final AuditService auditService;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenService jwtTokenService;
 
     /**
      * 根据用户ID获取用户基本信息
@@ -239,8 +240,17 @@ public class UserService {
         log.info("用户注册成功: userId={}, username={}, type={}, IP={}",
                 user.getUserId(), user.getUsername(), request.getType(), clientIp);
 
-        // 8. 使用MapStruct转换响应对象
-        return userConverter.userToRegisterResponse(user);
+        // 8. 生成JWT令牌
+        String accessToken = jwtTokenService.generateAccessToken(user.getUserId(), user.getUsername());
+        String refreshToken = jwtTokenService.generateRefreshToken(user.getUserId(), user.getUsername());
+
+        // 9. 使用MapStruct转换响应对象并设置令牌
+        RegisterResponse response = userConverter.userToRegisterResponse(user);
+        response.setAccessToken(accessToken);
+        response.setRefreshToken(refreshToken);
+        response.setExpiresIn((int) jwtTokenService.getAccessTokenExpiration());
+
+        return response;
     }
 
     /**
@@ -364,9 +374,9 @@ public class UserService {
     private void createInitialUserProfile(String userId) {
         UserProfile userProfile = new UserProfile();
         userProfile.setUserId(userId);
-        userProfile.setLanguage("zh-CN");
-        userProfile.setTimezone("Asia/Shanghai");
-        userProfile.setCurrency("CNY");
+        userProfile.setLanguage("en");
+        userProfile.setTimezone("UTC");
+        userProfile.setCurrency("USD");
         userProfile.setNotificationsEnabled(true);
         userProfile.setCreatedAt(LocalDateTime.now());
         userProfile.setUpdatedAt(LocalDateTime.now());

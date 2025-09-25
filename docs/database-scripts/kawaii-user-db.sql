@@ -138,6 +138,15 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+-- Leaf框架专用的更新时间触发器函数
+CREATE OR REPLACE FUNCTION update_leaf_update_time_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.update_time = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -169,8 +178,8 @@ INSERT INTO leaf_alloc(biz_tag, max_id, step, description) VALUES
 ('notification-id', 600000, 2000, '通知相关ID');
 
 -- 创建更新时间触发器
-CREATE TRIGGER update_leaf_alloc_updated_at BEFORE UPDATE ON leaf_alloc
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_leaf_alloc_update_time BEFORE UPDATE ON leaf_alloc
+    FOR EACH ROW EXECUTE FUNCTION update_leaf_update_time_column();
 
 -- ================================================================
 -- 数据库初始化完成

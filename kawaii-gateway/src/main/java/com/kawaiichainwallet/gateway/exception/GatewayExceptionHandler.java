@@ -1,6 +1,7 @@
 package com.kawaiichainwallet.gateway.exception;
 
 import com.kawaiichainwallet.gateway.dto.ApiResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
 import org.springframework.core.annotation.Order;
@@ -22,9 +23,10 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 @Order(-1)
 @Component
+@RequiredArgsConstructor
 public class GatewayExceptionHandler implements ErrorWebExceptionHandler {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     @Override
     public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {

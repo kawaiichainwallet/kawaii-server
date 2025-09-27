@@ -1,13 +1,11 @@
 package com.kawaiichainwallet.gateway.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.kawaiichainwallet.gateway.dto.ApiResponse;
 import com.kawaiichainwallet.gateway.config.RouteSecurityConfig;
 import com.kawaiichainwallet.gateway.dto.UserContext;
 import com.kawaiichainwallet.gateway.service.JwtValidationService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -31,17 +29,16 @@ import java.util.List;
 @Component
 public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFactory<AuthenticationGatewayFilterFactory.Config> {
 
-    private final ObjectMapper objectMapper = new ObjectMapper()
-            .registerModule(new JavaTimeModule());
+    private final ObjectMapper objectMapper;
+    private final RouteSecurityConfig routeSecurityConfig;
 
-    @Autowired
-    private RouteSecurityConfig routeSecurityConfig;
+    private final JwtValidationService jwtValidationService;
 
-    @Autowired
-    private JwtValidationService jwtValidationService;
-
-    public AuthenticationGatewayFilterFactory() {
+    public AuthenticationGatewayFilterFactory(ObjectMapper objectMapper, RouteSecurityConfig routeSecurityConfig, JwtValidationService jwtValidationService) {
         super(Config.class);
+        this.objectMapper = objectMapper;
+        this.routeSecurityConfig = routeSecurityConfig;
+        this.jwtValidationService = jwtValidationService;
     }
 
     @Override

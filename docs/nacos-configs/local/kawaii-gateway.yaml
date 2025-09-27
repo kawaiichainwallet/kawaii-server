@@ -76,29 +76,17 @@ spring:
 
 # 应用配置
 app:
-  # 服务地址配置
-  services:
-    user:
-      url: "http://localhost:8091"
-
   # 路由安全配置
   security:
     routes:
       # 公开路径 - 无需认证
       public-paths:
-        - "/api/v1/user/auth/login"
-        - "/api/v1/user/auth/register"
-        - "/api/v1/user/auth/send-login-otp"
-        - "/api/v1/user/auth/send-register-otp"
-        - "/api/v1/user/auth/validate"
+        - "/api/v1/user/auth/**"        # 所有用户认证相关接口
+        - "/api/v1/user/check-**"       # 用户检查接口（用户名、邮箱、手机号存在性检查）
+        - "/api/v1/core/health"         # 健康检查
+        - "/api/v1/payment/webhook/**"  # 支付回调
         - "/actuator/**"
         - "/health"
-
-      # 受保护路径 - 需要认证
-      protected-paths:
-        - "/api/v1/user/users/**"
-        - "/api/v1/core/**"
-        - "/api/v1/payment/**"
 
       # 管理员路径 - 仅管理员可访问
       admin-paths:

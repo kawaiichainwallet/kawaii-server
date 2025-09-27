@@ -53,25 +53,43 @@ spring:
                       requested-tokens: 1
               order: 1
 
-            # 钱包核心服务路由 - 统一规范为 /api/v1/core/**
-            - id: kawaii-core
+            # 核心服务公开路由 - 无需认证的接口
+            - id: kawaii-core-public
+              uri: lb://kawaii-core
+              predicates:
+                - Path=/api/v1/core/health
+              filters:
+                - RewritePath=/api/v1/(?<service>\w+)/(?<segment>.*), /$\{service}/$\{segment}
+              order: 2
+
+            # 核心服务受保护路由 - 需要认证的接口
+            - id: kawaii-core-protected
               uri: lb://kawaii-core
               predicates:
                 - Path=/api/v1/core/**
               filters:
                 - name: Authentication
                 - RewritePath=/api/v1/(?<service>\w+)/(?<segment>.*), /$\{service}/$\{segment}
-              order: 2
+              order: 3
 
-            # 支付服务路由 - 统一规范为 /api/v1/payment/**
-            - id: kawaii-payment
+            # 支付服务公开路由 - 无需认证的接口
+            - id: kawaii-payment-public
+              uri: lb://kawaii-payment
+              predicates:
+                - Path=/api/v1/payment/webhook/**
+              filters:
+                - RewritePath=/api/v1/(?<service>\w+)/(?<segment>.*), /$\{service}/$\{segment}
+              order: 4
+
+            # 支付服务受保护路由 - 需要认证的接口
+            - id: kawaii-payment-protected
               uri: lb://kawaii-payment
               predicates:
                 - Path=/api/v1/payment/**
               filters:
                 - name: Authentication
                 - RewritePath=/api/v1/(?<service>\w+)/(?<segment>.*), /$\{service}/$\{segment}
-              order: 3
+              order: 5
           # 全局CORS配置
           globalcors:
             cors-configurations:
@@ -95,15 +113,6 @@ app:
   # 路由安全配置
   security:
     routes:
-      # 公开路径 - 无需认证
-      public-paths:
-        - "/api/v1/user/auth/**"        # 所有用户认证相关接口
-        - "/api/v1/user/check-**"       # 用户检查接口（用户名、邮箱、手机号存在性检查）
-        - "/api/v1/core/health"         # 健康检查
-        - "/api/v1/payment/webhook/**"  # 支付回调
-        - "/actuator/**"
-        - "/health"
-
       # 管理员路径 - 仅管理员可访问
       admin-paths:
         - "/api/v1/user/users"

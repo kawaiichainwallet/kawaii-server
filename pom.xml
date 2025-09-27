@@ -51,7 +51,7 @@
         <spring-cloud-alibaba.version>2025.0.0.0-preview</spring-cloud-alibaba.version>
         <mybatis-plus.version>3.5.8</mybatis-plus.version>
         <hutool.version>5.8.28</hutool.version>
-        <springdoc.version>2.2.0</springdoc.version>
+        <springdoc.version>2.7.0</springdoc.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <nimbus-jose.version>9.40</nimbus-jose.version>
         <lombok.version>1.18.30</lombok.version>

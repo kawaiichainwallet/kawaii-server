@@ -3,7 +3,7 @@ package com.kawaiichainwallet.user.controller;
 import com.kawaiichainwallet.common.enums.ApiCode;
 import com.kawaiichainwallet.common.response.R;
 import com.kawaiichainwallet.common.utils.ValidationUtil;
-import com.kawaiichainwallet.user.context.UserContextHolder;
+import com.kawaiichainwallet.common.context.UserContextHolder;
 import com.kawaiichainwallet.user.dto.UpdateUserInfoRequest;
 import com.kawaiichainwallet.user.dto.UserDetailsDto;
 import com.kawaiichainwallet.user.entity.User;

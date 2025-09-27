@@ -111,10 +111,10 @@ public class UserContextHolder {
      */
     private static HttpServletRequest getCurrentRequest() {
         try {
-            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-            return attributes.getRequest();
-        } catch (IllegalStateException e) {
-            // 在非Web上下文中调用时会抛出此异常
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            return attributes != null ? attributes.getRequest() : null;
+        } catch (Exception e) {
+            // 在非Web上下文中调用时会抛出异常，如Swagger文档生成时
             return null;
         }
     }

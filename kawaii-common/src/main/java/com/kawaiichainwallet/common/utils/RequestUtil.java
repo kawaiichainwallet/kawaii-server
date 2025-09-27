@@ -1,5 +1,6 @@
 package com.kawaiichainwallet.common.utils;
 
+import com.kawaiichainwallet.common.context.UserContextHolder;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
@@ -73,12 +74,10 @@ public class RequestUtil {
     }
 
     /**
-     * 获取当前用户ID（从请求头或Security Context中获取）
+     * 获取当前用户ID（从Gateway传递的请求头中获取）
      */
     public static String getCurrentUserId() {
-        // 这里应该从Spring Security Context或JWT Token中获取用户ID
-        // 暂时返回null，具体实现需要集成JWT解析逻辑
-        return null;
+        return UserContextHolder.getCurrentUserId();
     }
 
     /**

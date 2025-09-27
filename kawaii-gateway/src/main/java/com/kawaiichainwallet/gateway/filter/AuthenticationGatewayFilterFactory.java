@@ -102,8 +102,7 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
                     .header("X-User-Id", userContext.getUserId())
                     .header("X-User-Email", userContext.getEmail())
                     .header("X-User-Roles", String.join(",", userContext.getRoles()))
-
-
+                    .header("X-Authenticated", "true")
                     // 请求追踪
                     .header("X-Request-Source", "gateway")
                     .header("X-Request-Timestamp", String.valueOf(System.currentTimeMillis()))

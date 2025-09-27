@@ -20,14 +20,30 @@ spring:
       server:
         webflux:
           routes:
-            # 用户服务路由 - 统一规范为 /api/v1/user/**
-            - id: kawaii-user
+            # 用户服务公开路由 - 无需认证的接口
+            - id: kawaii-user-public
+              uri: lb://kawaii-user
+              predicates:
+                - Path=/api/v1/user/auth/**,/api/v1/user/check-**
+              filters:
+                - RewritePath=/api/v1/(?<service>\w+)/(?<segment>.*), /$\{service}/$\{segment}
+                - name: RequestRateLimiter
+                  args:
+                    key-resolver: "#{@ipKeyResolver}"
+                    redis-rate-limiter:
+                      replenish-rate: 20
+                      burst-capacity: 40
+                      requested-tokens: 1
+              order: 0
+
+            # 用户服务受保护路由 - 需要认证的接口
+            - id: kawaii-user-protected
               uri: lb://kawaii-user
               predicates:
                 - Path=/api/v1/user/**
               filters:
                 - name: Authentication
-                - RewritePath=/api/v1/user/(?<segment>.*), /user/$\{segment}
+                - RewritePath=/api/v1/(?<service>\w+)/(?<segment>.*), /$\{service}/$\{segment}
                 - name: RequestRateLimiter
                   args:
                     key-resolver: "#{@ipKeyResolver}"
@@ -44,7 +60,7 @@ spring:
                 - Path=/api/v1/core/**
               filters:
                 - name: Authentication
-                - RewritePath=/api/v1/core/(?<segment>.*), /core/$\{segment}
+                - RewritePath=/api/v1/(?<service>\w+)/(?<segment>.*), /$\{service}/$\{segment}
               order: 2
 
             # 支付服务路由 - 统一规范为 /api/v1/payment/**
@@ -54,7 +70,7 @@ spring:
                 - Path=/api/v1/payment/**
               filters:
                 - name: Authentication
-                - RewritePath=/api/v1/payment/(?<segment>.*), /payment/$\{segment}
+                - RewritePath=/api/v1/(?<service>\w+)/(?<segment>.*), /$\{service}/$\{segment}
               order: 3
           # 全局CORS配置
           globalcors:

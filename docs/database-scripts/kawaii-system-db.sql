@@ -3,8 +3,6 @@
 -- 负责：系统配置、审计追踪（由Gateway管理）
 -- ================================================================
 
--- 启用UUID扩展
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ================================================================
 -- 1. 系统配置表 (system_configs)
@@ -31,7 +29,6 @@ CREATE TABLE system_configs (
 );
 
 CREATE INDEX idx_system_configs_group ON system_configs(config_group);
-CREATE INDEX idx_system_configs_public ON system_configs(is_public);
 
 -- ================================================================
 -- 2. 审计日志表 (audit_logs)
@@ -65,8 +62,7 @@ CREATE TABLE audit_logs (
 
 -- 索引 (支持按月分区)
 CREATE INDEX idx_audit_logs_user_id ON audit_logs(user_id);
-CREATE INDEX idx_audit_logs_action ON audit_logs(action);
-CREATE INDEX idx_audit_logs_resource ON audit_logs(resource_type, resource_id);
+CREATE INDEX idx_audit_logs_resource ON audit_logs(resource_id);
 CREATE INDEX idx_audit_logs_created_at ON audit_logs(created_at);
 
 -- ================================================================

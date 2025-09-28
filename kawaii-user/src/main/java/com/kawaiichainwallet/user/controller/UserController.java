@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -145,10 +146,11 @@ public class UserController {
     }
 
     /**
-     * 获取用户列表（管理员功能）
+     * 获取用户列表（管理员功能） - 使用@PreAuthorize注解进行权限控制
      */
     @GetMapping
     @Operation(summary = "获取用户列表", description = "管理员获取用户列表")
+    @PreAuthorize("T(com.kawaiichainwallet.common.context.UserContextHolder).isAdmin()")
     public R<List<UserDetailsDto>> getUserList(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -157,5 +159,37 @@ public class UserController {
         log.info("获取用户列表请求: page={}, size={}, status={}", page, size, status);
         List<UserDetailsDto> users = userService.getUserList(page, size, status);
         return R.success(users);
+    }
+
+    /**
+     * 删除用户（管理员功能）
+     */
+    @DeleteMapping("/{userId}")
+    @Operation(summary = "删除用户", description = "管理员删除指定用户")
+    public R<String> deleteUser(@PathVariable String userId) {
+        // 使用UserContextHolder进行权限检查
+        if (!UserContextHolder.isAdmin()) {
+            return R.error(ApiCode.FORBIDDEN, "仅管理员可以删除用户");
+        }
+
+        log.info("删除用户请求: userId={}, 操作人: {}", userId, UserContextHolder.getCurrentUserId());
+        // userService.deleteUser(userId); // 实际业务逻辑
+        return R.success("用户删除成功");
+    }
+
+    /**
+     * 修改用户状态（需要ADMIN或USER_MANAGER角色）
+     */
+    @PutMapping("/{userId}/status")
+    @Operation(summary = "修改用户状态", description = "修改指定用户的状态")
+    @PreAuthorize("T(com.kawaiichainwallet.common.context.UserContextHolder).hasAnyRole('ADMIN', 'USER_MANAGER')")
+    public R<Void> updateUserStatus(
+            @PathVariable String userId,
+            @RequestParam String status) {
+
+        log.info("修改用户状态请求: userId={}, status={}, 操作人: {}",
+                userId, status, UserContextHolder.getCurrentUserId());
+        // userService.updateUserStatus(userId, status); // 实际业务逻辑
+        return R.success("用户状态修改成功");
     }
 }

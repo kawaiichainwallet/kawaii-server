@@ -112,7 +112,7 @@ public class UserContextHolder {
     private static HttpServletRequest getCurrentRequest() {
         try {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-            return attributes != null ? attributes.getRequest() : null;
+            return attributes.getRequest();
         } catch (Exception e) {
             // 在非Web上下文中调用时会抛出异常，如Swagger文档生成时
             return null;

@@ -4,7 +4,7 @@
 
 项目使用统一的错误码管理：
 
-- **位置**: `kawaii-common/src/main/java/com/kawaiichainwallet/common/enums/ApiCode.java`
+- **位置**: `kawaii-common-core/src/main/java/com/kawaiichainwallet/common/enums/ApiCode.java`
 - **使用**: 所有API响应统一使用 `R<T>` 包装器和 `ApiCode` 枚举
 - **分类**: 按业务模块划分错误码区间
 

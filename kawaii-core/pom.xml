@@ -13,10 +13,17 @@
     <packaging>jar</packaging>
 
     <dependencies>
-        <!-- Common模块 -->
+        <!-- Kawaii Common Spring - Spring相关配置和组件 -->
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
-            <artifactId>kawaii-common</artifactId>
+            <artifactId>kawaii-common-spring</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <!-- Kawaii Common Business - 公共业务逻辑 -->
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>kawaii-common-business</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 

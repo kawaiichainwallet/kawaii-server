@@ -32,10 +32,10 @@
             <artifactId>jakarta.validation-api</artifactId>
         </dependency>
 
-        <!-- 引用公共模块 -->
+        <!-- Kawaii Common Core - 基础类型和工具 -->
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
-            <artifactId>kawaii-common</artifactId>
+            <artifactId>kawaii-common-core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
     </dependencies>

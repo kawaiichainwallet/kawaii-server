@@ -58,6 +58,13 @@
             <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
 
+        <!-- Kawaii Common Core - 基础工具类，无Spring依赖 -->
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>kawaii-common-core</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
         <!-- API接口模块 -->
         <dependency>
             <groupId>${project.parent.groupId}</groupId>

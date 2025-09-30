@@ -2,8 +2,8 @@ package com.kawaiichainwallet.api.user.fallback;
 
 import com.kawaiichainwallet.api.user.client.AuthServiceApi;
 import com.kawaiichainwallet.api.user.dto.TokenValidationResponse;
-import com.kawaiichainwallet.common.response.R;
-import com.kawaiichainwallet.common.enums.ApiCode;
+import com.kawaiichainwallet.common.core.response.R;
+import com.kawaiichainwallet.common.core.enums.ApiCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.openfeign.FallbackFactory;
 import org.springframework.stereotype.Component;

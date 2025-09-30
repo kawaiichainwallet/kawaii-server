@@ -1,7 +1,7 @@
 package com.kawaiichainwallet.common.business.audit;
 
-import com.kawaiichainwallet.common.context.UserContextHolder;
-import com.kawaiichainwallet.common.utils.TimeUtil;
+import com.kawaiichainwallet.common.core.utils.TimeUtil;
+import com.kawaiichainwallet.common.spring.context.UserContextHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

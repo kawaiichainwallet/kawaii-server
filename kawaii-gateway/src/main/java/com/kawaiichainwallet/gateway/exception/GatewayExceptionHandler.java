@@ -1,7 +1,7 @@
 package com.kawaiichainwallet.gateway.exception;
 
-import com.kawaiichainwallet.common.enums.ApiCode;
-import com.kawaiichainwallet.common.response.R;
+import com.kawaiichainwallet.common.core.enums.ApiCode;
+import com.kawaiichainwallet.common.core.response.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
 import org.springframework.core.annotation.Order;

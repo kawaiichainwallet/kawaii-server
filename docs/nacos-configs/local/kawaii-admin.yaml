@@ -1,0 +1,67 @@
+spring:
+  # 数据库配置 - 本地PostgreSQL
+  datasource:
+    url: jdbc:postgresql://localhost:5432/kawaii-admin-db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC
+
+# 应用业务配置 - 本地开发
+app:
+  # 管理员认证配置
+  admin:
+    # 登录安全配置
+    login:
+      max-attempts: 5  # 管理员登录失败次数限制
+      lock-duration: 15  # 15分钟锁定
+      session-timeout: 1800  # 30分钟会话超时
+
+    # 权限配置
+    permissions:
+      super-admin-roles: ["SUPER_ADMIN"]  # 超级管理员角色
+      read-only-roles: ["READ_ONLY"]      # 只读角色
+
+    # 审计配置
+    audit:
+      enable: true
+      sensitive-operations:  # 需要记录的敏感操作
+        - "CREATE_ADMIN"
+        - "DELETE_ADMIN"
+        - "ASSIGN_ROLE"
+        - "UPDATE_CONFIG"
+        - "EXPORT_DATA"
+      retention-days: 90  # 审计日志保留90天
+
+  # 系统配置管理
+  system:
+    config:
+      # 配置变更审批
+      require-approval: false  # 本地开发关闭审批
+      auto-backup: true        # 自动备份配置
+
+    # 数据导出配置
+    export:
+      max-records: 10000       # 单次导出最大记录数
+      formats: ["CSV", "EXCEL", "JSON"]
+      temp-dir: "/tmp/kawaii-admin-exports"
+
+
+  # 安全配置
+  security:
+    # CORS配置 - 本地开发允许管理后台来源
+    cors:
+      allowed-origins:
+        - "http://localhost:3001"    # 管理后台前端
+        - "http://localhost:8080"    # Gateway
+        - "http://127.0.0.1:3001"
+      allowed-methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+      allowed-headers: "*"
+      allow-credentials: true
+
+  # 文件上传配置
+  upload:
+    max-file-size: 10MB      # 最大文件大小
+    allowed-types: ["jpg", "png", "pdf", "csv", "xlsx"]
+    upload-path: "/tmp/kawaii-admin-uploads"

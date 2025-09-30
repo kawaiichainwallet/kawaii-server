@@ -33,6 +33,7 @@
         <module>kawaii-notification</module>
         <module>kawaii-payment</module>
         <module>kawaii-user</module>
+        <module>kawaii-admin</module>
     </modules>
 
     <scm>

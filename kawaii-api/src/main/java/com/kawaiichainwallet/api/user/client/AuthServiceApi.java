@@ -2,7 +2,7 @@ package com.kawaiichainwallet.api.user.client;
 
 import com.kawaiichainwallet.api.user.dto.TokenValidationResponse;
 import com.kawaiichainwallet.api.user.fallback.AuthServiceApiFallbackFactory;
-import com.kawaiichainwallet.common.response.R;
+import com.kawaiichainwallet.common.core.response.R;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 

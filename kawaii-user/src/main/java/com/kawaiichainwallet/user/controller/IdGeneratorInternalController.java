@@ -3,15 +3,13 @@ package com.kawaiichainwallet.user.controller;
 import com.kawaiichainwallet.api.user.client.IdGeneratorServiceApi;
 import com.kawaiichainwallet.api.user.dto.IdGenerationRequest;
 import com.kawaiichainwallet.api.user.dto.IdGenerationResponse;
-import com.kawaiichainwallet.common.enums.ApiCode;
-import com.kawaiichainwallet.common.response.R;
+import com.kawaiichainwallet.common.core.response.R;
 import com.kawaiichainwallet.user.service.DistributedIdService;
-import com.kawaiichainwallet.common.utils.TimeUtil;
+import com.kawaiichainwallet.common.core.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 

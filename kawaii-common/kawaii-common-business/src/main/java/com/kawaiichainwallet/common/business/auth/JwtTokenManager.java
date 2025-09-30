@@ -1,6 +1,6 @@
 package com.kawaiichainwallet.common.business.auth;
 
-import com.kawaiichainwallet.common.utils.TimeUtil;
+import com.kawaiichainwallet.common.core.utils.TimeUtil;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;

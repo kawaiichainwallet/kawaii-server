@@ -1,8 +1,8 @@
 package com.kawaiichainwallet.user.service;
 
-import com.kawaiichainwallet.common.enums.ApiCode;
-import com.kawaiichainwallet.common.exception.BusinessException;
-import com.kawaiichainwallet.common.utils.ValidationUtil;
+import com.kawaiichainwallet.common.core.enums.ApiCode;
+import com.kawaiichainwallet.common.core.exception.BusinessException;
+import com.kawaiichainwallet.common.core.utils.ValidationUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.kawaiichainwallet.user.dto.UserDetailsDto;
 import com.kawaiichainwallet.user.dto.UpdateUserInfoRequest;

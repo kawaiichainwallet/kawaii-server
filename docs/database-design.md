@@ -24,14 +24,14 @@
 
 ### 数据库分配方案
 
-| 数据库 | 微服务 | 端口 | 业务域 | 主要表 |
+| 数据库 | 微服务 | 端口   | 业务域 | 主要表 |
 |--------|--------|------|--------|--------|
 | `kawaii-user-db` | kawaii-user | 8091 | 用户身份管理、认证授权、个人资料 | users, user_profiles, user_kyc, jwt_blacklist |
 | `kawaii-core-db` | kawaii-core | 8092 | 钱包管理、区块链资产、链上交易 | supported_chains, wallets, wallet_addresses, tokens, transactions, transaction_logs |
 | `kawaii-payment-db` | kawaii-payment | 8093 | 支付处理、生活缴费 | payment_orders, bill_providers, bill_payments |
 | `kawaii-merchant-db` | kawaii-merchant | 8094 | 商户管理、API配置 | merchants |
 | `kawaii-notification-db` | kawaii-notification | 8095 | 消息通知、推送管理 | notifications |
-| `kawaii-system-db` | kawaii-gateway | 8090 | 系统配置、审计追踪 | system_configs, audit_logs |
+| `kawaii-admin-db` | kawaii-admin-service | 8096 | 管理后台、系统配置、运营审计 | system_configs, audit_logs, admin_users, admin_roles |
 
 ### 数据库脚本文件
 
@@ -42,7 +42,7 @@
 - `kawaii-payment-db.sql` - 支付服务数据库
 - `kawaii-merchant-db.sql` - 商户服务数据库
 - `kawaii-notification-db.sql` - 通知服务数据库
-- `kawaii-system-db.sql` - 系统配置数据库
+- `kawaii-admin-db.sql` - 管理后台数据库
 
 ## 🚀 数据库部署
 
@@ -57,7 +57,7 @@ createdb kawaii_core_db
 createdb kawaii_payment_db
 createdb kawaii_merchant_db
 createdb kawaii_notification_db
-createdb kawaii_system_db
+createdb kawaii_admin_db
 ```
 
 #### 2. 执行DDL脚本
@@ -81,8 +81,8 @@ psql -d kawaii_merchant_db -f kawaii-merchant-db.sql
 # 通知服务数据库
 psql -d kawaii_notification_db -f kawaii-notification-db.sql
 
-# 系统配置数据库
-psql -d kawaii_system_db -f kawaii-system-db.sql
+# 管理后台数据库
+psql -d kawaii_admin_db -f kawaii-admin-db.sql
 ```
 
 #### 3. 批量执行脚本
@@ -99,7 +99,7 @@ databases=(
     "kawaii_payment_db:kawaii-payment-db.sql"
     "kawaii_merchant_db:kawaii-merchant-db.sql"
     "kawaii_notification_db:kawaii-notification-db.sql"
-    "kawaii_system_db:kawaii-system-db.sql"
+    "kawaii_admin_db:kawaii-admin-db.sql"
 )
 
 for db_script in "${databases[@]}"; do

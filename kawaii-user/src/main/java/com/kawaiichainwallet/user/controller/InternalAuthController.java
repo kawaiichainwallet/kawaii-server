@@ -2,8 +2,8 @@ package com.kawaiichainwallet.user.controller;
 
 import com.kawaiichainwallet.api.user.client.AuthServiceApi;
 import com.kawaiichainwallet.api.user.dto.TokenValidationResponse;
-import com.kawaiichainwallet.common.enums.ApiCode;
-import com.kawaiichainwallet.common.response.R;
+import com.kawaiichainwallet.common.core.enums.ApiCode;
+import com.kawaiichainwallet.common.core.response.R;
 import com.kawaiichainwallet.user.converter.ServiceApiConverter;
 import com.kawaiichainwallet.user.service.AuthService;
 import com.kawaiichainwallet.user.service.UserService;

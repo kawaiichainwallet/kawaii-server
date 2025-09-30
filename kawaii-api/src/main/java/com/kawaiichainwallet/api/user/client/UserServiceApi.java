@@ -4,7 +4,7 @@ import com.kawaiichainwallet.api.user.dto.UserInfoResponse;
 import com.kawaiichainwallet.api.user.dto.TokenValidationResponse;
 import com.kawaiichainwallet.api.user.dto.UserPaymentPermissionResponse;
 import com.kawaiichainwallet.api.user.fallback.UserServiceApiFallbackFactory;
-import com.kawaiichainwallet.common.response.R;
+import com.kawaiichainwallet.common.core.response.R;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 

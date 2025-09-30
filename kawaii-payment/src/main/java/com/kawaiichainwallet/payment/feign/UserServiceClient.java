@@ -1,10 +1,9 @@
 package com.kawaiichainwallet.payment.feign;
 
-import com.kawaiichainwallet.common.response.R;
+import com.kawaiichainwallet.common.core.response.R;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
 
 /**
  * 用户服务Feign客户端 - 支付服务调用

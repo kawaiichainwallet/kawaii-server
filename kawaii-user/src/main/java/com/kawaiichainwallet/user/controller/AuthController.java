@@ -1,9 +1,9 @@
 package com.kawaiichainwallet.user.controller;
 
+import com.kawaiichainwallet.common.spring.utils.RequestUtil;
 import com.kawaiichainwallet.user.dto.*;
 import com.kawaiichainwallet.user.service.AuthService;
-import com.kawaiichainwallet.common.response.R;
-import com.kawaiichainwallet.common.utils.RequestUtil;
+import com.kawaiichainwallet.common.core.response.R;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;

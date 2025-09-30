@@ -1,6 +1,6 @@
 package com.kawaiichainwallet.user.service;
 
-import com.kawaiichainwallet.common.utils.TimeUtil;
+import com.kawaiichainwallet.common.core.utils.TimeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,7 +8,6 @@ import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
 /**

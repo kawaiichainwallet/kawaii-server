@@ -1,9 +1,9 @@
 package com.kawaiichainwallet.user.controller;
 
-import com.kawaiichainwallet.common.enums.ApiCode;
-import com.kawaiichainwallet.common.response.R;
-import com.kawaiichainwallet.common.utils.ValidationUtil;
-import com.kawaiichainwallet.common.context.UserContextHolder;
+import com.kawaiichainwallet.common.core.enums.ApiCode;
+import com.kawaiichainwallet.common.core.response.R;
+import com.kawaiichainwallet.common.core.utils.ValidationUtil;
+import com.kawaiichainwallet.common.spring.context.UserContextHolder;
 import com.kawaiichainwallet.user.dto.UpdateUserInfoRequest;
 import com.kawaiichainwallet.user.dto.UserDetailsDto;
 import com.kawaiichainwallet.user.entity.User;

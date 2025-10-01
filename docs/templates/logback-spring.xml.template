@@ -2,7 +2,7 @@
 <configuration>
     <!-- 定义变量 -->
     <property name="LOG_HOME" value="${LOG_PATH:-logs}"/>
-    <property name="APP_NAME" value="kawaii-user"/>
+    <property name="APP_NAME" value="{{SERVICE_NAME}}"/>
 
     <!-- 统一日志格式 -->
     <property name="CONSOLE_LOG_PATTERN"
@@ -75,12 +75,8 @@
     <logger name="org.apache.http" level="WARN"/>
     <logger name="com.zaxxer.hikari" level="WARN"/>
     <logger name="org.hibernate.validator" level="WARN"/>
-
-    <!-- SQL日志 -->
-    <logger name="com.kawaiichainwallet.user.mapper" level="DEBUG" additivity="false">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="ASYNC_FILE"/>
-    </logger>
+    <!-- 服务特定的日志配置，各服务可根据需要添加 -->
+    {{SERVICE_SPECIFIC_LOGGERS}}
 
     <!-- 业务日志 -->
     <logger name="com.kawaiichainwallet" level="INFO" additivity="false">
@@ -100,9 +96,7 @@
     <springProfile name="local,dev">
         <!-- 开发环境显示更多调试信息 -->
         <logger name="com.kawaiichainwallet" level="DEBUG"/>
-        <logger name="com.baomidou.mybatisplus" level="DEBUG"/>
-        <logger name="org.springframework.web" level="DEBUG"/>
-        <logger name="org.springframework.security" level="DEBUG"/>
+        {{SERVICE_DEV_LOGGERS}}
 
         <!-- 开发环境控制台显示DEBUG -->
         <appender name="DEV_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">

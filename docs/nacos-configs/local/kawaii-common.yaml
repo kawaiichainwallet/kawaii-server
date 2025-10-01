@@ -52,16 +52,6 @@ feign:
   okhttp:
     enabled: true
 
-# 日志配置 - 本地开发使用DEBUG级别
-logging:
-  level:
-    root: INFO
-    com.kawaiichainwallet: DEBUG
-    org.springframework.cloud.gateway: DEBUG
-    org.springframework.security: DEBUG
-    feign: DEBUG
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
 # 管理端点配置 - 本地开发暴露所有端点
 management:

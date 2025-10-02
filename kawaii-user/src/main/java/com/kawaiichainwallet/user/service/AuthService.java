@@ -36,7 +36,6 @@ public class AuthService {
     private final AuthConverter authConverter;
     private final OtpService otpService;
     private final JwtTokenService jwtTokenService;
-    private final AuditService auditService;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
@@ -58,10 +57,8 @@ public class AuthService {
         User user = userMapper.findByIdentifier(request.getIdentifier());
         if (user == null) {
             // 记录登录失败
-            auditService.logAction(null, "LOGIN_FAILED", "user", null,
-                    String.format("用户不存在: %s, IP: %s",
-                            ValidationUtil.maskSensitiveInfo(request.getIdentifier()), clientIp),
-                    clientIp, userAgent, false, "用户不存在");
+            log.warn("Login failed: user not found - identifier: {}, IP: {}",
+                    ValidationUtil.maskSensitiveInfo(request.getIdentifier()), clientIp);
             throw new BusinessException(ApiCode.INVALID_CREDENTIALS, "用户名或密码错误");
         }
 
@@ -91,10 +88,6 @@ public class AuthService {
         // 验证OTP
         boolean otpValid = otpService.verifyOtp(request.getPhone(), "phone", "login", request.getOtpCode());
         if (!otpValid) {
-            auditService.logAction(null, "LOGIN_FAILED", "user", null,
-                    String.format("OTP验证失败: %s, IP: %s",
-                            ValidationUtil.maskPhone(request.getPhone()), clientIp),
-                    clientIp, userAgent, false, "验证码错误");
             throw new BusinessException(ApiCode.OTP_INVALID, "验证码错误或已过期");
         }
 
@@ -104,10 +97,6 @@ public class AuthService {
                         .eq(User::getPhone, request.getPhone())
                         .ne(User::getStatus, "deleted"));
         if (user == null) {
-            auditService.logAction(null, "LOGIN_FAILED", "user", null,
-                    String.format("用户不存在: %s, IP: %s",
-                            ValidationUtil.maskPhone(request.getPhone()), clientIp),
-                    clientIp, userAgent, false, "用户不存在");
             throw new BusinessException(ApiCode.USER_NOT_FOUND, "用户不存在");
         }
 
@@ -134,9 +123,6 @@ public class AuthService {
                         .ne(User::getStatus, "deleted"));
         if (user == null) {
             // 为了安全，不暴露用户是否存在，但记录日志
-            auditService.logAction(null, "SEND_LOGIN_OTP_FAILED", "otp", null,
-                    String.format("用户不存在: %s, IP: %s", ValidationUtil.maskPhone(phone), clientIp),
-                    clientIp, userAgent, false, "用户不存在");
             // 仍然返回成功，不暴露用户是否存在
         } else {
             // 检查账户状态
@@ -146,9 +132,6 @@ public class AuthService {
             otpService.sendOtp(phone, "phone", "login");
 
             // 记录审计日志
-            auditService.logAction(user.getUserId(), "SEND_LOGIN_OTP", "otp", null,
-                    String.format("发送登录验证码: %s, IP: %s", ValidationUtil.maskPhone(phone), clientIp),
-                    clientIp, userAgent, true, null);
         }
 
         log.info("发送登录验证码请求: phone={}, IP={}", ValidationUtil.maskPhone(phone), clientIp);
@@ -179,8 +162,6 @@ public class AuthService {
             String newRefreshToken = jwtTokenService.generateRefreshToken(userId, username);
 
             // 记录审计日志
-            auditService.logAction(userId, "REFRESH_TOKEN", "auth", null,
-                    "刷新Token成功", clientIp, userAgent, true, null);
 
             // 使用MapStruct构建响应
             LoginResponse response = authConverter.createLoginResponse(userId, username);
@@ -190,8 +171,6 @@ public class AuthService {
 
             return response;
         } catch (Exception e) {
-            auditService.logAction(null, "REFRESH_TOKEN_FAILED", "auth", null,
-                    "刷新Token失败: " + e.getMessage(), clientIp, userAgent, false, e.getMessage());
             throw new BusinessException(ApiCode.INVALID_TOKEN, "Token刷新失败");
         }
     }
@@ -201,8 +180,6 @@ public class AuthService {
      */
     public void logout(String userId, String clientIp, String userAgent) {
         // 记录登出审计日志
-        auditService.logAction(userId, "LOGOUT", "auth", userId,
-                "用户登出", clientIp, userAgent, true, null);
 
         // TODO: 将Token加入黑名单（需要Redis实现）
         log.info("用户登出成功: userId={}, IP={}", userId, clientIp);
@@ -303,17 +280,11 @@ public class AuthService {
                 default -> "账户状态异常";
             };
 
-            auditService.logAction(user.getUserId(), "LOGIN_FAILED", "user", user.getUserId(),
-                    String.format("账户状态异常: %s, IP: %s", user.getStatus(), clientIp),
-                    clientIp, userAgent, false, errorMsg);
             throw new BusinessException(ApiCode.ACCOUNT_DISABLED, errorMsg);
         }
 
         // 检查账户是否被锁定
         if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(LocalDateTime.now())) {
-            auditService.logAction(user.getUserId(), "LOGIN_FAILED", "user", user.getUserId(),
-                    String.format("账户已锁定: %s, IP: %s", user.getLockedUntil(), clientIp),
-                    clientIp, userAgent, false, "账户已锁定");
             throw new BusinessException(ApiCode.ACCOUNT_LOCKED,
                     String.format("账户已被锁定，解锁时间: %s", user.getLockedUntil()));
         }
@@ -339,17 +310,10 @@ public class AuthService {
             LocalDateTime lockUntil = LocalDateTime.now().plusMinutes(accountLockDurationMinutes);
             userMapper.lockUser(user.getUserId(), lockUntil);
 
-            auditService.logAction(user.getUserId(), "ACCOUNT_LOCKED", "user", user.getUserId(),
-                    String.format("账户因登录失败次数过多被锁定: %d次, IP: %s", currentAttempts, clientIp),
-                    clientIp, userAgent, true, null);
 
             log.warn("账户被锁定: userId={}, attempts={}, lockUntil={}",
                     user.getUserId(), currentAttempts, lockUntil);
         } else {
-            auditService.logAction(user.getUserId(), "LOGIN_FAILED", "user", user.getUserId(),
-                    String.format("登录失败: %s, 尝试次数: %d/%d, IP: %s",
-                            reason, currentAttempts, maxLoginAttempts, clientIp),
-                    clientIp, userAgent, false, reason);
         }
     }
 
@@ -368,9 +332,6 @@ public class AuthService {
         String refreshToken = jwtTokenService.generateRefreshToken(user.getUserId(), user.getUsername());
 
         // 记录登录成功审计日志
-        auditService.logAction(user.getUserId(), "LOGIN_SUCCESS", "user", user.getUserId(),
-                String.format("登录成功: %s, IP: %s", loginMethod, clientIp),
-                clientIp, userAgent, true, null);
 
         // 使用MapStruct构建响应，自动处理脱敏
         LoginResponse response = authConverter.userToLoginResponse(user);

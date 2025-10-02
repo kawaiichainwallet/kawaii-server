@@ -35,7 +35,6 @@ public class UserService {
     private final UserProfileMapper userProfileMapper;
     private final UserConverter userConverter;
     private final OtpService otpService;
-    private final AuditService auditService;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenService jwtTokenService;
 
@@ -191,36 +190,21 @@ public class UserService {
         // 2. 验证OTP验证码
         boolean otpValid = otpService.verifyOtp(request.getTarget(), request.getType(), "register", request.getOtpCode());
         if (!otpValid) {
-            auditService.logAction(null, "REGISTER_FAILED", "user", null,
-                    String.format("OTP验证失败: %s, IP: %s",
-                            ValidationUtil.maskSensitiveInfo(request.getTarget()), clientIp),
-                    clientIp, userAgent, false, "验证码错误");
             throw new BusinessException(ApiCode.OTP_INVALID, "验证码错误或已过期");
         }
 
         // 3. 检查用户名是否已存在
         if (isUsernameExists(request.getUsername())) {
-            auditService.logAction(null, "REGISTER_FAILED", "user", null,
-                    String.format("用户名已存在: %s, IP: %s", request.getUsername(), clientIp),
-                    clientIp, userAgent, false, "用户名已存在");
             throw new BusinessException(ApiCode.USER_ALREADY_EXISTS, "用户名已被使用");
         }
 
         // 4. 检查邮箱或手机号是否已存在
         if ("email".equals(request.getType())) {
             if (isEmailExists(request.getTarget())) {
-                auditService.logAction(null, "REGISTER_FAILED", "user", null,
-                        String.format("邮箱已存在: %s, IP: %s",
-                                ValidationUtil.maskEmail(request.getTarget()), clientIp),
-                        clientIp, userAgent, false, "邮箱已被注册");
                 throw new BusinessException(ApiCode.EMAIL_ALREADY_EXISTS, "邮箱已被注册");
             }
         } else if ("phone".equals(request.getType())) {
             if (isPhoneExists(request.getTarget())) {
-                auditService.logAction(null, "REGISTER_FAILED", "user", null,
-                        String.format("手机号已存在: %s, IP: %s",
-                                ValidationUtil.maskPhone(request.getTarget()), clientIp),
-                        clientIp, userAgent, false, "手机号已被注册");
                 throw new BusinessException(ApiCode.PHONE_ALREADY_EXISTS, "手机号已被注册");
             }
         }
@@ -233,9 +217,6 @@ public class UserService {
         createInitialUserProfile(user.getUserId());
 
         // 7. 记录注册成功审计日志
-        auditService.logAction(user.getUserId(), "REGISTER_SUCCESS", "user", user.getUserId(),
-                String.format("用户注册成功: %s, IP: %s", request.getType(), clientIp),
-                clientIp, userAgent, true, null);
 
         log.info("用户注册成功: userId={}, username={}, type={}, IP={}",
                 user.getUserId(), user.getUsername(), request.getType(), clientIp);
@@ -279,10 +260,6 @@ public class UserService {
         }
 
         if (exists) {
-            auditService.logAction(null, "SEND_REGISTER_OTP_FAILED", "otp", null,
-                    String.format("目标已注册: %s, IP: %s",
-                            ValidationUtil.maskSensitiveInfo(target), clientIp),
-                    clientIp, userAgent, false, "目标已注册");
             throw new BusinessException(ApiCode.USER_ALREADY_EXISTS,
                     "email".equals(type) ? "邮箱已被注册" : "手机号已被注册");
         }
@@ -291,10 +268,6 @@ public class UserService {
         otpService.sendOtp(target, type, "register");
 
         // 记录审计日志
-        auditService.logAction(null, "SEND_REGISTER_OTP", "otp", null,
-                String.format("发送注册验证码: %s, IP: %s",
-                        ValidationUtil.maskSensitiveInfo(target), clientIp),
-                clientIp, userAgent, true, null);
 
         log.info("发送注册验证码请求: target={}, type={}, IP={}",
                 ValidationUtil.maskSensitiveInfo(target), type, clientIp);

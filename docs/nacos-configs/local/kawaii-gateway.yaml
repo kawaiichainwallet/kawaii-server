@@ -55,3 +55,58 @@ app:
       # 内部路径 - 仅服务间调用，阻止外部直接访问
       internal-paths:
         - "/kawaii-*/internal/**"
+
+# Gateway请求日志配置
+gateway:
+  request-logging:
+    # 是否启用请求日志
+    enabled: true
+
+    # 是否记录请求头（本地开发启用，生产环境可关闭）
+    log-headers: true
+
+    # 是否记录请求体（本地开发可启用，生产环境建议关闭）
+    log-request-body: false
+
+    # 是否记录响应体（本地开发可启用，生产环境建议关闭）
+    log-response-body: true
+
+    # 记录响应体的最大大小（字节）
+    max-response-body-size: 2048
+
+    # 是否记录敏感路径的详细信息（建议关闭）
+    log-sensitive-paths: false
+
+    # 排除的路径模式（不记录日志）
+    exclude-paths:
+      - "/actuator/**"
+      - "/health"
+      - "/favicon.ico"
+      - "/kawaii-*/actuator/**"
+
+    # 需要脱敏的字段名
+    sensitive-fields:
+      - "password"
+      - "token"
+      - "authorization"
+      - "cookie"
+      - "session"
+      - "secret"
+      - "key"
+      - "passwd"
+      - "pwd"
+      - "credential"
+      - "refreshToken"
+      - "accessToken"
+      - "otp"
+      - "otpCode"
+      - "verificationCode"
+
+    # 敏感路径模式（这些路径的详细信息会被脱敏处理）
+    sensitive-paths:
+      - "/kawaii-user/auth/login"
+      - "/kawaii-user/auth/register"
+      - "/kawaii-user/auth/refresh"
+      - "/kawaii-user/auth/send-**-otp"
+      - "/kawaii-admin/auth/**"
+      - "/kawaii-*/password/**"

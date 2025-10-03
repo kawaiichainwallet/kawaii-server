@@ -1,6 +1,7 @@
 package com.kawaiichainwallet.gateway.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kawaiichainwallet.gateway.config.RequestBodyCacheConfig;
 import com.kawaiichainwallet.gateway.config.RequestLoggingConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -72,7 +73,7 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
         exchange.getAttributes().put("REQUEST_ID", requestId);
 
         // 记录请求日志
-        logRequest(request, requestId, startTime);
+        logRequest(exchange, requestId, startTime);
 
         // 装饰响应以记录响应日志
         ServerHttpResponseDecorator decoratedResponse = new ServerHttpResponseDecorator(response) {
@@ -105,7 +106,8 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
     /**
      * 记录请求日志
      */
-    private void logRequest(ServerHttpRequest request, String requestId, String startTime) {
+    private void logRequest(ServerWebExchange exchange, String requestId, String startTime) {
+        ServerHttpRequest request = exchange.getRequest();
         try {
             Map<String, Object> logData = new LinkedHashMap<>();
             logData.put("type", "REQUEST");
@@ -155,7 +157,15 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
                 logData.put("contentLength", contentLength);
             }
 
-            // TODO: 读取请求体需要特殊处理避免消费数据流
+            // 读取缓存的请求体
+            if (loggingConfig.isLogRequestBody() && isJsonRequest(request)) {
+                String cachedBody = exchange.getAttribute(RequestBodyCacheConfig.CUSTOM_CACHED_REQUEST_BODY_ATTR);
+                if (cachedBody != null && !cachedBody.isEmpty()) {
+                    // 脱敏处理请求体
+                    String maskedRequestBody = maskSensitiveJsonData(cachedBody);
+                    logData.put("requestBody", maskedRequestBody);
+                }
+            }
 
             apiLogger.info("API_REQUEST: {}", objectMapper.writeValueAsString(logData));
 
@@ -298,6 +308,14 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
     }
 
     /**
+     * 判断是否是JSON请求
+     */
+    private boolean isJsonRequest(ServerHttpRequest request) {
+        String contentType = request.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
+        return contentType != null && contentType.toLowerCase().contains("application/json");
+    }
+
+    /**
      * 判断是否是JSON响应
      */
     private boolean isJsonResponse(ServerHttpResponse response) {
@@ -351,7 +369,7 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        // 设置执行优先级
-        return Ordered.LOWEST_PRECEDENCE - 1;
+        // 必须在请求体缓存过滤器之后执行
+        return Ordered.HIGHEST_PRECEDENCE + 100;
     }
 }

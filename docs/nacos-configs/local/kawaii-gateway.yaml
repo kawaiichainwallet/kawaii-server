@@ -66,7 +66,7 @@ gateway:
     log-headers: true
 
     # 是否记录请求体（本地开发可启用，生产环境建议关闭）
-    log-request-body: false
+    log-request-body: true
 
     # 是否记录响应体（本地开发可启用，生产环境建议关闭）
     log-response-body: true

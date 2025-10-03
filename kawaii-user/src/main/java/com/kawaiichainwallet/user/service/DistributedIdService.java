@@ -2,6 +2,7 @@ package com.kawaiichainwallet.user.service;
 
 import com.kawaiichainwallet.api.user.dto.IdGenerationRequest;
 import com.kawaiichainwallet.api.user.dto.IdGenerationResponse;
+import com.kawaiichainwallet.common.core.exception.IdGenerationException;
 import com.kawaiichainwallet.user.config.LeafConfiguration;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,7 @@ public class DistributedIdService {
             return new IdGenerationResponse(id, bizTag, "segment");
         } catch (Exception e) {
             log.error("Failed to generate segment ID for bizTag: {}", bizTag, e);
-            throw new RuntimeException("Generate segment ID failed: " + e.getMessage());
+            throw new IdGenerationException("Generate ID failed: " + e.getMessage());
         }
     }
 
@@ -51,7 +52,7 @@ public class DistributedIdService {
             return new IdGenerationResponse(id, "snowflake", "snowflake");
         } catch (Exception e) {
             log.error("Failed to generate snowflake ID", e);
-            throw new RuntimeException("Generate snowflake ID failed: " + e.getMessage());
+            throw new IdGenerationException("Generate ID failed: " + e.getMessage());
         }
     }
 
@@ -74,7 +75,7 @@ public class DistributedIdService {
             return new IdGenerationResponse(ids, bizTag, "segment");
         } catch (Exception e) {
             log.error("Failed to generate batch segment IDs: {}", request, e);
-            throw new RuntimeException("Generate batch segment IDs failed: " + e.getMessage());
+            throw new IdGenerationException("Generate batch segment IDs failed: " + e.getMessage());
         }
     }
 

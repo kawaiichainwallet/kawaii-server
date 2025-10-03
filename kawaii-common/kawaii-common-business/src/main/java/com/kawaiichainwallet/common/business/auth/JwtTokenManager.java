@@ -1,5 +1,6 @@
 package com.kawaiichainwallet.common.business.auth;
 
+import com.kawaiichainwallet.common.core.exception.JwtException;
 import com.kawaiichainwallet.common.core.utils.TimeUtil;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -42,7 +43,7 @@ public class JwtTokenManager {
             this.jwtSigner = new MACSigner(secretBytes);
             this.jwtVerifier = new MACVerifier(secretBytes);
         } catch (JOSEException e) {
-            throw new RuntimeException("Failed to initialize JWT manager", e);
+            throw new JwtException("Failed to initialize JWT manager", e);
         }
     }
 
@@ -218,7 +219,7 @@ public class JwtTokenManager {
             return signedJWT.serialize();
         } catch (JOSEException e) {
             log.error("Failed to sign JWT token", e);
-            throw new RuntimeException("Failed to sign JWT token", e);
+            throw new JwtException("Failed to sign JWT token", e);
         }
     }
 

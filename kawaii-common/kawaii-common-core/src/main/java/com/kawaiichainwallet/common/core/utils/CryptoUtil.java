@@ -4,6 +4,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.digest.BCrypt;
+import com.kawaiichainwallet.common.core.exception.CryptoException;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.Cipher;
@@ -80,7 +81,7 @@ public class CryptoUtil {
             return Base64.getEncoder().encodeToString(secretKey.getEncoded());
         } catch (Exception e) {
             log.error("生成AES密钥失败", e);
-            throw new RuntimeException("生成AES密钥失败", e);
+            throw new CryptoException("生成AES密钥失败", e);
         }
     }
 
@@ -107,7 +108,7 @@ public class CryptoUtil {
             return Base64.getEncoder().encodeToString(encryptedBytes);
         } catch (Exception e) {
             log.error("AES加密失败", e);
-            throw new RuntimeException("AES加密失败", e);
+            throw new CryptoException("AES加密失败", e);
         }
     }
 
@@ -135,7 +136,7 @@ public class CryptoUtil {
             return new String(decryptedBytes, StandardCharsets.UTF_8);
         } catch (Exception e) {
             log.error("AES解密失败", e);
-            throw new RuntimeException("AES解密失败", e);
+            throw new CryptoException("AES解密失败", e);
         }
     }
 

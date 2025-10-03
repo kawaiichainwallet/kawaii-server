@@ -1,5 +1,6 @@
 package com.kawaiichainwallet.user.config;
 
+import com.kawaiichainwallet.common.core.exception.IdGenerationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -60,7 +61,7 @@ public class LeafConfiguration {
                 int updated = jdbcTemplate.update(updateSql, bizTag);
 
                 if (updated == 0) {
-                    throw new RuntimeException("BizTag not found: " + bizTag);
+                    throw new IdGenerationException("BizTag not found: " + bizTag);
                 }
 
                 // 获取更新后的max_id
@@ -70,7 +71,7 @@ public class LeafConfiguration {
                 return maxId;
             } catch (Exception e) {
                 log.error("Generate segment ID failed for bizTag: {}", bizTag, e);
-                throw new RuntimeException("Generate segment ID failed", e);
+                throw new IdGenerationException("Generate ID failed", e);
             }
         }
     }
@@ -104,7 +105,7 @@ public class LeafConfiguration {
             long timestamp = System.currentTimeMillis();
 
             if (timestamp < lastTimestamp) {
-                throw new RuntimeException("Clock moved backwards");
+                throw new IdGenerationException("Clock moved backwards");
             }
 
             if (lastTimestamp == timestamp) {

@@ -1,5 +1,6 @@
 package com.kawaiichainwallet.gateway.service;
 
+import com.kawaiichainwallet.common.core.exception.JwtException;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSVerifier;
@@ -29,7 +30,7 @@ public class JwtValidationService {
             byte[] secretBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
             this.jwtVerifier = new MACVerifier(secretBytes);
         } catch (JOSEException e) {
-            throw new RuntimeException("Failed to initialize JWT verifier", e);
+            throw new JwtException("Failed to initialize JWT verifier", e);
         }
     }
 

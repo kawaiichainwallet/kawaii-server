@@ -3,10 +3,10 @@ package com.kawaiichainwallet.admin.service;
 import com.kawaiichainwallet.api.user.client.IdGeneratorServiceApi;
 import com.kawaiichainwallet.api.user.dto.IdGenerationRequest;
 import com.kawaiichainwallet.api.user.dto.IdGenerationResponse;
+import com.kawaiichainwallet.common.core.exception.IdGenerationException;
 import com.kawaiichainwallet.common.core.response.R;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -39,11 +39,11 @@ public class AdminIdGeneratorService {
                 return id;
             } else {
                 log.error("Failed to generate admin user ID: {}", result.getMsg());
-                throw new RuntimeException("Generate admin user ID failed: " + result.getMsg());
+                throw new IdGenerationException("Generate ID failed: " + result.getMsg());
             }
         } catch (Exception e) {
             log.error("Failed to generate admin user ID", e);
-            throw new RuntimeException("Generate admin user ID failed", e);
+            throw new IdGenerationException("Generate ID failed", e);
         }
     }
 
@@ -59,11 +59,11 @@ public class AdminIdGeneratorService {
                 return id;
             } else {
                 log.error("Failed to generate audit log ID: {}", result.getMsg());
-                throw new RuntimeException("Generate audit log ID failed: " + result.getMsg());
+                throw new IdGenerationException("Generate ID failed: " + result.getMsg());
             }
         } catch (Exception e) {
             log.error("Failed to generate audit log ID", e);
-            throw new RuntimeException("Generate audit log ID failed", e);
+            throw new IdGenerationException("Generate ID failed", e);
         }
     }
 
@@ -79,11 +79,11 @@ public class AdminIdGeneratorService {
                 return id;
             } else {
                 log.error("Failed to generate config ID: {}", result.getMsg());
-                throw new RuntimeException("Generate config ID failed: " + result.getMsg());
+                throw new IdGenerationException("Generate ID failed: " + result.getMsg());
             }
         } catch (Exception e) {
             log.error("Failed to generate config ID", e);
-            throw new RuntimeException("Generate config ID failed", e);
+            throw new IdGenerationException("Generate ID failed", e);
         }
     }
 
@@ -109,11 +109,11 @@ public class AdminIdGeneratorService {
                 return result.getData();
             } else {
                 log.error("Failed to generate batch IDs: {}", result.getMsg());
-                throw new RuntimeException("Generate batch IDs failed: " + result.getMsg());
+                throw new IdGenerationException("Generate batch IDs failed: " + result.getMsg());
             }
         } catch (Exception e) {
             log.error("Failed to generate batch IDs for bizTag: {}, count: {}", bizTag, count, e);
-            throw new RuntimeException("Generate batch IDs failed", e);
+            throw new IdGenerationException("Generate batch IDs failed", e);
         }
     }
 

@@ -1,5 +1,6 @@
 package com.kawaiichainwallet.user.service;
 
+import com.kawaiichainwallet.common.core.exception.RateLimitException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -31,7 +32,7 @@ public class OtpService {
     public String generateAndStoreOtp(String identifier) {
         // 检查是否被阻止
         if (isBlocked(identifier)) {
-            throw new RuntimeException("验证码发送过于频繁，请稍后重试");
+            throw new RateLimitException("验证码发送过于频繁，请稍后重试");
         }
 
         String otp = generateOtp();

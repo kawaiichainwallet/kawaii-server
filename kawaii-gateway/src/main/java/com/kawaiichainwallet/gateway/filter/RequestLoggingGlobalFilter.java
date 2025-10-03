@@ -1,6 +1,7 @@
 package com.kawaiichainwallet.gateway.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kawaiichainwallet.common.spring.config.ObjectMapperFactory;
 import com.kawaiichainwallet.gateway.config.RequestBodyCacheConfig;
 import com.kawaiichainwallet.gateway.config.RequestLoggingConfig;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +42,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @RequiredArgsConstructor
 public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = ObjectMapperFactory.createObjectMapper();
     private final RequestLoggingConfig loggingConfig;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 

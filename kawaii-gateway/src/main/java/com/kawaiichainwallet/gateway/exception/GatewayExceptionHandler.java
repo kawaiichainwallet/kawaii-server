@@ -2,6 +2,7 @@ package com.kawaiichainwallet.gateway.exception;
 
 import com.kawaiichainwallet.common.core.enums.ApiCode;
 import com.kawaiichainwallet.common.core.response.R;
+import com.kawaiichainwallet.common.spring.config.ObjectMapperFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
 import org.springframework.core.annotation.Order;
@@ -15,8 +16,6 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -30,9 +29,7 @@ public class GatewayExceptionHandler implements ErrorWebExceptionHandler {
     private final ObjectMapper objectMapper;
 
     public GatewayExceptionHandler() {
-        this.objectMapper = new ObjectMapper();
-        this.objectMapper.registerModule(new JavaTimeModule());
-        this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        this.objectMapper = ObjectMapperFactory.createObjectMapper();
     }
 
     @Override

@@ -65,6 +65,13 @@
             <version>${project.parent.version}</version>
         </dependency>
 
+        <!-- Kawaii Common Spring - Spring通用配置 -->
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>kawaii-common-spring</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
         <!-- API接口模块 -->
         <dependency>
             <groupId>${project.parent.groupId}</groupId>

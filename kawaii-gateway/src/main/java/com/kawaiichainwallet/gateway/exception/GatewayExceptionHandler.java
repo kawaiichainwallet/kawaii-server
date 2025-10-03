@@ -1,6 +1,8 @@
 package com.kawaiichainwallet.gateway.exception;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kawaiichainwallet.common.core.enums.ApiCode;
+import com.kawaiichainwallet.common.core.exception.BusinessException;
 import com.kawaiichainwallet.common.core.response.R;
 import com.kawaiichainwallet.common.spring.config.ObjectMapperFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -15,14 +17,14 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 
 /**
  * Gateway WebFlux 全局异常处理器
+ * Order设为-2，优先级高于DefaultErrorWebExceptionHandler(-1)
  */
 @Slf4j
-@Order(-1)
+@Order(-2)
 @Component
 public class GatewayExceptionHandler implements ErrorWebExceptionHandler {
 
@@ -47,24 +49,30 @@ public class GatewayExceptionHandler implements ErrorWebExceptionHandler {
         HttpStatus httpStatus;
 
         // 根据异常类型处理
-        if (ex instanceof ResponseStatusException statusException) {
+        if (ex instanceof BusinessException businessException) {
+            // 处理业务异常
+            httpStatus = getHttpStatusFromCode(businessException.getCode());
+            result = R.error(businessException.getCode(), businessException.getMessage());
+            log.warn("业务异常: code={}, message={}", businessException.getCode(), businessException.getMessage());
+        } else if (ex instanceof ResponseStatusException statusException) {
             httpStatus = HttpStatus.valueOf(statusException.getStatusCode().value());
             result = handleResponseStatusException(statusException);
         } else if (ex instanceof IllegalArgumentException) {
             httpStatus = HttpStatus.BAD_REQUEST;
             result = R.error(ApiCode.BAD_REQUEST, ex.getMessage());
+            log.warn("非法参数: {}", ex.getMessage());
         } else if (ex.getClass().getSimpleName().contains("AccessDenied")) {
             httpStatus = HttpStatus.FORBIDDEN;
             result = R.error(ApiCode.FORBIDDEN, "权限不足");
-            log.warn("Access denied in gateway: {}", ex.getMessage());
+            log.warn("访问被拒绝: {}", ex.getMessage());
         } else if (ex.getClass().getSimpleName().contains("Authentication")) {
             httpStatus = HttpStatus.UNAUTHORIZED;
             result = R.error(ApiCode.UNAUTHORIZED, "认证失败");
-            log.warn("Authentication failed in gateway: {}", ex.getMessage());
+            log.warn("认证失败: {}", ex.getMessage());
         } else {
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
             result = R.error(ApiCode.INTERNAL_SERVER_ERROR, "网关内部错误");
-            log.error("Gateway unexpected error occurred", ex);
+            log.error("网关未知异常", ex);
         }
 
         response.setStatusCode(httpStatus);
@@ -93,5 +101,44 @@ public class GatewayExceptionHandler implements ErrorWebExceptionHandler {
             case SERVICE_UNAVAILABLE -> R.error(ApiCode.SERVICE_UNAVAILABLE, message);
             default -> R.error(ApiCode.INTERNAL_SERVER_ERROR, message);
         };
+    }
+
+    /**
+     * 根据业务错误码获取HTTP状态码
+     */
+    private HttpStatus getHttpStatusFromCode(Integer code) {
+        if (code == null) {
+            return HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+
+        // 2xx 成功
+        if (code >= 200 && code < 300) {
+            return HttpStatus.OK;
+        }
+
+        // 4xx 客户端错误
+        if (code >= 400 && code < 500) {
+            return switch (code) {
+                case 400 -> HttpStatus.BAD_REQUEST;
+                case 401 -> HttpStatus.UNAUTHORIZED;
+                case 403 -> HttpStatus.FORBIDDEN;
+                case 404 -> HttpStatus.NOT_FOUND;
+                case 405 -> HttpStatus.METHOD_NOT_ALLOWED;
+                case 409 -> HttpStatus.CONFLICT;
+                case 429 -> HttpStatus.TOO_MANY_REQUESTS;
+                default -> HttpStatus.BAD_REQUEST;
+            };
+        }
+
+        // 5xx 服务端错误
+        if (code >= 500 && code < 600) {
+            return switch (code) {
+                case 503 -> HttpStatus.SERVICE_UNAVAILABLE;
+                default -> HttpStatus.INTERNAL_SERVER_ERROR;
+            };
+        }
+
+        // 业务错误码(1xxx-9xxx)，统一返回200状态码，由前端根据code判断
+        return HttpStatus.OK;
     }
 }

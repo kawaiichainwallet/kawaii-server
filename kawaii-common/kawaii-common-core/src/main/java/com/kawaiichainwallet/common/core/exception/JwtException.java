@@ -1,5 +1,7 @@
 package com.kawaiichainwallet.common.core.exception;
 
+import com.kawaiichainwallet.common.core.enums.ApiCode;
+
 import java.io.Serial;
 
 /**
@@ -11,10 +13,18 @@ public class JwtException extends BusinessException {
     private static final long serialVersionUID = 1L;
 
     public JwtException(String message) {
-        super(message);
+        super(ApiCode.TOKEN_INVALID, message);
     }
 
     public JwtException(String message, Throwable cause) {
         super(message, cause);
+    }
+
+    public JwtException(ApiCode apiCode) {
+        super(apiCode);
+    }
+
+    public JwtException(ApiCode apiCode, String message) {
+        super(apiCode, message);
     }
 }

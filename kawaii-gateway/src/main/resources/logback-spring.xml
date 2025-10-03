@@ -16,7 +16,7 @@
             <pattern>${CONSOLE_LOG_PATTERN}</pattern>
             <charset>UTF-8</charset>
         </encoder>
-        <!-- 过滤器：只输出INFO及以上级别 -->
+        <!-- 只输出INFO及以上级别 -->
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>INFO</level>
         </filter>
@@ -90,14 +90,6 @@
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
             <charset>UTF-8</charset>
         </encoder>
-        <!-- 只记录API相关日志 -->
-        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-            <evaluator>
-                <expression>return message != null &amp;&amp; (message.contains("API_REQUEST") || message.contains("API_RESPONSE") || message.contains("API_COMPLETION"));</expression>
-            </evaluator>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
-        </filter>
     </appender>
 
     <!-- 异步API日志输出 -->
@@ -113,8 +105,8 @@
     <logger name="org.springframework.web.reactive" level="WARN"/>
     <logger name="reactor.netty" level="WARN"/>
 
-    <!-- 请求日志专门配置 -->
-    <logger name="com.kawaiichainwallet.gateway.filter.RequestLoggingGlobalFilter" level="INFO" additivity="false">
+    <!-- API请求日志专门配置 -->
+    <logger name="gateway.api.requests" level="INFO" additivity="false">
         <appender-ref ref="ASYNC_API_LOG"/>
         <appender-ref ref="CONSOLE"/>
     </logger>
@@ -135,12 +127,12 @@
 
     <!-- 开发环境配置 -->
     <springProfile name="local,dev">
-        <!-- 开发环境显示更多调试信息 -->
+        <!-- 开发环境调试级别 -->
         <logger name="com.kawaiichainwallet" level="DEBUG"/>
         <logger name="org.springframework.cloud.gateway" level="DEBUG"/>
         <logger name="org.springframework.web.reactive" level="DEBUG"/>
 
-        <!-- 开发环境控制台显示DEBUG -->
+        <!-- 开发环境控制台 -->
         <appender name="DEV_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
                 <pattern>%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan([%X{traceId:-}]) %logger{20} - %msg%n</pattern>
@@ -165,7 +157,7 @@
 
     <!-- 生产环境配置 -->
     <springProfile name="prod">
-        <!-- 生产环境关闭控制台输出，只输出到文件 -->
+        <!-- 生产环境只输出到文件 -->
         <root level="WARN">
             <appender-ref ref="ASYNC_FILE"/>
             <appender-ref ref="ERROR_FILE"/>

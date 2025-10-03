@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kawaiichainwallet.gateway.config.RequestLoggingConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
@@ -42,6 +44,9 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
     private final RequestLoggingConfig loggingConfig;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
+    // 专用的API日志记录器
+    private static final Logger apiLogger = LoggerFactory.getLogger("gateway.api.requests");
+
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         // 检查是否启用日志记录
@@ -76,7 +81,7 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
                 if (body instanceof Flux) {
                     Flux<? extends DataBuffer> fluxBody = (Flux<? extends DataBuffer>) body;
                     return super.writeWith(fluxBody.buffer().map(dataBuffers -> {
-                        // 记录响应日志 - 使用AtomicReference来处理响应体内容
+                        // 记录响应日志
                         AtomicReference<DataBuffer> responseDataBuffer = new AtomicReference<>();
                         if (!dataBuffers.isEmpty()) {
                             responseDataBuffer.set(dataBuffers.get(0));
@@ -114,13 +119,13 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
             String clientIp = getClientIp(request);
             logData.put("clientIp", clientIp);
 
-            // 记录查询参数（脱敏处理）
+            // 记录查询参数并脱敏
             MultiValueMap<String, String> queryParams = request.getQueryParams();
             if (!queryParams.isEmpty()) {
                 logData.put("queryParams", maskSensitiveData(queryParams.toSingleValueMap()));
             }
 
-            // 记录请求头（根据配置决定是否记录）
+            // 记录请求头
             if (loggingConfig.isLogHeaders()) {
                 HttpHeaders headers = request.getHeaders();
                 Map<String, String> headerMap = new HashMap<>();
@@ -139,7 +144,7 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
                 logData.put("userAgent", userAgent);
             }
 
-            // 记录Content-Type和Content-Length
+            // 记录内容类型和大小
             String contentType = request.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
             if (contentType != null) {
                 logData.put("contentType", contentType);
@@ -150,10 +155,9 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
                 logData.put("contentLength", contentLength);
             }
 
-            // 如果是POST/PUT请求且内容类型是JSON，记录请求体（但要脱敏）
-            // 注意：在WebFlux中读取请求体比较复杂，这里先记录基本信息
+            // TODO: 读取请求体需要特殊处理避免消费数据流
 
-            log.info("API_REQUEST: {}", objectMapper.writeValueAsString(logData));
+            apiLogger.info("API_REQUEST: {}", objectMapper.writeValueAsString(logData));
 
         } catch (Exception e) {
             log.error("记录请求日志失败: requestId={}", requestId, e);
@@ -196,21 +200,20 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
                     totalSize <= loggingConfig.getMaxResponseBodySize() &&
                     isJsonResponse(response)) {
 
-                    // 创建字节数组副本避免影响原数据流
+                    // 读取响应体内容
                     byte[] bytes = new byte[dataBuffer.readableByteCount()];
-                    // 保存当前读取位置，然后读取数据，最后恢复位置
                     int originalReaderIndex = dataBuffer.readPosition();
                     dataBuffer.read(bytes);
-                    dataBuffer.readPosition(originalReaderIndex); // 恢复原始读取位置
+                    dataBuffer.readPosition(originalReaderIndex);
                     String responseBody = new String(bytes, StandardCharsets.UTF_8);
 
-                    // 脱敏处理响应体中的敏感信息
+                    // 脱敏处理响应体
                     String maskedResponseBody = maskSensitiveJsonData(responseBody);
                     logData.put("responseBody", maskedResponseBody);
                 }
             }
 
-            log.info("API_RESPONSE: {}", objectMapper.writeValueAsString(logData));
+            apiLogger.info("API_RESPONSE: {}", objectMapper.writeValueAsString(logData));
 
         } catch (Exception e) {
             log.error("记录响应日志失败: requestId={}", requestId, e);
@@ -245,7 +248,7 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
                 logData.put("targetService", routedUri.getHost() + ":" + routedUri.getPort());
             }
 
-            log.info("API_COMPLETION: {}", objectMapper.writeValueAsString(logData));
+            apiLogger.info("API_COMPLETION: {}", objectMapper.writeValueAsString(logData));
 
         } catch (Exception e) {
             log.error("记录完成日志失败: requestId={}", requestId, e);
@@ -332,7 +335,7 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
      */
     private String maskSensitiveJsonData(String jsonData) {
         try {
-            // 简单的字符串替换脱敏，避免解析复杂JSON
+            // 使用正则表达式脱敏JSON字段
             String masked = jsonData;
             for (String sensitive : loggingConfig.getSensitiveFields()) {
                 masked = masked.replaceAll(
@@ -348,7 +351,7 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        // 设置较低的优先级，确保在其他过滤器之后执行
+        // 设置执行优先级
         return Ordered.LOWEST_PRECEDENCE - 1;
     }
 }

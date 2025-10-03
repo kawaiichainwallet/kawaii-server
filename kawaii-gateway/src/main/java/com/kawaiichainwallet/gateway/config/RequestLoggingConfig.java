@@ -45,7 +45,7 @@ public class RequestLoggingConfig {
     private boolean logSensitivePaths = false;
 
     /**
-     * 排除的路径模式（不记录日志）
+     * 排除的路径模式
      */
     private Set<String> excludePaths = Set.of(
         "/actuator/**",
@@ -75,9 +75,9 @@ public class RequestLoggingConfig {
     );
 
     /**
-     * 需要记录详细信息的路径（即使是敏感路径）
+     * 强制记录的路径
      */
     private Set<String> forceLogPaths = Set.of(
-        // 可以配置需要强制记录的路径
+        // 暂时为空
     );
 }

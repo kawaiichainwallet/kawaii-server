@@ -14,13 +14,13 @@ public interface UserProfileMapper extends BaseMapper<UserProfile> {
      * 更新用户头像
      */
     @Update("UPDATE user_profiles SET avatar_url = #{avatarUrl}, updated_at = CURRENT_TIMESTAMP WHERE user_id = #{userId}")
-    int updateAvatar(@Param("userId") String userId, @Param("avatarUrl") String avatarUrl);
+    int updateAvatar(@Param("userId") Long userId, @Param("avatarUrl") String avatarUrl);
 
     /**
      * 更新用户显示名称
      */
     @Update("UPDATE user_profiles SET display_name = #{displayName}, updated_at = CURRENT_TIMESTAMP WHERE user_id = #{userId}")
-    int updateDisplayName(@Param("userId") String userId, @Param("displayName") String displayName);
+    int updateDisplayName(@Param("userId") Long userId, @Param("displayName") String displayName);
 
     /**
      * 更新用户偏好设置
@@ -31,7 +31,7 @@ public interface UserProfileMapper extends BaseMapper<UserProfile> {
                                 updated_at = CURRENT_TIMESTAMP
         WHERE user_id = #{userId}
         """)
-    int updatePreferences(@Param("userId") String userId,
+    int updatePreferences(@Param("userId") Long userId,
                          @Param("language") String language,
                          @Param("timezone") String timezone,
                          @Param("currency") String currency,

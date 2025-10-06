@@ -11,7 +11,7 @@ public class LoginResponse {
     /**
      * 用户ID
      */
-    private String userId;
+    private Long userId;
 
     /**
      * 用户名

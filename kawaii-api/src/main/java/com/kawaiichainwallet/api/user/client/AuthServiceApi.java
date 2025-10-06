@@ -28,7 +28,7 @@ public interface AuthServiceApi {
      * 验证用户是否已认证（内部调用）
      */
     @GetMapping("/check-authentication/{userId}")
-    R<Boolean> checkAuthentication(@PathVariable("userId") String userId);
+    R<Boolean> checkAuthentication(@PathVariable("userId") long userId);
 
     /**
      * 撤销用户的所有Token（内部调用，用于安全事件响应）

@@ -23,10 +23,10 @@ public class User extends BaseEntity {
     private static final long serialVersionUID = 8799985057427895763L;
 
     /**
-     * 用户ID
+     * 用户ID (使用Leaf分布式ID生成器)
      */
-    @TableId(value = "user_id", type = IdType.ASSIGN_UUID)
-    private String userId;
+    @TableId(value = "user_id", type = IdType.INPUT)
+    private Long userId;
 
     /**
      * 用户名

@@ -54,7 +54,7 @@ public class InternalAuthController implements AuthServiceApi {
     }
 
     @Override
-    public R<Boolean> checkAuthentication(String userId) {
+    public R<Boolean> checkAuthentication(long userId) {
         log.info("内部服务检查用户认证状态: userId={}", userId);
 
         try {

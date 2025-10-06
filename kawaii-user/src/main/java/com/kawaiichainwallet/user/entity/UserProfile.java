@@ -23,16 +23,16 @@ public class UserProfile extends BaseEntity {
     private static final long serialVersionUID = 7725232293474192226L;
 
     /**
-     * 资料ID
+     * 资料ID (使用Leaf分布式ID生成器)
      */
-    @TableId(value = "profile_id", type = IdType.ASSIGN_UUID)
-    private String profileId;
+    @TableId(value = "profile_id", type = IdType.INPUT)
+    private Long profileId;
 
     /**
      * 用户ID
      */
     @TableField("user_id")
-    private String userId;
+    private Long userId;
 
     /**
      * 名字

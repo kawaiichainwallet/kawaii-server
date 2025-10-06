@@ -30,7 +30,7 @@ public interface UserServiceApi {
      * 根据用户ID获取用户信息（内部调用）
      */
     @GetMapping("/{userId}")
-    R<UserInfoResponse> getUserInfo(@PathVariable("userId") String userId);
+    R<UserInfoResponse> getUserInfo(@PathVariable("userId") long userId);
 
     /**
      * 根据用户名获取用户信息（内部调用）
@@ -54,7 +54,7 @@ public interface UserServiceApi {
      * 检查用户是否存在
      */
     @GetMapping("/exists/{userId}")
-    R<Boolean> userExists(@PathVariable("userId") String userId);
+    R<Boolean> userExists(@PathVariable("userId") long userId);
 
     /**
      * 获取用户的支付权限信息

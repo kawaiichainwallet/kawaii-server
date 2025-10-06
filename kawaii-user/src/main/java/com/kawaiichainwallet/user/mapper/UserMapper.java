@@ -58,31 +58,31 @@ public interface UserMapper extends BaseMapper<User> {
      * 增加登录失败次数
      */
     @Update("UPDATE users SET login_attempts = login_attempts + 1, updated_at = NOW() WHERE user_id = #{userId}")
-    int incrementLoginAttempts(@Param("userId") String userId);
+    int incrementLoginAttempts(@Param("userId") Long userId);
 
     /**
      * 重置登录失败次数
      */
     @Update("UPDATE users SET login_attempts = 0, updated_at = NOW() WHERE user_id = #{userId}")
-    int resetLoginAttempts(@Param("userId") String userId);
+    int resetLoginAttempts(@Param("userId") Long userId);
 
     /**
      * 锁定用户账户
      */
     @Update("UPDATE users SET locked_until = #{lockUntil}, updated_at = NOW() WHERE user_id = #{userId}")
-    int lockUser(@Param("userId") String userId, @Param("lockUntil") LocalDateTime lockUntil);
+    int lockUser(@Param("userId") Long userId, @Param("lockUntil") LocalDateTime lockUntil);
 
     /**
      * 解锁用户账户
      */
     @Update("UPDATE users SET locked_until = NULL, login_attempts = 0, updated_at = NOW() WHERE user_id = #{userId}")
-    int unlockUser(@Param("userId") String userId);
+    int unlockUser(@Param("userId") Long userId);
 
     /**
      * 更新最后登录信息
      */
     @Update("UPDATE users SET last_login_at = #{loginTime}, last_login_ip = #{ipAddress}, updated_at = NOW() WHERE user_id = #{userId}")
-    int updateLoginInfo(@Param("userId") String userId,
+    int updateLoginInfo(@Param("userId") Long userId,
                        @Param("loginTime") LocalDateTime loginTime,
                        @Param("ipAddress") String ipAddress);
 }

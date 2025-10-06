@@ -97,7 +97,8 @@ public class AuthController {
     public R<Void> logout(HttpServletRequest httpRequest) {
         String clientIp = RequestUtil.getClientIpAddress(httpRequest);
         String userAgent = httpRequest.getHeader("User-Agent");
-        String userId = RequestUtil.getCurrentUserId();
+        String userIdStr = RequestUtil.getCurrentUserId();
+        Long userId = userIdStr != null ? Long.parseLong(userIdStr) : null;
 
         authService.logout(userId, clientIp, userAgent);
         return R.success("登出成功");
@@ -146,7 +147,7 @@ public class AuthController {
 
         String clientIp = RequestUtil.getClientIpAddress(httpRequest);
 
-        boolean isValid = authService.verifyOtp(
+        String verificationToken = authService.verifyOtp(
                 request.getTarget(),
                 request.getType(),
                 request.getOtpCode(),
@@ -154,8 +155,8 @@ public class AuthController {
                 clientIp
         );
 
-        if (isValid) {
-            return R.success(VerifyOtpResponse.success(null), "验证成功");
+        if (verificationToken != null) {
+            return R.success(VerifyOtpResponse.success(verificationToken), "验证成功");
         } else {
             return R.error(ApiCode.OTP_INVALID);
         }

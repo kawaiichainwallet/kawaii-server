@@ -53,7 +53,7 @@ public class InternalUserController implements UserServiceApi {
     }
 
     @Override
-    public R<UserInfoResponse> getUserInfo(String userId) {
+    public R<UserInfoResponse> getUserInfo(long userId) {
         log.info("内部服务获取用户信息请求: userId={}", userId);
 
         try {
@@ -131,7 +131,7 @@ public class InternalUserController implements UserServiceApi {
     }
 
     @Override
-    public R<Boolean> userExists(String userId) {
+    public R<Boolean> userExists(long userId) {
         log.info("内部服务检查用户是否存在: userId={}", userId);
 
         try {

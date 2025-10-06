@@ -34,7 +34,7 @@ public class JwtTokenService {
     /**
      * 生成访问令牌
      */
-    public String generateAccessToken(String userId, String username) {
+    public String generateAccessToken(long userId, String username) {
         Instant now = TimeUtil.nowInstant();
         Instant expiresAt = TimeUtil.plusSeconds(now, accessTokenExpiration);
 
@@ -42,7 +42,7 @@ public class JwtTokenService {
                 .issuer(issuer)
                 .issuedAt(now)
                 .expiresAt(expiresAt)
-                .subject(userId)
+                .subject(String.valueOf(userId))
                 .claim("username", username)
                 .claim("type", "access")
                 .claim("roles", "USER")
@@ -57,7 +57,7 @@ public class JwtTokenService {
     /**
      * 生成刷新令牌
      */
-    public String generateRefreshToken(String userId, String username) {
+    public String generateRefreshToken(long userId, String username) {
         Instant now = TimeUtil.nowInstant();
         Instant expiresAt = TimeUtil.plusSeconds(now, refreshTokenExpiration);
 
@@ -65,7 +65,7 @@ public class JwtTokenService {
                 .issuer(issuer)
                 .issuedAt(now)
                 .expiresAt(expiresAt)
-                .subject(userId)
+                .subject(String.valueOf(userId))
                 .claim("username", username)
                 .claim("type", "refresh")
                 .build();
@@ -115,11 +115,12 @@ public class JwtTokenService {
     /**
      * 从令牌中提取用户ID
      */
-    public String extractUserIdFromToken(String token) {
+    public Long extractUserIdFromToken(String token) {
         try {
             Jwt jwt = jwtDecoder.decode(token);
-            return jwt.getSubject();
-        } catch (JwtException e) {
+            String subject = jwt.getSubject();
+            return subject != null ? Long.parseLong(subject) : null;
+        } catch (JwtException | NumberFormatException e) {
             log.debug("提取用户ID失败: {}", e.getMessage());
             return null;
         }

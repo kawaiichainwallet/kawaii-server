@@ -38,6 +38,7 @@ public class AuthService {
     private final JwtTokenService jwtTokenService;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final VerificationTokenService verificationTokenService;
 
     @Value("${app.auth.max-login-attempts:5}")
     private int maxLoginAttempts;
@@ -148,7 +149,7 @@ public class AuthService {
             }
 
             // 从Token中提取用户信息
-            String userId = jwtTokenService.extractUserIdFromToken(request.getRefreshToken());
+            Long userId = jwtTokenService.extractUserIdFromToken(request.getRefreshToken());
             String username = jwtTokenService.extractUsernameFromToken(request.getRefreshToken());
 
             // 验证用户是否仍然有效
@@ -178,7 +179,7 @@ public class AuthService {
     /**
      * 用户登出
      */
-    public void logout(String userId, String clientIp, String userAgent) {
+    public void logout(long userId, String clientIp, String userAgent) {
         // 记录登出审计日志
 
         // TODO: 将Token加入黑名单（需要Redis实现）
@@ -202,7 +203,7 @@ public class AuthService {
             response.setValid(isValid);
 
             if (isValid) {
-                String userId = jwtTokenService.extractUserIdFromToken(token);
+                Long userId = jwtTokenService.extractUserIdFromToken(token);
                 String username = jwtTokenService.extractUsernameFromToken(token);
 
                 response.setUserId(userId);
@@ -347,8 +348,10 @@ public class AuthService {
 
     /**
      * 验证OTP验证码
+     *
+     * @return 验证成功返回验证Token,验证失败返回null
      */
-    public boolean verifyOtp(String target, String type, String otpCode, String purpose, String clientIp) {
+    public String verifyOtp(String target, String type, String otpCode, String purpose, String clientIp) {
         log.info("验证OTP: target={}, type={}, purpose={}, IP={}", target, type, purpose, clientIp);
 
         // 验证参数
@@ -363,10 +366,13 @@ public class AuthService {
 
         if (isValid) {
             log.info("OTP验证成功: target={}, purpose={}", target, purpose);
+
+            // 生成验证Token
+            String verificationToken = verificationTokenService.generateToken(target, type, purpose);
+            return verificationToken;
         } else {
             log.warn("OTP验证失败: target={}, purpose={}, IP={}", target, purpose, clientIp);
+            return null;
         }
-
-        return isValid;
     }
 }

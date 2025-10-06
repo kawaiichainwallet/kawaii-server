@@ -37,11 +37,13 @@ public class UserService {
     private final OtpService otpService;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenService jwtTokenService;
+    private final VerificationTokenService verificationTokenService;
+    private final DistributedIdService distributedIdService;
 
     /**
      * 根据用户ID获取用户基本信息
      */
-    public User getUserById(String userId) {
+    public User getUserById(long userId) {
         User user = userMapper.selectById(userId);
         if (user == null) {
             throw new BusinessException(ApiCode.USER_NOT_FOUND);
@@ -94,7 +96,7 @@ public class UserService {
     /**
      * 获取用户详细信息（包含用户资料）
      */
-    public UserDetailsDto getUserInfo(String userId) {
+    public UserDetailsDto getUserInfo(long userId) {
         User user = getUserById(userId);
 
         UserProfile userProfile = userProfileMapper.selectOne(
@@ -116,7 +118,7 @@ public class UserService {
      * 更新用户信息
      */
     @Transactional(rollbackFor = Exception.class)
-    public UserDetailsDto updateUserInfo(String userId, UpdateUserInfoRequest request) {
+    public UserDetailsDto updateUserInfo(long userId, UpdateUserInfoRequest request) {
         User user = getUserById(userId);
 
         // 更新用户基本信息
@@ -187,11 +189,18 @@ public class UserService {
         // 1. 验证请求参数
         validateRegisterRequest(request);
 
-        // 2. 验证OTP验证码
-        boolean otpValid = otpService.verifyOtp(request.getTarget(), request.getType(), "register", request.getOtpCode());
-        if (!otpValid) {
-            throw new BusinessException(ApiCode.OTP_INVALID, "验证码错误或已过期");
+        // 2. 验证Token (替代OTP验证)
+        boolean tokenValid = verificationTokenService.verifyToken(
+                request.getVerificationToken(),
+                request.getTarget(),
+                "register"
+        );
+        if (!tokenValid) {
+            throw new BusinessException(ApiCode.INVALID_TOKEN, "验证Token无效或已过期");
         }
+
+        // 3. 使用Token(防止重复使用)
+        verificationTokenService.consumeToken(request.getVerificationToken());
 
         // 3. 检查用户名是否已存在
         if (isUsernameExists(request.getUsername())) {
@@ -314,7 +323,10 @@ public class UserService {
      */
     private User createUser(RegisterRequest request, String clientIp) {
         User user = new User();
-        user.setUserId(UUID.randomUUID().toString());
+
+        // 使用Leaf分布式ID生成器生成用户ID
+        Long userId = distributedIdService.generateSegmentId("user-id").getId();
+        user.setUserId(userId);
         user.setUsername(request.getUsername());
 
         // 根据注册类型设置邮箱或手机号
@@ -344,8 +356,12 @@ public class UserService {
     /**
      * 创建初始用户资料
      */
-    private void createInitialUserProfile(String userId) {
+    private void createInitialUserProfile(long userId) {
         UserProfile userProfile = new UserProfile();
+
+        // 使用Leaf分布式ID生成器生成资料ID
+        Long profileId = distributedIdService.generateSegmentId("user-profile-id").getId();
+        userProfile.setProfileId(profileId);
         userProfile.setUserId(userId);
         userProfile.setLanguage("en");
         userProfile.setTimezone("UTC");
@@ -360,7 +376,7 @@ public class UserService {
     /**
      * 更新用户资料
      */
-    private void updateUserProfile(String userId, UpdateUserInfoRequest request) {
+    private void updateUserProfile(long userId, UpdateUserInfoRequest request) {
         UserProfile userProfile = userProfileMapper.selectOne(
                 new LambdaQueryWrapper<UserProfile>()
                         .eq(UserProfile::getUserId, userId));

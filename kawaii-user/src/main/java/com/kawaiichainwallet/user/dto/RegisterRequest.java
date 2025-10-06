@@ -25,11 +25,10 @@ public class RegisterRequest {
     private String type;
 
     /**
-     * OTP验证码
+     * 验证Token (OTP验证通过后获取)
      */
-    @NotBlank(message = "请输入验证码")
-    @Pattern(regexp = "^\\d{6}$", message = "验证码应为6位数字")
-    private String otpCode;
+    @NotBlank(message = "请提供验证Token")
+    private String verificationToken;
 
     /**
      * 用户名

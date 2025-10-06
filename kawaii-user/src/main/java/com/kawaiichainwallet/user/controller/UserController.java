@@ -36,11 +36,12 @@ public class UserController {
     @GetMapping("/profile")
     @Operation(summary = "获取当前用户信息", description = "获取当前登录用户的详细信息")
     public R<UserDetailsDto> getCurrentUserInfo() {
-        String userId = UserContextHolder.getCurrentUserId();
-        if (userId == null) {
+        String userIdStr = UserContextHolder.getCurrentUserId();
+        if (userIdStr == null) {
             return R.error(ApiCode.UNAUTHORIZED);
         }
 
+        Long userId = Long.parseLong(userIdStr);
         log.info("获取用户信息请求: userId={}", userId);
         UserDetailsDto response = userService.getUserInfo(userId);
         return R.success(response);
@@ -51,7 +52,7 @@ public class UserController {
      */
     @GetMapping("/{userId}")
     @Operation(summary = "根据ID获取用户信息", description = "管理员或授权用户获取指定用户信息")
-    public R<UserDetailsDto> getUserInfoHttp(@PathVariable String userId) {
+    public R<UserDetailsDto> getUserInfoHttp(@PathVariable Long userId) {
         log.info("获取指定用户信息请求: userId={}", userId);
         UserDetailsDto response = userService.getUserInfo(userId);
         return R.success(response);
@@ -63,11 +64,12 @@ public class UserController {
     @PutMapping("/profile")
     @Operation(summary = "更新用户信息", description = "更新当前登录用户的信息")
     public R<UserDetailsDto> updateCurrentUserInfo(@Valid @RequestBody UpdateUserInfoRequest request) {
-        String userId = UserContextHolder.getCurrentUserId();
-        if (userId == null) {
+        String userIdStr = UserContextHolder.getCurrentUserId();
+        if (userIdStr == null) {
             return R.error(ApiCode.UNAUTHORIZED);
         }
 
+        Long userId = Long.parseLong(userIdStr);
         log.info("更新用户信息请求: userId={}", userId);
         UserDetailsDto response = userService.updateUserInfo(userId, request);
         return R.success(response, "用户信息更新成功");

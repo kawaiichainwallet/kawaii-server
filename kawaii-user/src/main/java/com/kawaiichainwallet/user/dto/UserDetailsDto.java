@@ -13,7 +13,7 @@ public class UserDetailsDto {
     /**
      * 用户ID
      */
-    private String userId;
+    private Long userId;
 
     /**
      * 用户名

@@ -29,7 +29,7 @@ public class AuthServiceApiFallbackFactory implements FallbackFactory<AuthServic
             }
 
             @Override
-            public R<Boolean> checkAuthentication(String userId) {
+            public R<Boolean> checkAuthentication(long userId) {
                 log.error("检查用户认证状态失败: userId={}", userId, cause);
                 return R.error(ApiCode.SERVICE_UNAVAILABLE);
             }

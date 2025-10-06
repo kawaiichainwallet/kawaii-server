@@ -33,7 +33,7 @@ public class UserServiceApiFallbackFactory implements FallbackFactory<UserServic
             }
 
             @Override
-            public R<UserInfoResponse> getUserInfo(String userId) {
+            public R<UserInfoResponse> getUserInfo(long userId) {
                 log.error("获取用户信息失败: userId={}", userId, cause);
                 return R.error(ApiCode.SERVICE_UNAVAILABLE);
             }
@@ -57,7 +57,7 @@ public class UserServiceApiFallbackFactory implements FallbackFactory<UserServic
             }
 
             @Override
-            public R<Boolean> userExists(String userId) {
+            public R<Boolean> userExists(long userId) {
                 log.error("检查用户是否存在失败: userId={}", userId, cause);
                 return R.error(ApiCode.SERVICE_UNAVAILABLE);
             }

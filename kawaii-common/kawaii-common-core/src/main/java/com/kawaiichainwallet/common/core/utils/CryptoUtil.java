@@ -1,5 +1,6 @@
 package com.kawaiichainwallet.common.core.utils;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
@@ -39,7 +40,7 @@ public class CryptoUtil {
      * @return 加密后的密码
      */
     public static String encryptPassword(String password, String salt) {
-        if (StrUtil.isBlank(password) || StrUtil.isBlank(salt)) {
+        if (CharSequenceUtil.isBlank(password) || CharSequenceUtil.isBlank(salt)) {
             throw new IllegalArgumentException("密码和盐值不能为空");
         }
 
@@ -57,7 +58,7 @@ public class CryptoUtil {
      * @return 验证结果
      */
     public static boolean verifyPassword(String password, String salt, String hashedPassword) {
-        if (StrUtil.isBlank(password) || StrUtil.isBlank(salt) || StrUtil.isBlank(hashedPassword)) {
+        if (CharSequenceUtil.isBlank(password) || CharSequenceUtil.isBlank(salt) || CharSequenceUtil.isBlank(hashedPassword)) {
             return false;
         }
 
@@ -93,7 +94,7 @@ public class CryptoUtil {
      * @return 加密后的数据（Base64编码）
      */
     public static String encryptAES(String data, String key) {
-        if (StrUtil.isBlank(data) || StrUtil.isBlank(key)) {
+        if (CharSequenceUtil.isBlank(data) || CharSequenceUtil.isBlank(key)) {
             throw new IllegalArgumentException("数据和密钥不能为空");
         }
 
@@ -120,7 +121,7 @@ public class CryptoUtil {
      * @return 解密后的数据
      */
     public static String decryptAES(String encryptedData, String key) {
-        if (StrUtil.isBlank(encryptedData) || StrUtil.isBlank(key)) {
+        if (CharSequenceUtil.isBlank(encryptedData) || CharSequenceUtil.isBlank(key)) {
             throw new IllegalArgumentException("加密数据和密钥不能为空");
         }
 
@@ -144,7 +145,7 @@ public class CryptoUtil {
      * 生成MD5哈希
      */
     public static String md5(String data) {
-        if (StrUtil.isBlank(data)) {
+        if (CharSequenceUtil.isBlank(data)) {
             throw new IllegalArgumentException("数据不能为空");
         }
         return SecureUtil.md5(data);
@@ -154,7 +155,7 @@ public class CryptoUtil {
      * 生成SHA256哈希
      */
     public static String sha256(String data) {
-        if (StrUtil.isBlank(data)) {
+        if (CharSequenceUtil.isBlank(data)) {
             throw new IllegalArgumentException("数据不能为空");
         }
         return SecureUtil.sha256(data);

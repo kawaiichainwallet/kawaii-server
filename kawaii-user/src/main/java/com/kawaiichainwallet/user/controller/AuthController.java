@@ -1,5 +1,6 @@
 package com.kawaiichainwallet.user.controller;
 
+import com.kawaiichainwallet.common.core.enums.ApiCode;
 import com.kawaiichainwallet.common.spring.utils.RequestUtil;
 import com.kawaiichainwallet.user.dto.*;
 import com.kawaiichainwallet.user.service.AuthService;
@@ -132,6 +133,32 @@ public class AuthController {
 
         authService.sendRegisterOtp(request.getTarget(), request.getType(), clientIp, userAgent);
         return R.success("验证码发送成功");
+    }
+
+    /**
+     * 验证OTP验证码
+     */
+    @PostMapping("/verify-otp")
+    @Operation(summary = "验证OTP验证码", description = "验证手机号或邮箱的OTP验证码")
+    public R<VerifyOtpResponse> verifyOtp(
+            @Valid @RequestBody VerifyOtpRequest request,
+            HttpServletRequest httpRequest) {
+
+        String clientIp = RequestUtil.getClientIpAddress(httpRequest);
+
+        boolean isValid = authService.verifyOtp(
+                request.getTarget(),
+                request.getType(),
+                request.getOtpCode(),
+                request.getPurpose(),
+                clientIp
+        );
+
+        if (isValid) {
+            return R.success(VerifyOtpResponse.success(null), "验证成功");
+        } else {
+            return R.error(ApiCode.OTP_INVALID);
+        }
     }
 
     /**

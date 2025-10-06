@@ -113,6 +113,13 @@ public class R<T> {
     }
 
     /**
+     * 失败响应（带数据）
+     */
+    public static <T> R<T> error(T data) {
+        return new R<>(500, null, data);
+    }
+
+    /**
      * 失败响应（带状态码和消息）
      */
     public static <T> R<T> error(Integer code, String msg) {

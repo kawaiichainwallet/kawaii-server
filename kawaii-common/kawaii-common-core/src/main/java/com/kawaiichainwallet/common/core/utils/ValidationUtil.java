@@ -1,5 +1,6 @@
 package com.kawaiichainwallet.common.core.utils;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.StrUtil;
 
 import java.util.regex.Pattern;
@@ -32,42 +33,42 @@ public class ValidationUtil {
      * 验证手机号是否有效
      */
     public static boolean isValidPhone(String phone) {
-        return StrUtil.isNotBlank(phone) && PHONE_PATTERN.matcher(phone).matches();
+        return CharSequenceUtil.isNotBlank(phone) && PHONE_PATTERN.matcher(phone).matches();
     }
 
     /**
      * 验证邮箱是否有效
      */
     public static boolean isValidEmail(String email) {
-        return StrUtil.isNotBlank(email) && EMAIL_PATTERN.matcher(email).matches();
+        return CharSequenceUtil.isNotBlank(email) && EMAIL_PATTERN.matcher(email).matches();
     }
 
     /**
      * 验证密码强度是否符合要求
      */
     public static boolean isValidPassword(String password) {
-        return StrUtil.isNotBlank(password) && PASSWORD_PATTERN.matcher(password).matches();
+        return CharSequenceUtil.isNotBlank(password) && PASSWORD_PATTERN.matcher(password).matches();
     }
 
     /**
      * 验证用户名是否有效
      */
     public static boolean isValidUsername(String username) {
-        return StrUtil.isNotBlank(username) && USERNAME_PATTERN.matcher(username).matches();
+        return CharSequenceUtil.isNotBlank(username) && USERNAME_PATTERN.matcher(username).matches();
     }
 
     /**
      * 验证数字验证码是否有效
      */
     public static boolean isValidNumericCode(String code) {
-        return StrUtil.isNotBlank(code) && NUMERIC_CODE_PATTERN.matcher(code).matches();
+        return CharSequenceUtil.isNotBlank(code) && NUMERIC_CODE_PATTERN.matcher(code).matches();
     }
 
     /**
      * 验证字符串是否不为空且长度在指定范围内
      */
     public static boolean isValidLength(String str, int minLength, int maxLength) {
-        if (StrUtil.isBlank(str)) {
+        if (CharSequenceUtil.isBlank(str)) {
             return false;
         }
         int length = str.trim().length();
@@ -139,7 +140,7 @@ public class ValidationUtil {
      * 脱敏敏感信息（通用方法）
      */
     public static String maskSensitiveInfo(String info) {
-        if (StrUtil.isBlank(info)) {
+        if (CharSequenceUtil.isBlank(info)) {
             return info;
         }
 
@@ -160,7 +161,7 @@ public class ValidationUtil {
      * 检查是否为有效的UUID格式
      */
     public static boolean isValidUUID(String uuid) {
-        if (StrUtil.isBlank(uuid)) {
+        if (CharSequenceUtil.isBlank(uuid)) {
             return false;
         }
         try {

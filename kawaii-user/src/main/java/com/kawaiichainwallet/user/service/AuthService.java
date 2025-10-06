@@ -344,4 +344,29 @@ public class AuthService {
 
         return response;
     }
+
+    /**
+     * 验证OTP验证码
+     */
+    public boolean verifyOtp(String target, String type, String otpCode, String purpose, String clientIp) {
+        log.info("验证OTP: target={}, type={}, purpose={}, IP={}", target, type, purpose, clientIp);
+
+        // 验证参数
+        if ("phone".equals(type)) {
+            ValidationUtil.isValidPhone(target);
+        } else if ("email".equals(type)) {
+            ValidationUtil.isValidEmail(target);
+        }
+
+        // 调用OTP服务验证
+        boolean isValid = otpService.verifyOtp(target, otpCode, type, clientIp);
+
+        if (isValid) {
+            log.info("OTP验证成功: target={}, purpose={}", target, purpose);
+        } else {
+            log.warn("OTP验证失败: target={}, purpose={}, IP={}", target, purpose, clientIp);
+        }
+
+        return isValid;
+    }
 }

@@ -9,7 +9,7 @@
 CREATE TABLE users (
     user_id BIGINT PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
+    email VARCHAR(100),
     phone VARCHAR(20),
     password_hash VARCHAR(255) NOT NULL, -- BCrypt加密存储，包含内置盐值
 
@@ -24,7 +24,7 @@ CREATE TABLE users (
     login_attempts INTEGER DEFAULT 0,
     locked_until TIMESTAMP WITH TIME ZONE,
     last_login_at TIMESTAMP WITH TIME ZONE,
-    last_login_ip INET,
+    last_login_ip VARCHAR(15),
 
     -- 元数据
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -35,6 +35,7 @@ CREATE TABLE users (
 
 -- 索引
 CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_phone ON users(phone);
 CREATE INDEX idx_users_username ON users(username);
 CREATE INDEX idx_users_created_at ON users(created_at);
 

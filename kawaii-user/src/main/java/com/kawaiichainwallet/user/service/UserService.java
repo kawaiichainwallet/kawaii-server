@@ -360,7 +360,7 @@ public class UserService {
         UserProfile userProfile = new UserProfile();
 
         // 使用Leaf分布式ID生成器生成资料ID
-        Long profileId = distributedIdService.generateSegmentId("user-profile-id").getId();
+        Long profileId = distributedIdService.generateSegmentId("user-id").getId();
         userProfile.setProfileId(profileId);
         userProfile.setUserId(userId);
         userProfile.setLanguage("en");

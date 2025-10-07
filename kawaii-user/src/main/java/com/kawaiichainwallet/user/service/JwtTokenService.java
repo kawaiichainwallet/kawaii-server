@@ -48,7 +48,7 @@ public class JwtTokenService {
                 .claim("roles", "USER")
                 .build();
 
-        JwsHeader header = JwsHeader.with(() -> "RS256").build();
+        JwsHeader header = JwsHeader.with(() -> "ES256").build();
         JwtEncoderParameters parameters = JwtEncoderParameters.from(header, claims);
 
         return jwtEncoder.encode(parameters).getTokenValue();
@@ -70,7 +70,7 @@ public class JwtTokenService {
                 .claim("type", "refresh")
                 .build();
 
-        JwsHeader header = JwsHeader.with(() -> "RS256").build();
+        JwsHeader header = JwsHeader.with(() -> "ES256").build();
         JwtEncoderParameters parameters = JwtEncoderParameters.from(header, claims);
 
         return jwtEncoder.encode(parameters).getTokenValue();

@@ -1,6 +1,10 @@
 -- ================================================================
 -- KawaiiChain Wallet - 通知服务数据库 (kawaii-notification-db)
 -- 负责：消息通知、推送管理
+--
+-- 【时间字段约定】
+-- 所有时间字段使用 TIMESTAMP 类型（不带时区），统一存储 UTC 时间
+-- 应用层负责时区转换，确保写入数据库的时间都是 UTC
 -- ================================================================
 
 
@@ -9,7 +13,7 @@
 -- ================================================================
 CREATE TABLE notifications (
     notification_id BIGINT PRIMARY KEY,
-    user_id BIGINT NOT NULL, -- 注意：不再是外键，而是引用用户服务的用户ID
+    user_id BIGINT NOT NULL,
 
     -- 通知内容
     title VARCHAR(200) NOT NULL,
@@ -26,13 +30,13 @@ CREATE TABLE notifications (
     -- 状态管理
     is_read BOOLEAN DEFAULT FALSE,
     is_sent BOOLEAN DEFAULT FALSE,
-    sent_at TIMESTAMP WITH TIME ZONE,
+    sent_at TIMESTAMP,
 
     -- 元数据
     metadata JSONB,
 
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC'),
+    updated_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC')
 );
 
 CREATE INDEX idx_notifications_user_id ON notifications(user_id);
@@ -46,7 +50,7 @@ CREATE INDEX idx_notifications_created_at ON notifications(created_at);
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
+    NEW.updated_at = (NOW() AT TIME ZONE 'UTC');
     RETURN NEW;
 END;
 $$ language 'plpgsql';

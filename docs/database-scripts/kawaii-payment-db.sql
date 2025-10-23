@@ -1,6 +1,10 @@
 -- ================================================================
 -- KawaiiChain Wallet - 支付服务数据库 (kawaii-payment-db)
 -- 负责：支付处理、生活缴费
+--
+-- 【时间字段约定】
+-- 所有时间字段使用 TIMESTAMP 类型（不带时区），统一存储 UTC 时间
+-- 应用层负责时区转换，确保写入数据库的时间都是 UTC
 -- ================================================================
 
 
@@ -9,7 +13,7 @@
 -- ================================================================
 CREATE TABLE payment_orders (
     order_id BIGINT PRIMARY KEY,
-    merchant_id BIGINT NOT NULL, -- 注意：不再是外键，而是引用商户服务的商户ID
+    merchant_id BIGINT NOT NULL,
 
     -- 订单信息
     merchant_order_id VARCHAR(100) NOT NULL, -- 商户方订单号
@@ -19,7 +23,7 @@ CREATE TABLE payment_orders (
 
     -- 支付信息
     payment_address VARCHAR(100),
-    token_id BIGINT, -- 注意：不再是外键，而是引用核心服务的代币ID
+    token_id BIGINT,
     exchange_rate DECIMAL(20, 8), -- 法币汇率
     actual_amount DECIMAL(20, 8), -- 实际支付金额
 
@@ -28,8 +32,8 @@ CREATE TABLE payment_orders (
         ('created', 'pending', 'paid', 'overpaid', 'underpaid', 'expired', 'cancelled', 'refunded')),
 
     -- 时间配置
-    expires_at TIMESTAMP WITH TIME ZONE,
-    paid_at TIMESTAMP WITH TIME ZONE,
+    expires_at TIMESTAMP,
+    paid_at TIMESTAMP,
 
     -- 回调配置
     callback_url VARCHAR(500),
@@ -38,11 +42,11 @@ CREATE TABLE payment_orders (
     callback_success BOOLEAN DEFAULT FALSE,
 
     -- 关联交易
-    payment_tx_id BIGINT, -- 注意：不再是外键，而是引用核心服务的交易ID
-    refund_tx_id BIGINT, -- 注意：不再是外键，而是引用核心服务的交易ID
+    payment_tx_id BIGINT,
+    refund_tx_id BIGINT,
 
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC'),
+    updated_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC')
 );
 
 CREATE INDEX idx_payment_orders_merchant_id ON payment_orders(merchant_id);
@@ -77,8 +81,8 @@ CREATE TABLE bill_providers (
     is_active BOOLEAN DEFAULT TRUE,
     maintenance_mode BOOLEAN DEFAULT FALSE,
 
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC'),
+    updated_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC')
 );
 
 CREATE INDEX idx_bill_providers_type ON bill_providers(service_type);
@@ -89,7 +93,7 @@ CREATE INDEX idx_bill_providers_active ON bill_providers(is_active);
 -- ================================================================
 CREATE TABLE bill_payments (
     payment_id BIGINT PRIMARY KEY,
-    user_id BIGINT NOT NULL, -- 注意：不再是外键，而是引用用户服务的用户ID
+    user_id BIGINT NOT NULL,
     provider_id BIGINT NOT NULL REFERENCES bill_providers(provider_id),
 
     -- 账单信息
@@ -100,7 +104,7 @@ CREATE TABLE bill_payments (
 
     -- 支付信息
     payment_method VARCHAR(20) DEFAULT 'crypto', -- crypto, balance
-    transaction_id BIGINT, -- 注意：不再是外键，而是引用核心服务的交易ID
+    transaction_id BIGINT,
 
     -- 账单详情
     billing_period VARCHAR(20), -- 账单周期
@@ -116,9 +120,9 @@ CREATE TABLE bill_payments (
     provider_response JSONB, -- 服务商响应
 
     -- 时间信息
-    processed_at TIMESTAMP WITH TIME ZONE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    processed_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC'),
+    updated_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC')
 );
 
 CREATE INDEX idx_bill_payments_user_id ON bill_payments(user_id);
@@ -131,7 +135,7 @@ CREATE INDEX idx_bill_payments_created_at ON bill_payments(created_at);
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
+    NEW.updated_at = (NOW() AT TIME ZONE 'UTC');
     RETURN NEW;
 END;
 $$ language 'plpgsql';

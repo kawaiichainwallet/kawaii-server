@@ -1,6 +1,10 @@
 -- ================================================================
 -- KawaiiChain Wallet - 用户服务数据库 (kawaii-user-db)
 -- 负责：用户身份管理、认证授权、个人资料、安全控制
+--
+-- 【时间字段约定】
+-- 所有时间字段使用 TIMESTAMP 类型（不带时区），统一存储 UTC 时间
+-- 应用层负责时区转换，确保写入数据库的时间都是 UTC
 -- ================================================================
 
 -- ================================================================
@@ -22,13 +26,13 @@ CREATE TABLE users (
     two_factor_enabled BOOLEAN DEFAULT FALSE,
     two_factor_secret VARCHAR(100),
     login_attempts INTEGER DEFAULT 0,
-    locked_until TIMESTAMP WITH TIME ZONE,
-    last_login_at TIMESTAMP WITH TIME ZONE,
+    locked_until TIMESTAMP,
+    last_login_at TIMESTAMP,
     last_login_ip VARCHAR(15),
 
-    -- 元数据
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    -- 元数据（UTC时间）
+    created_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC'),
+    updated_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC'),
     created_by BIGINT,
     updated_by BIGINT
 );
@@ -68,8 +72,9 @@ CREATE TABLE user_profiles (
     currency VARCHAR(10) DEFAULT 'USD',
     notifications_enabled BOOLEAN DEFAULT TRUE,
 
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    -- 元数据（UTC时间）
+    created_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC'),
+    updated_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC')
 );
 
 CREATE UNIQUE INDEX idx_user_profiles_user_id ON user_profiles(user_id);
@@ -92,18 +97,19 @@ CREATE TABLE user_kyc (
     id_back_url VARCHAR(500),
     selfie_url VARCHAR(500),
 
-    -- 审核信息
-    submitted_at TIMESTAMP WITH TIME ZONE,
-    reviewed_at TIMESTAMP WITH TIME ZONE,
-    reviewed_by BIGINT, -- 注意：这里不再是外键，而是引用其他服务的用户ID
+    -- 审核信息（UTC时间）
+    submitted_at TIMESTAMP,
+    reviewed_at TIMESTAMP,
+    reviewed_by BIGINT,
     rejection_reason TEXT,
-    expires_at TIMESTAMP WITH TIME ZONE,
+    expires_at TIMESTAMP,
 
     -- 额外文档
     additional_docs JSONB,
 
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    -- 元数据（UTC时间）
+    created_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC'),
+    updated_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC')
 );
 
 CREATE UNIQUE INDEX idx_user_kyc_user_id ON user_kyc(user_id);
@@ -116,8 +122,8 @@ CREATE TABLE jwt_blacklist (
     token_id VARCHAR(100) NOT NULL UNIQUE, -- JWT的jti claim
     user_id BIGINT NOT NULL REFERENCES users(user_id),
     token_type VARCHAR(20) DEFAULT 'access' CHECK (token_type IN ('access', 'refresh')),
-    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
-    blacklisted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL,
+    blacklisted_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC'),
     reason VARCHAR(100) DEFAULT 'logout' -- logout, force_logout, security
 );
 
@@ -126,21 +132,21 @@ CREATE INDEX idx_jwt_blacklist_token_id ON jwt_blacklist(token_id);
 CREATE INDEX idx_jwt_blacklist_user_id ON jwt_blacklist(user_id);
 
 -- ================================================================
--- 自动更新时间戳触发器
+-- 自动更新时间戳触发器（UTC时间）
 -- ================================================================
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
+    NEW.updated_at = (NOW() AT TIME ZONE 'UTC');
     RETURN NEW;
 END;
 $$ language 'plpgsql';
 
--- Leaf框架专用的更新时间触发器函数
+-- Leaf框架专用的更新时间触发器函数（UTC时间）
 CREATE OR REPLACE FUNCTION update_leaf_update_time_column()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.update_time = CURRENT_TIMESTAMP;
+    NEW.update_time = (NOW() AT TIME ZONE 'UTC');
     RETURN NEW;
 END;
 $$ language 'plpgsql';
@@ -162,7 +168,7 @@ CREATE TABLE leaf_alloc (
     max_id BIGINT NOT NULL DEFAULT 1,
     step INT NOT NULL,
     description VARCHAR(256) DEFAULT NULL,
-    update_time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP NOT NULL DEFAULT (NOW() AT TIME ZONE 'UTC'),
     PRIMARY KEY (biz_tag)
 );
 

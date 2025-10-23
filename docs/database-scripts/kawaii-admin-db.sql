@@ -1,6 +1,10 @@
 -- ================================================================
 -- KawaiiChain Wallet - 管理后台数据库 (kawaii-admin-db)
 -- 负责：系统配置、运营审计、管理员权限（由kawaii-admin-service管理）
+--
+-- 【时间字段约定】
+-- 所有时间字段使用 TIMESTAMP 类型（不带时区），统一存储 UTC 时间
+-- 应用层负责时区转换，确保写入数据库的时间都是 UTC
 -- ================================================================
 
 
@@ -23,9 +27,10 @@ CREATE TABLE system_configs (
     is_public BOOLEAN DEFAULT FALSE, -- 是否可公开访问
     is_encrypted BOOLEAN DEFAULT FALSE, -- 值是否加密存储
 
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_by BIGINT -- 注意：不再是外键，而是引用用户服务的用户ID
+    -- 元数据（UTC时间）
+    created_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC'),
+    updated_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC'),
+    updated_by BIGINT
 );
 
 CREATE INDEX idx_system_configs_group ON system_configs(config_group);
@@ -38,7 +43,7 @@ CREATE TABLE audit_logs (
     log_id BIGINT PRIMARY KEY,
 
     -- 操作信息
-    user_id BIGINT, -- 注意：不再是外键，而是引用用户服务的用户ID
+    user_id BIGINT,
     action VARCHAR(100) NOT NULL, -- CREATE, UPDATE, DELETE, LOGIN, LOGOUT等
     resource_type VARCHAR(50) NOT NULL, -- user, wallet, transaction等
     resource_id BIGINT,
@@ -58,7 +63,8 @@ CREATE TABLE audit_logs (
     success BOOLEAN DEFAULT TRUE,
     error_message TEXT,
 
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    -- 元数据（UTC时间）
+    created_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC')
 );
 
 -- 索引 (支持按月分区)
@@ -91,16 +97,16 @@ CREATE TABLE admin_users (
     two_factor_enabled BOOLEAN DEFAULT FALSE,
     two_factor_secret VARCHAR(100),
     login_attempts INTEGER DEFAULT 0,
-    locked_until TIMESTAMP WITH TIME ZONE,
-    last_login_at TIMESTAMP WITH TIME ZONE,
+    locked_until TIMESTAMP,
+    last_login_at TIMESTAMP,
     last_login_ip INET,
 
     -- 权限控制
     is_super_admin BOOLEAN DEFAULT FALSE,
     permissions TEXT[], -- 额外权限列表
 
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC'),
+    updated_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC'),
     created_by BIGINT,
     updated_by BIGINT
 );
@@ -127,8 +133,8 @@ CREATE TABLE admin_roles (
     -- 状态管理
     is_active BOOLEAN DEFAULT TRUE,
 
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC'),
+    updated_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC'),
     created_by BIGINT,
     updated_by BIGINT
 );
@@ -145,9 +151,9 @@ CREATE TABLE admin_user_roles (
     role_id BIGINT NOT NULL REFERENCES admin_roles(role_id) ON DELETE CASCADE,
 
     -- 分配信息
-    assigned_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    assigned_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC'),
     assigned_by BIGINT,
-    expires_at TIMESTAMP WITH TIME ZONE, -- 角色过期时间（可选）
+    expires_at TIMESTAMP, -- 角色过期时间（可选）
 
     UNIQUE(admin_id, role_id)
 );
@@ -173,7 +179,7 @@ INSERT INTO admin_roles(role_id, role_name, role_code, description, permissions)
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
+    NEW.updated_at = (NOW() AT TIME ZONE 'UTC');
     RETURN NEW;
 END;
 $$ language 'plpgsql';

@@ -1,6 +1,10 @@
 -- ================================================================
 -- KawaiiChain Wallet - 商户服务数据库 (kawaii-merchant-db)
 -- 负责：商户管理、API配置
+--
+-- 【时间字段约定】
+-- 所有时间字段使用 TIMESTAMP 类型（不带时区），统一存储 UTC 时间
+-- 应用层负责时区转换，确保写入数据库的时间都是 UTC
 -- ================================================================
 
 
@@ -9,7 +13,7 @@
 -- ================================================================
 CREATE TABLE merchants (
     merchant_id BIGINT PRIMARY KEY,
-    user_id BIGINT NOT NULL, -- 注意：不再是外键，而是引用用户服务的用户ID
+    user_id BIGINT NOT NULL,
 
     -- 商户信息
     merchant_name VARCHAR(200) NOT NULL,
@@ -44,8 +48,8 @@ CREATE TABLE merchants (
     status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'active', 'suspended', 'inactive')),
     kyc_verified BOOLEAN DEFAULT FALSE,
 
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC'),
+    updated_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC')
 );
 
 CREATE INDEX idx_merchants_user_id ON merchants(user_id);
@@ -58,7 +62,7 @@ CREATE UNIQUE INDEX idx_merchants_api_key ON merchants(api_key);
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
+    NEW.updated_at = (NOW() AT TIME ZONE 'UTC');
     RETURN NEW;
 END;
 $$ language 'plpgsql';

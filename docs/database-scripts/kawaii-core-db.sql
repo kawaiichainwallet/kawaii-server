@@ -1,6 +1,10 @@
 -- ================================================================
 -- KawaiiChain Wallet - 钱包核心服务数据库 (kawaii-core-db)
 -- 负责：钱包管理、区块链资产、链上交易
+--
+-- 【时间字段约定】
+-- 所有时间字段使用 TIMESTAMP 类型（不带时区），统一存储 UTC 时间
+-- 应用层负责时区转换，确保写入数据库的时间都是 UTC
 -- ================================================================
 
 -- ================================================================
@@ -27,8 +31,8 @@ CREATE TABLE supported_chains (
     min_confirmations INTEGER DEFAULT 6,
     gas_price_levels JSONB, -- {"slow": 10, "standard": 20, "fast": 30}
 
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC'),
+    updated_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC')
 );
 
 CREATE INDEX idx_supported_chains_active ON supported_chains(is_active);
@@ -38,7 +42,7 @@ CREATE INDEX idx_supported_chains_active ON supported_chains(is_active);
 -- ================================================================
 CREATE TABLE wallets (
     wallet_id BIGINT PRIMARY KEY,
-    user_id BIGINT NOT NULL, -- 注意：不再是外键，而是引用用户服务的用户ID
+    user_id BIGINT NOT NULL,
 
     -- 钱包基本信息
     wallet_name VARCHAR(100) NOT NULL,
@@ -58,8 +62,8 @@ CREATE TABLE wallets (
     is_active BOOLEAN DEFAULT TRUE,
     is_default BOOLEAN DEFAULT FALSE,
 
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC'),
+    updated_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC')
 );
 
 CREATE INDEX idx_wallets_user_id ON wallets(user_id);
@@ -82,14 +86,14 @@ CREATE TABLE wallet_addresses (
 
     -- 余额缓存 (定期更新)
     balance_cache DECIMAL(36, 18) DEFAULT 0,
-    balance_updated_at TIMESTAMP WITH TIME ZONE,
+    balance_updated_at TIMESTAMP,
 
     -- 状态管理
     is_active BOOLEAN DEFAULT TRUE,
     label VARCHAR(100), -- 用户自定义标签
 
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC'),
+    updated_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC')
 );
 
 CREATE UNIQUE INDEX idx_wallet_addresses_chain_address ON wallet_addresses(chain_id, address);
@@ -120,11 +124,11 @@ CREATE TABLE tokens (
 
     -- 价格信息缓存
     price_usd DECIMAL(20, 8),
-    price_updated_at TIMESTAMP WITH TIME ZONE,
+    price_updated_at TIMESTAMP,
     market_cap DECIMAL(30, 2),
 
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC'),
+    updated_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC')
 );
 
 CREATE UNIQUE INDEX idx_tokens_chain_contract ON tokens(chain_id, contract_address);
@@ -136,7 +140,7 @@ CREATE INDEX idx_tokens_active ON tokens(is_active);
 -- ================================================================
 CREATE TABLE transactions (
     transaction_id BIGINT PRIMARY KEY,
-    user_id BIGINT NOT NULL, -- 注意：不再是外键，而是引用用户服务的用户ID
+    user_id BIGINT NOT NULL,
     wallet_id BIGINT NOT NULL REFERENCES wallets(wallet_id),
     chain_id BIGINT NOT NULL REFERENCES supported_chains(chain_id),
 
@@ -172,10 +176,10 @@ CREATE TABLE transactions (
     tags TEXT[], -- 用户自定义标签
 
     -- 时间信息
-    submitted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    confirmed_at TIMESTAMP WITH TIME ZONE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    submitted_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC'),
+    confirmed_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC'),
+    updated_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC')
 );
 
 -- 索引 (支持按月分区)
@@ -203,7 +207,7 @@ CREATE TABLE transaction_logs (
     event_name VARCHAR(100),
     decoded_data JSONB,
 
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'UTC')
 );
 
 CREATE INDEX idx_transaction_logs_tx_id ON transaction_logs(transaction_id);
@@ -215,7 +219,7 @@ CREATE INDEX idx_transaction_logs_contract ON transaction_logs(contract_address)
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
+    NEW.updated_at = (NOW() AT TIME ZONE 'UTC');
     RETURN NEW;
 END;
 $$ language 'plpgsql';

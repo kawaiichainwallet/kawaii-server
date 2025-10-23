@@ -83,13 +83,16 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
                 if (body instanceof Flux) {
                     Flux<? extends DataBuffer> fluxBody = (Flux<? extends DataBuffer>) body;
                     return super.writeWith(fluxBody.buffer().map(dataBuffers -> {
-                        // 记录响应日志
-                        AtomicReference<DataBuffer> responseDataBuffer = new AtomicReference<>();
+                        // 合并所有buffer并记录日志
                         if (!dataBuffers.isEmpty()) {
-                            responseDataBuffer.set(dataBuffers.get(0));
-                            logResponse(exchange, requestId, responseDataBuffer.get());
+                            // 合并多个buffer为一个
+                            DataBuffer joinedBuffer = response.bufferFactory().join(dataBuffers);
+                            // 记录响应日志
+                            logResponse(exchange, requestId, joinedBuffer);
+                            // 返回合并后的buffer
+                            return joinedBuffer;
                         }
-                        return dataBuffers.get(0);
+                        return response.bufferFactory().allocateBuffer(0);
                     }));
                 }
                 return super.writeWith(body);

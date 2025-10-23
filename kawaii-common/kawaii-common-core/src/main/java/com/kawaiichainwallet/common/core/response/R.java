@@ -39,11 +39,6 @@ public class R<T> {
      */
     private String traceId;
 
-    /**
-     * 是否成功
-     */
-    private Boolean success;
-
     public R() {
         this.timestamp = TimeUtil.nowUtc();
     }
@@ -53,7 +48,6 @@ public class R<T> {
         this.code = code;
         this.msg = msg;
         this.data = data;
-        this.success = code == 200;
     }
 
     /**
@@ -173,7 +167,7 @@ public class R<T> {
      * 判断是否成功
      */
     public boolean isSuccess() {
-        return Boolean.TRUE.equals(this.success);
+        return this.code != null && this.code == 200;
     }
 
     /**

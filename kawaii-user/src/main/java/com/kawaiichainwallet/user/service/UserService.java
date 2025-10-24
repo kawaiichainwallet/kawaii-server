@@ -10,8 +10,10 @@ import com.kawaiichainwallet.user.dto.RegisterRequest;
 import com.kawaiichainwallet.user.dto.RegisterResponse;
 import com.kawaiichainwallet.user.entity.User;
 import com.kawaiichainwallet.user.entity.UserProfile;
+import com.kawaiichainwallet.user.entity.UserKyc;
 import com.kawaiichainwallet.user.mapper.UserMapper;
 import com.kawaiichainwallet.user.mapper.UserProfileMapper;
+import com.kawaiichainwallet.user.mapper.UserKycMapper;
 import com.kawaiichainwallet.user.converter.UserConverter;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +35,7 @@ public class UserService {
 
     private final UserMapper userMapper;
     private final UserProfileMapper userProfileMapper;
+    private final UserKycMapper userKycMapper;
     private final UserConverter userConverter;
     private final OtpService otpService;
     private final PasswordEncoder passwordEncoder;
@@ -103,12 +106,22 @@ public class UserService {
                 new LambdaQueryWrapper<UserProfile>()
                         .eq(UserProfile::getUserId, userId));
 
+        // 查询KYC信息
+        UserKyc userKyc = userKycMapper.findByUserId(userId);
+
         // 使用MapStruct进行对象转换和脱敏处理
         UserDetailsDto response;
         if (userProfile != null) {
             response = userConverter.userAndProfileToUserDetailsDto(user, userProfile);
         } else {
             response = userConverter.userToUserDetailsDto(user);
+        }
+
+        // 设置KYC级别
+        if (userKyc != null && userKyc.getKycLevel() != null) {
+            response.setKycLevel("LEVEL_" + userKyc.getKycLevel());
+        } else {
+            response.setKycLevel("LEVEL_0");  // 默认未认证
         }
 
         return response;

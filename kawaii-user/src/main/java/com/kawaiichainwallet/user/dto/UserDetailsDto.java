@@ -78,6 +78,15 @@ public class UserDetailsDto {
     private String currency;
 
     /**
+     * KYC认证级别
+     * LEVEL_0: 未认证
+     * LEVEL_1: L1 基础认证
+     * LEVEL_2: L2 身份认证
+     * LEVEL_3: L3 高级认证
+     */
+    private String kycLevel;
+
+    /**
      * 创建时间（UTC）
      */
     private LocalDateTime createdAt;

@@ -13,9 +13,7 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
@@ -30,8 +28,10 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * 请求日志记录全局过滤器
@@ -89,11 +89,17 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
                     return super.writeWith(fluxBody.buffer().map(dataBuffers -> {
                         // 合并所有buffer并记录日志
                         if (!dataBuffers.isEmpty()) {
-                            // 合并多个buffer为一个
+                            // 合并多个buffer为一个（buffer会被框架自动释放）
                             DataBuffer joinedBuffer = response.bufferFactory().join(dataBuffers);
-                            // 记录响应日志
-                            logResponse(exchange, requestId, joinedBuffer);
-                            // 返回合并后的buffer
+
+                            // 记录响应日志（只读取，不修改buffer）
+                            try {
+                                logResponse(exchange, requestId, joinedBuffer);
+                            } catch (Exception e) {
+                                log.error("记录响应日志失败: requestId={}", requestId, e);
+                            }
+
+                            // 返回合并后的buffer（由Reactor框架管理生命周期）
                             return joinedBuffer;
                         }
                         return response.bufferFactory().allocateBuffer(0);
@@ -105,10 +111,10 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
 
         // 继续执行过滤器链
         return chain.filter(exchange.mutate().response(decoratedResponse).build())
-            .doFinally(signalType -> {
-                // 记录完成日志
-                logRequestCompletion(exchange, requestId, signalType.toString());
-            });
+                .doFinally(signalType -> {
+                    // 记录完成日志
+                    logRequestCompletion(exchange, requestId, signalType.toString());
+                });
     }
 
     /**
@@ -214,8 +220,8 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
 
                 // 根据配置决定是否记录响应体
                 if (loggingConfig.isLogResponseBody() &&
-                    totalSize <= loggingConfig.getMaxResponseBodySize() &&
-                    isJsonResponse(response)) {
+                        totalSize <= loggingConfig.getMaxResponseBodySize() &&
+                        isJsonResponse(response)) {
 
                     // 读取响应体内容
                     byte[] bytes = new byte[dataBuffer.readableByteCount()];
@@ -290,7 +296,7 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
         }
 
         return request.getRemoteAddress() != null ?
-            request.getRemoteAddress().getAddress().getHostAddress() : "unknown";
+                request.getRemoteAddress().getAddress().getHostAddress() : "unknown";
     }
 
     /**
@@ -298,7 +304,7 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
      */
     private boolean isExcludedPath(String path) {
         return loggingConfig.getExcludePaths().stream()
-            .anyMatch(pattern -> pathMatcher.match(pattern, path));
+                .anyMatch(pattern -> pathMatcher.match(pattern, path));
     }
 
     /**
@@ -306,7 +312,7 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
      */
     private boolean isSensitiveField(String fieldName) {
         return loggingConfig.getSensitiveFields().stream()
-            .anyMatch(sensitive -> fieldName.toLowerCase().contains(sensitive.toLowerCase()));
+                .anyMatch(sensitive -> fieldName.toLowerCase().contains(sensitive.toLowerCase()));
     }
 
     /**
@@ -314,7 +320,7 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
      */
     private boolean isSensitivePath(String path) {
         return loggingConfig.getSensitivePaths().stream()
-            .anyMatch(pattern -> pathMatcher.match(pattern, path));
+                .anyMatch(pattern -> pathMatcher.match(pattern, path));
     }
 
     /**
@@ -367,8 +373,8 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
             String masked = jsonData;
             for (String sensitive : loggingConfig.getSensitiveFields()) {
                 masked = masked.replaceAll(
-                    "\"" + sensitive + "\"\\s*:\\s*\"[^\"]+\"",
-                    "\"" + sensitive + "\":\"***\""
+                        "\"" + sensitive + "\"\\s*:\\s*\"[^\"]+\"",
+                        "\"" + sensitive + "\":\"***\""
                 );
             }
             return masked;

@@ -15,6 +15,7 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.text.ParseException;
 import java.util.Base64;
+import java.util.Date;
 
 /**
  * JWT验证服务 - 使用ES256算法和EC公钥验证
@@ -51,12 +52,34 @@ public class JwtValidationService {
     }
 
     /**
-     * 验证JWT Token
+     * 验证JWT Token（包括签名和过期时间）
      */
     public boolean validateToken(String token) {
         try {
             SignedJWT signedJWT = SignedJWT.parse(token);
-            return signedJWT.verify(jwtVerifier);
+
+            // 1. 验证签名
+            if (!signedJWT.verify(jwtVerifier)) {
+                log.debug("JWT signature verification failed");
+                return false;
+            }
+
+            // 2. 检查过期时间
+            JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
+            Date expirationTime = claims.getExpirationTime();
+            if (expirationTime != null && expirationTime.before(new Date())) {
+                log.debug("JWT token has expired at: {}", expirationTime);
+                return false;
+            }
+
+            // 3. 检查生效时间（Not Before）
+            Date notBeforeTime = claims.getNotBeforeTime();
+            if (notBeforeTime != null && notBeforeTime.after(new Date())) {
+                log.debug("JWT token not yet valid, will be valid from: {}", notBeforeTime);
+                return false;
+            }
+
+            return true;
         } catch (ParseException | JOSEException e) {
             log.debug("JWT validation failed: {}", e.getMessage());
             return false;

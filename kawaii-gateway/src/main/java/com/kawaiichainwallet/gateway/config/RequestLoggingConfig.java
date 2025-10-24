@@ -48,36 +48,36 @@ public class RequestLoggingConfig {
      * 排除的路径模式
      */
     private Set<String> excludePaths = Set.of(
-        "/actuator/**",
-        "/health",
-        "/favicon.ico"
+            "/actuator/**",
+            "/health",
+            "/favicon.ico"
     );
 
     /**
      * 需要脱敏的字段名
      */
     private Set<String> sensitiveFields = Set.of(
-        "password", "token", "authorization", "cookie", "session",
-        "secret", "key", "passwd", "pwd", "credential", "refreshToken",
-        "accessToken", "otp", "otpCode", "verificationCode"
+            "password", "token", "authorization", "cookie", "session",
+            "secret", "key", "passwd", "pwd", "credential", "refreshToken",
+            "accessToken", "otp", "otpCode", "verificationCode"
     );
 
     /**
      * 敏感路径模式
      */
     private Set<String> sensitivePaths = Set.of(
-        "/auth/login",
-        "/auth/register",
-        "/auth/refresh",
-        "/user/password",
-        "/admin/login",
-        "/otp/**"
+            "/auth/login",
+            "/auth/register",
+            "/auth/refresh",
+            "/user/password",
+            "/admin/login",
+            "/otp/**"
     );
 
     /**
      * 强制记录的路径
      */
     private Set<String> forceLogPaths = Set.of(
-        // 暂时为空
+            // 暂时为空
     );
 }

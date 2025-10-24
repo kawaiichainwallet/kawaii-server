@@ -3,6 +3,7 @@ package com.kawaiichainwallet.gateway.config;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,11 @@ import java.util.Map;
 @Component
 @ConfigurationProperties(prefix = "app.security.routes")
 public class RouteSecurityConfig {
+
+    /**
+     * 路径匹配器 - 支持Ant风格的通配符（*, **, ?）
+     */
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     /**
      * 公开路径 - 无需认证
@@ -106,29 +112,25 @@ public class RouteSecurityConfig {
         }
 
         return rolePaths.entrySet().stream()
-            .filter(entry -> pathMatches(path, entry.getKey()))
-            .findFirst()
-            .map(Map.Entry::getValue)
-            .orElse(List.of());
+                .filter(entry -> pathMatches(path, entry.getKey()))
+                .findFirst()
+                .map(Map.Entry::getValue)
+                .orElse(List.of());
     }
 
     /**
-     * 路径匹配算法
-     * 支持通配符 * 和 **
+     * 路径匹配算法 - 使用Spring的AntPathMatcher
+     * 支持Ant风格的通配符：
+     * - ? 匹配单个字符
+     * - * 匹配0个或多个字符（单层路径）
+     * - ** 匹配0个或多个目录
+     * <p>
+     * 示例：
+     * - /api/user/123 匹配 /api/user/*
+     * - /api/user/profile/edit 匹配 /api/user/**
+     * - /api/user/1 匹配 /api/user/?
      */
     private boolean pathMatches(String path, String pattern) {
-        // 简单实现：支持 ** 通配符
-        if (pattern.endsWith("/**")) {
-            String prefix = pattern.substring(0, pattern.length() - 3);
-            return path.startsWith(prefix);
-        }
-
-        if (pattern.endsWith("/*")) {
-            String prefix = pattern.substring(0, pattern.length() - 2);
-            String remaining = path.substring(prefix.length());
-            return path.startsWith(prefix) && !remaining.contains("/");
-        }
-
-        return pattern.equals(path);
+        return pathMatcher.match(pattern, path);
     }
 }

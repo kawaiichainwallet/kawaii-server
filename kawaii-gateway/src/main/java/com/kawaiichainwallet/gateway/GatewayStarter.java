@@ -17,7 +17,7 @@ import java.util.TimeZone;
  * </p>
  */
 @SpringBootApplication(scanBasePackages = {
-    "com.kawaiichainwallet.gateway"
+        "com.kawaiichainwallet.gateway"
 })
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = "com.kawaiichainwallet.api")

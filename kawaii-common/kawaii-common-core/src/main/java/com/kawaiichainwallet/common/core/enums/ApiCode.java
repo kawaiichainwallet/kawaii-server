@@ -22,7 +22,9 @@ public enum ApiCode {
 
     // 服务端错误 5xx
     INTERNAL_SERVER_ERROR(500, "服务器内部错误"),
+    BAD_GATEWAY(502, "网关错误"),
     SERVICE_UNAVAILABLE(503, "服务暂不可用"),
+    GATEWAY_TIMEOUT(504, "网关超时"),
 
     // 业务错误 1xxx
     VALIDATION_ERROR(1001, "参数验证失败"),

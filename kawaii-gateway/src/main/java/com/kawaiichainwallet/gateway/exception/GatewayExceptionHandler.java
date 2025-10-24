@@ -17,7 +17,9 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Gateway WebFlux 全局异常处理器
@@ -69,7 +71,23 @@ public class GatewayExceptionHandler implements ErrorWebExceptionHandler {
             httpStatus = HttpStatus.UNAUTHORIZED;
             result = R.error(ApiCode.UNAUTHORIZED, "认证失败");
             log.warn("认证失败: {}", ex.getMessage());
+        } else if (ex instanceof TimeoutException || ex.getClass().getSimpleName().contains("Timeout")) {
+            // 超时异常
+            httpStatus = HttpStatus.GATEWAY_TIMEOUT;
+            result = R.error(ApiCode.GATEWAY_TIMEOUT, "后端服务响应超时");
+            log.warn("后端服务超时: {}", ex.getMessage());
+        } else if (ex.getCause() instanceof IOException || ex.getClass().getSimpleName().contains("ConnectException")) {
+            // 连接异常
+            httpStatus = HttpStatus.BAD_GATEWAY;
+            result = R.error(ApiCode.BAD_GATEWAY, "后端服务不可用");
+            log.error("后端服务连接失败: {}", ex.getMessage(), ex);
+        } else if (ex.getClass().getSimpleName().contains("ServiceUnavailable")) {
+            // 服务不可用
+            httpStatus = HttpStatus.SERVICE_UNAVAILABLE;
+            result = R.error(ApiCode.SERVICE_UNAVAILABLE, "服务暂时不可用");
+            log.error("服务不可用: {}", ex.getMessage());
         } else {
+            // 未知异常
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
             result = R.error(ApiCode.INTERNAL_SERVER_ERROR, "网关内部错误");
             log.error("网关未知异常", ex);

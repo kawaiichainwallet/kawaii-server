@@ -1,8 +1,8 @@
 package com.kawaiichainwallet.gateway.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kawaiichainwallet.gateway.dto.ApiResponse;
 import com.kawaiichainwallet.gateway.config.RouteSecurityConfig;
+import com.kawaiichainwallet.gateway.dto.ApiResponse;
 import com.kawaiichainwallet.gateway.dto.UserContext;
 import com.kawaiichainwallet.gateway.service.JwtValidationService;
 import lombok.extern.slf4j.Slf4j;
@@ -17,9 +17,7 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
 
 /**
@@ -103,7 +101,7 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
                 }
             }
 
-            // 7. 检查角色权限
+            // 8. 检查角色权限
             List<String> requiredRoles = routeSecurityConfig.getRequiredRoles(path);
             if (!requiredRoles.isEmpty()) {
                 boolean hasRequiredRole = requiredRoles.stream()
@@ -114,7 +112,7 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
                 }
             }
 
-            // 8. 添加用户信息到请求头
+            // 9. 添加用户信息到请求头
             ServerHttpRequest modifiedRequest = request.mutate()
                     // 基础用户信息
                     .header("X-User-Id", userContext.getUserId())

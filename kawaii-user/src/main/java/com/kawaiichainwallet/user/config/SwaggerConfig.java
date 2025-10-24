@@ -28,10 +28,10 @@ public class SwaggerConfig {
                                 .email("contact@kawaiichainwallet.com")))
                 .servers(List.of(
                         new Server()
-                                .url("http://localhost:8091/user")
+                                .url("http://localhost:8091")
                                 .description("本地开发环境"),
                         new Server()
-                                .url("http://localhost:8080/api/v1/user")
+                                .url("http://localhost:8090/kawaii-user")
                                 .description("通过网关访问")
                 ));
     }

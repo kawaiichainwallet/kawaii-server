@@ -84,6 +84,7 @@ public class RequestBodyCacheConfig {
                         // 使用CachedBodyOutputMessage重新插入请求体
                         HttpHeaders headers = new HttpHeaders();
                         headers.putAll(request.getHeaders());
+                        // 移除Content-Length，让BodyInserter自动设置
                         headers.remove(HttpHeaders.CONTENT_LENGTH);
 
                         CachedBodyOutputMessage outputMessage = new CachedBodyOutputMessage(exchange, headers);
@@ -94,13 +95,11 @@ public class RequestBodyCacheConfig {
                                     ServerHttpRequestDecorator decorator = new ServerHttpRequestDecorator(request) {
                                         @Override
                                         public HttpHeaders getHeaders() {
-                                            long contentLength = headers.getContentLength();
                                             HttpHeaders httpHeaders = new HttpHeaders();
-                                            httpHeaders.putAll(headers);
-                                            if (contentLength > 0) {
-                                                httpHeaders.setContentLength(contentLength);
-                                            } else {
-                                                httpHeaders.set(HttpHeaders.TRANSFER_ENCODING, "chunked");
+                                            httpHeaders.putAll(super.getHeaders());
+                                            // 设置正确的Content-Length
+                                            if (httpHeaders.getContentLength() < 0) {
+                                                httpHeaders.setContentLength(body.getBytes(java.nio.charset.StandardCharsets.UTF_8).length);
                                             }
                                             return httpHeaders;
                                         }

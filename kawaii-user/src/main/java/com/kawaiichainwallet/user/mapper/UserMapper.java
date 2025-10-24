@@ -67,7 +67,7 @@ public interface UserMapper extends BaseMapper<User> {
     int resetLoginAttempts(@Param("userId") Long userId);
 
     /**
-     * 锁定用户账户
+     * 锁定用户账户（时间为 UTC）
      */
     @Update("UPDATE users SET locked_until = #{lockUntil}, updated_at = NOW() WHERE user_id = #{userId}")
     int lockUser(@Param("userId") Long userId, @Param("lockUntil") LocalDateTime lockUntil);
@@ -79,7 +79,7 @@ public interface UserMapper extends BaseMapper<User> {
     int unlockUser(@Param("userId") Long userId);
 
     /**
-     * 更新最后登录信息
+     * 更新最后登录信息（时间为 UTC）
      */
     @Update("UPDATE users SET last_login_at = #{loginTime}, last_login_ip = #{ipAddress}, updated_at = NOW() WHERE user_id = #{userId}")
     int updateLoginInfo(@Param("userId") Long userId,

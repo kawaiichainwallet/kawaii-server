@@ -47,11 +47,11 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
             ServerHttpRequest request = exchange.getRequest();
             String path = request.getURI().getPath();
 
-            log.debug("Processing request to path: {}", path);
+            log.info("AuthenticationFilter - Processing request to path: {}", path);
 
             // 1. 检查是否为公开端点
             if (routeSecurityConfig.isPublicPath(path)) {
-                log.debug("Public endpoint access: {}", path);
+                log.info("AuthenticationFilter - Public endpoint access: {}", path);
                 return chain.filter(exchange);
             }
 
@@ -108,7 +108,7 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
                     .header("X-Request-Timestamp", String.valueOf(System.currentTimeMillis()))
                     .build();
 
-            log.debug("Authenticated request for user: {} with roles: {} to path: {}",
+            log.info("AuthenticationFilter - Authenticated request for user: {} with roles: {} to path: {}",
                     userContext.getUserId(), userContext.getRoles(), path);
 
             return chain.filter(exchange.mutate().request(modifiedRequest).build());
@@ -120,14 +120,17 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
         try {
             String userId = jwtValidationService.getUserIdFromToken(token);
             String username = jwtValidationService.getUsernameFromToken(token);
+            String rolesStr = jwtValidationService.getRolesFromToken(token);
 
-            // 根据用户信息构建用户上下文
-            // 这里可以调用用户服务获取完整的用户信息，包括角色
-            // 暂时使用基础信息和默认角色
+            // 解析角色字符串（可能是逗号分隔的）
+            List<String> roles = rolesStr != null && !rolesStr.isEmpty()
+                    ? Arrays.asList(rolesStr.split(","))
+                    : Arrays.asList("USER");
+
             return UserContext.builder()
                     .userId(userId)
-                    .email(username) // 如果username是邮箱格式
-                    .roles(Arrays.asList("USER", "VERIFIED")) // 默认角色，实际应从用户服务获取
+                    .email(username)
+                    .roles(roles)
                     .build();
         } catch (Exception e) {
             log.error("Failed to extract user context from token", e);

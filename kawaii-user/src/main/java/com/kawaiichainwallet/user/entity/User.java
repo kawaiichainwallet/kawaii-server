@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 
 /**
  * 用户实体类 - 对应 users 表（包含认证和用户信息）
+ *
+ * <p><b>时间字段约定</b>：所有时间字段统一使用 UTC 时区</p>
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -85,13 +87,13 @@ public class User extends BaseEntity {
     private Integer loginAttempts;
 
     /**
-     * 锁定截止时间
+     * 锁定截止时间（UTC）
      */
     @TableField("locked_until")
     private LocalDateTime lockedUntil;
 
     /**
-     * 最后登录时间
+     * 最后登录时间（UTC）
      */
     @TableField("last_login_at")
     private LocalDateTime lastLoginAt;

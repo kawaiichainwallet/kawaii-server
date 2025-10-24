@@ -6,11 +6,39 @@ import java.time.format.DateTimeFormatter;
 /**
  * UTC时间工具类
  * 确保整个应用使用统一的UTC时间处理
+ *
+ * <p><b>重要约定</b>：
+ * <ul>
+ *   <li>数据库中所有 TIMESTAMP 字段统一存储 UTC 时间</li>
+ *   <li>Java 代码中所有 LocalDateTime 字段表示 UTC 时间</li>
+ *   <li>禁止直接使用 LocalDateTime.now()，必须使用 TimeUtil.nowUtc()</li>
+ *   <li>前端显示时由前端负责转换为用户本地时区</li>
+ * </ul>
+ * </p>
+ *
+ * <p><b>使用示例</b>：
+ * <pre>
+ * // ✅ 正确：获取当前 UTC 时间
+ * LocalDateTime now = TimeUtil.nowUtc();
+ * user.setCreatedAt(now);
+ *
+ * // ✅ 正确：判断是否过期
+ * if (TimeUtil.isExpired(user.getLockedUntil())) {
+ *     // 解锁用户
+ * }
+ *
+ * // ❌ 错误：使用系统默认时区
+ * LocalDateTime now = LocalDateTime.now();  // 不要这样做！
+ * </pre>
+ * </p>
+ *
+ * @see java.time.LocalDateTime
+ * @see java.time.ZoneId
  */
 public final class TimeUtil {
 
     /**
-     * UTC时区
+     * UTC时区常量
      */
     public static final ZoneId UTC_ZONE = ZoneId.of("UTC");
 

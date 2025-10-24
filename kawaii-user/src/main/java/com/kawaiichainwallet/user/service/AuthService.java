@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.kawaiichainwallet.common.core.utils.TimeUtil;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -284,14 +285,15 @@ public class AuthService {
             throw new BusinessException(ApiCode.ACCOUNT_DISABLED, errorMsg);
         }
 
-        // 检查账户是否被锁定
-        if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(LocalDateTime.now())) {
+        // 检查账户是否被锁定（使用 UTC 时间）
+        LocalDateTime now = TimeUtil.nowUtc();
+        if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(now)) {
             throw new BusinessException(ApiCode.ACCOUNT_LOCKED,
                     String.format("账户已被锁定，解锁时间: %s", user.getLockedUntil()));
         }
 
         // 如果锁定时间已过，解锁账户
-        if (user.getLockedUntil() != null && user.getLockedUntil().isBefore(LocalDateTime.now())) {
+        if (user.getLockedUntil() != null && user.getLockedUntil().isBefore(now)) {
             userMapper.unlockUser(user.getUserId());
             log.info("账户自动解锁: userId={}", user.getUserId());
         }
@@ -306,9 +308,9 @@ public class AuthService {
 
         int currentAttempts = user.getLoginAttempts() + 1;
 
-        // 检查是否需要锁定账户
+        // 检查是否需要锁定账户（使用 UTC 时间）
         if (currentAttempts >= maxLoginAttempts) {
-            LocalDateTime lockUntil = LocalDateTime.now().plusMinutes(accountLockDurationMinutes);
+            LocalDateTime lockUntil = TimeUtil.nowUtc().plusMinutes(accountLockDurationMinutes);
             userMapper.lockUser(user.getUserId(), lockUntil);
 
 
@@ -325,8 +327,8 @@ public class AuthService {
         // 重置登录失败次数
         userMapper.resetLoginAttempts(user.getUserId());
 
-        // 更新最后登录信息
-        userMapper.updateLoginInfo(user.getUserId(), LocalDateTime.now(), clientIp);
+        // 更新最后登录信息（使用 UTC 时间）
+        userMapper.updateLoginInfo(user.getUserId(), TimeUtil.nowUtc(), clientIp);
 
         // 生成JWT令牌
         String accessToken = jwtTokenService.generateAccessToken(user.getUserId(), user.getUsername());

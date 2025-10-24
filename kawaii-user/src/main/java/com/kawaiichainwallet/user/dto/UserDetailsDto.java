@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 
 /**
  * 用户详细信息DTO - 用于用户服务内部业务逻辑
+ *
+ * <p><b>时间字段约定</b>：所有时间字段统一使用 UTC 时区</p>
  */
 @Data
 public class UserDetailsDto {
@@ -76,12 +78,12 @@ public class UserDetailsDto {
     private String currency;
 
     /**
-     * 创建时间
+     * 创建时间（UTC）
      */
     private LocalDateTime createdAt;
 
     /**
-     * 最后登录时间
+     * 最后登录时间（UTC）
      */
     private LocalDateTime lastLoginAt;
 }

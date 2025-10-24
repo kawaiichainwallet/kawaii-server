@@ -19,29 +19,60 @@ spring:
     gateway:
       server:
         webflux:
-        # 全局过滤器配置 - 应用到所有路由
-        default-filters:
-          - name: Authentication
-          - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+          # 全局过滤器配置 - 应用到所有路由
+          default-filters:
+            - name: Authentication
+            - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
 
-        # 全局CORS配置
-        globalcors:
-          cors-configurations:
-            '[/**]':
-                  allowedOriginPatterns: "*"
-                  allowedMethods:
-                    - GET
-                    - POST
-                    - PUT
-                    - DELETE
-                    - OPTIONS
-                  allowedHeaders: "*"
-                  allowCredentials: true
+          # 全局CORS配置
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOriginPatterns: "*"
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - OPTIONS
+                allowedHeaders: "*"
+                allowCredentials: true
+
+          # 路由配置
+          routes:
+            - id: kawaii-user-route
+              uri: lb://kawaii-user
+              predicates:
+                - Path=/kawaii-user/**
+            - id: kawaii-core-route
+              uri: lb://kawaii-core
+              predicates:
+                - Path=/kawaii-core/**
+            - id: kawaii-payment-route
+              uri: lb://kawaii-payment
+              predicates:
+                - Path=/kawaii-payment/**
+            - id: kawaii-merchant-route
+              uri: lb://kawaii-merchant
+              predicates:
+                - Path=/kawaii-merchant/**
+            - id: kawaii-notification-route
+              uri: lb://kawaii-notification
+              predicates:
+                - Path=/kawaii-notification/**
 
 # 应用配置
 app:
   # 路由安全配置
   security:
+    # JWT配置 - 使用与user服务相同的EC公钥验证Token
+    jwt:
+      # EC公钥 (ES256算法) - P-256曲线
+      public-key: |
+        -----BEGIN PUBLIC KEY-----
+        MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEQQbKGSWAq4Wa6jW35fh++sjgbFPh
+        nQUxaD8pAuViamrAxBuJcdFyM9I40W2Y0Rp69AYjolLpXzgwz+oigKs+nA==
+        -----END PUBLIC KEY-----
     routes:
       # 公开路径 - 无需认证
       public-paths:

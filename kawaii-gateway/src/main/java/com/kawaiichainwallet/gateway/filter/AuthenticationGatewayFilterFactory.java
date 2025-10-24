@@ -47,11 +47,11 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
             ServerHttpRequest request = exchange.getRequest();
             String path = request.getURI().getPath();
 
-            log.info("AuthenticationFilter - Processing request to path: {}", path);
+            log.debug("Processing request to path: {}", path);
 
             // 1. 检查是否为公开端点
             if (routeSecurityConfig.isPublicPath(path)) {
-                log.info("AuthenticationFilter - Public endpoint access: {}", path);
+                log.debug("Public endpoint access: {}", path);
                 return chain.filter(exchange);
             }
 
@@ -108,7 +108,7 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
                     .header("X-Request-Timestamp", String.valueOf(System.currentTimeMillis()))
                     .build();
 
-            log.info("AuthenticationFilter - Authenticated request for user: {} with roles: {} to path: {}",
+            log.debug("Authenticated request for user: {} with roles: {} to path: {}",
                     userContext.getUserId(), userContext.getRoles(), path);
 
             return chain.filter(exchange.mutate().request(modifiedRequest).build());

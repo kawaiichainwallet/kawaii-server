@@ -44,22 +44,32 @@ spring:
               uri: lb://kawaii-user
               predicates:
                 - Path=/kawaii-user/**
+              filters:
+                - StripPrefix=1
             - id: kawaii-core-route
               uri: lb://kawaii-core
               predicates:
                 - Path=/kawaii-core/**
+              filters:
+                - StripPrefix=1
             - id: kawaii-payment-route
               uri: lb://kawaii-payment
               predicates:
                 - Path=/kawaii-payment/**
+              filters:
+                - StripPrefix=1
             - id: kawaii-merchant-route
               uri: lb://kawaii-merchant
               predicates:
                 - Path=/kawaii-merchant/**
+              filters:
+                - StripPrefix=1
             - id: kawaii-notification-route
               uri: lb://kawaii-notification
               predicates:
                 - Path=/kawaii-notification/**
+              filters:
+                - StripPrefix=1
 
 # 应用配置
 app:

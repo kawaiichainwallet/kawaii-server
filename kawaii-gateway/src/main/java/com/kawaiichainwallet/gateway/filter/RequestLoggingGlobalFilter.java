@@ -69,12 +69,16 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
         String requestId = UUID.randomUUID().toString().substring(0, 8);
         String startTime = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
-        // 在exchange中存储请求开始时间，用于计算耗时
+        // 获取并缓存客户端IP（避免在doFinally中访问已回收的request）
+        String clientIp = getClientIp(request);
+
+        // 在exchange中存储请求开始时间、ID和客户端IP，用于后续使用
         exchange.getAttributes().put("REQUEST_START_TIME", System.currentTimeMillis());
         exchange.getAttributes().put("REQUEST_ID", requestId);
+        exchange.getAttributes().put("CLIENT_IP", clientIp);
 
         // 记录请求日志
-        logRequest(exchange, requestId, startTime);
+        logRequest(exchange, requestId, startTime, clientIp);
 
         // 装饰响应以记录响应日志
         ServerHttpResponseDecorator decoratedResponse = new ServerHttpResponseDecorator(response) {
@@ -110,7 +114,7 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
     /**
      * 记录请求日志
      */
-    private void logRequest(ServerWebExchange exchange, String requestId, String startTime) {
+    private void logRequest(ServerWebExchange exchange, String requestId, String startTime, String clientIp) {
         ServerHttpRequest request = exchange.getRequest();
         try {
             Map<String, Object> logData = new LinkedHashMap<>();
@@ -121,8 +125,7 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
             logData.put("uri", request.getURI().toString());
             logData.put("path", request.getPath().value());
 
-            // 获取客户端IP
-            String clientIp = getClientIp(request);
+            // 使用传入的客户端IP
             logData.put("clientIp", clientIp);
 
             // 记录查询参数并脱敏
@@ -254,7 +257,10 @@ public class RequestLoggingGlobalFilter implements GlobalFilter, Ordered {
             logData.put("statusCode", response.getStatusCode() != null ? response.getStatusCode().value() : null);
             logData.put("totalDuration", totalDuration + "ms");
             logData.put("signalType", signalType);
-            logData.put("clientIp", getClientIp(request));
+
+            // 使用缓存的客户端IP（避免访问已回收的request）
+            String clientIp = exchange.getAttribute("CLIENT_IP");
+            logData.put("clientIp", clientIp != null ? clientIp : "unknown");
 
             // 获取路由的目标服务
             URI routedUri = exchange.getAttribute(ServerWebExchangeUtils.GATEWAY_REQUEST_URL_ATTR);

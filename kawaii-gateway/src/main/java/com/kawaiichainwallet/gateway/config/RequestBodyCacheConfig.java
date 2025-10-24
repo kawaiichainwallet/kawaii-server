@@ -3,14 +3,20 @@ package com.kawaiichainwallet.gateway.config;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.cloud.gateway.filter.factory.rewrite.CachedBodyOutputMessage;
+import org.springframework.cloud.gateway.support.BodyInserterContext;
+import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.BodyInserter;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.HandlerStrategies;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.server.ServerWebExchange;
@@ -53,12 +59,12 @@ public class RequestBodyCacheConfig {
                 return chain.filter(exchange);
             }
 
-            // 使用Spring Cloud Gateway的ServerRequest来读取请求体
+            // 使用Spring Cloud Gateway推荐的方式缓存请求体
             return ServerRequest.create(exchange, HandlerStrategies.withDefaults().messageReaders())
                 .bodyToMono(String.class)
                 .defaultIfEmpty("")
                 .flatMap(body -> {
-                    // 将请求体存储到exchange attribute中
+                    // 缓存请求体字符串
                     exchange.getAttributes().put(CUSTOM_CACHED_REQUEST_BODY_ATTR, body);
 
                     // 如果请求体为空，直接继续
@@ -66,19 +72,37 @@ public class RequestBodyCacheConfig {
                         return chain.filter(exchange);
                     }
 
-                    // 创建新的请求装饰器，重新插入请求体
-                    ServerHttpRequest decorator = new ServerHttpRequestDecorator(request) {
-                        @Override
-                        public Flux<DataBuffer> getBody() {
-                            // 使用DataBufferFactory创建新的DataBuffer
-                            DataBuffer buffer = exchange.getResponse().bufferFactory()
-                                .wrap(body.getBytes(StandardCharsets.UTF_8));
-                            return Flux.just(buffer);
-                        }
-                    };
+                    // 使用CachedBodyOutputMessage重新插入请求体
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.putAll(request.getHeaders());
+                    headers.remove(HttpHeaders.CONTENT_LENGTH);
 
-                    // 使用装饰后的请求继续执行过滤器链
-                    return chain.filter(exchange.mutate().request(decorator).build());
+                    CachedBodyOutputMessage outputMessage = new CachedBodyOutputMessage(exchange, headers);
+                    BodyInserter<String, ?> bodyInserter = BodyInserters.fromValue(body);
+
+                    return bodyInserter.insert(outputMessage, new BodyInserterContext())
+                        .then(Mono.defer(() -> {
+                            ServerHttpRequestDecorator decorator = new ServerHttpRequestDecorator(request) {
+                                @Override
+                                public HttpHeaders getHeaders() {
+                                    long contentLength = headers.getContentLength();
+                                    HttpHeaders httpHeaders = new HttpHeaders();
+                                    httpHeaders.putAll(headers);
+                                    if (contentLength > 0) {
+                                        httpHeaders.setContentLength(contentLength);
+                                    } else {
+                                        httpHeaders.set(HttpHeaders.TRANSFER_ENCODING, "chunked");
+                                    }
+                                    return httpHeaders;
+                                }
+
+                                @Override
+                                public Flux<DataBuffer> getBody() {
+                                    return outputMessage.getBody();
+                                }
+                            };
+                            return chain.filter(exchange.mutate().request(decorator).build());
+                        }));
                 });
         }
 

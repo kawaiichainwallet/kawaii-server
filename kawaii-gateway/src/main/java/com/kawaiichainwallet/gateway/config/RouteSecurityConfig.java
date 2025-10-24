@@ -43,6 +43,11 @@ public class RouteSecurityConfig {
     private List<String> internalPaths;
 
     /**
+     * 可选认证路径 - Token无效也允许访问（但如果有效则解析用户信息）
+     */
+    private List<String> optionalAuthPaths;
+
+    /**
      * 检查路径是否为公开路径
      */
     public boolean isPublicPath(String path) {
@@ -50,6 +55,16 @@ public class RouteSecurityConfig {
             return false;
         }
         return publicPaths.stream().anyMatch(pattern -> pathMatches(path, pattern));
+    }
+
+    /**
+     * 检查路径是否为可选认证路径
+     */
+    public boolean isOptionalAuthPath(String path) {
+        if (optionalAuthPaths == null) {
+            return false;
+        }
+        return optionalAuthPaths.stream().anyMatch(pattern -> pathMatches(path, pattern));
     }
 
     /**

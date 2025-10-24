@@ -180,9 +180,14 @@ public class AuthService {
     /**
      * 用户登出
      */
-    public void logout(long userId, String clientIp, String userAgent) {
-        // 记录登出审计日志
+    public void logout(Long userId, String clientIp, String userAgent) {
+        // 如果userId为null，说明Token无效或已过期，直接返回成功
+        if (userId == null) {
+            log.info("匿名用户登出: IP={}", clientIp);
+            return;
+        }
 
+        // 记录登出审计日志
         // TODO: 将Token加入黑名单（需要Redis实现）
         log.info("用户登出成功: userId={}, IP={}", userId, clientIp);
     }

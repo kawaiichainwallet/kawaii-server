@@ -60,25 +60,43 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
                 return forbidden(exchange.getResponse(), "Internal endpoint not accessible externally");
             }
 
-            // 3. 检查认证头
+            // 3. 检查是否为可选认证路径（如登出接口）
+            boolean isOptionalAuth = routeSecurityConfig.isOptionalAuthPath(path);
+
+            // 4. 检查认证头
             String authHeader = request.getHeaders().getFirst("Authorization");
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                if (isOptionalAuth) {
+                    // 可选认证路径，Token缺失时也允许访问
+                    log.debug("Optional auth path accessed without token: {}", path);
+                    return chain.filter(exchange);
+                }
                 return unauthorized(exchange.getResponse(), "Missing or invalid authorization header");
             }
 
-            // 4. 提取并验证 JWT Token
+            // 5. 提取并验证 JWT Token
             String token = jwtValidationService.extractTokenFromHeader(authHeader);
             if (token == null || !jwtValidationService.validateAccessToken(token)) {
+                if (isOptionalAuth) {
+                    // 可选认证路径，Token无效时也允许访问
+                    log.debug("Optional auth path accessed with invalid token: {}", path);
+                    return chain.filter(exchange);
+                }
                 return unauthorized(exchange.getResponse(), "Invalid or expired token");
             }
 
-            // 5. 解析用户信息
+            // 6. 解析用户信息
             UserContext userContext = extractUserContextFromToken(token);
             if (userContext == null) {
+                if (isOptionalAuth) {
+                    // 可选认证路径，解析失败时也允许访问
+                    log.debug("Optional auth path - failed to parse user context: {}", path);
+                    return chain.filter(exchange);
+                }
                 return unauthorized(exchange.getResponse(), "Failed to parse user information from token");
             }
 
-            // 6. 检查管理员路径权限
+            // 7. 检查管理员路径权限
             if (routeSecurityConfig.isAdminPath(path)) {
                 if (!userContext.getRoles().contains("ADMIN")) {
                     return forbidden(exchange.getResponse(), "Admin access required");

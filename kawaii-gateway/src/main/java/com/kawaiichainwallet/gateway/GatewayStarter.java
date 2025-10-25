@@ -16,9 +16,7 @@ import java.util.TimeZone;
  * 确保所有时间操作统一使用 UTC 时区，避免时区相关的 bug。
  * </p>
  */
-@SpringBootApplication(scanBasePackages = {
-        "com.kawaiichainwallet.gateway"
-})
+@SpringBootApplication(scanBasePackages = "com.kawaiichainwallet")
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = "com.kawaiichainwallet.api")
 public class GatewayStarter {

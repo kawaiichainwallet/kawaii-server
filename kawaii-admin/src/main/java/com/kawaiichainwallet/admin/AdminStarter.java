@@ -10,11 +10,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  *
  * @author kawaii-server
  */
-@SpringBootApplication(scanBasePackages = {
-    "com.kawaiichainwallet.admin",
-    "com.kawaiichainwallet.common.spring",
-    "com.kawaiichainwallet.common.business"
-})
+@SpringBootApplication(scanBasePackages = "com.kawaiichainwallet")
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = "com.kawaiichainwallet.api")
 public class AdminStarter {

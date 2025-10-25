@@ -1,5 +1,5 @@
 -- ================================================================
--- KawaiiChain Wallet - 支付服务数据库 (kawaii-payment-db)
+-- KawaiiChain Wallet - 支付服务数据库 (kawaii_payment_db)
 -- 负责：支付处理、生活缴费
 --
 -- 【时间字段约定】

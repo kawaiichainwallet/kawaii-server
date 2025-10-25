@@ -1,10 +1,10 @@
 package com.kawaiichainwallet.gateway.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kawaiichainwallet.common.auth.JwtValidationService;
 import com.kawaiichainwallet.gateway.config.RouteSecurityConfig;
 import com.kawaiichainwallet.gateway.dto.ApiResponse;
 import com.kawaiichainwallet.gateway.dto.UserContext;
-import com.kawaiichainwallet.gateway.service.JwtValidationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;

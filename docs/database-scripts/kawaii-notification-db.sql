@@ -1,5 +1,5 @@
 -- ================================================================
--- KawaiiChain Wallet - 通知服务数据库 (kawaii-notification-db)
+-- KawaiiChain Wallet - 通知服务数据库 (kawaii_notification_db)
 -- 负责：消息通知、推送管理
 --
 -- 【时间字段约定】

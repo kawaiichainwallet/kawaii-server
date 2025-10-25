@@ -1,7 +1,7 @@
 spring:
   # 数据库配置 - 本地PostgreSQL
   datasource:
-    url: jdbc:postgresql://localhost:5432/kawaii-user-db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC
+    url: jdbc:postgresql://localhost:5432/kawaii_user_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC
 
 # 应用业务配置 - 本地开发
 app:
@@ -47,24 +47,13 @@ app:
     # JWT配置
     jwt:
       # EC私钥 (ES256算法，PKCS#8格式) - P-256曲线
-      # 生产环境必须通过环境变量或密钥管理服务注入
+      # 仅user服务需要私钥用于生成Token
       private-key: |
         -----BEGIN PRIVATE KEY-----
         MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgQlwptdFKqSYDlfrm
         Ho42sEgGxgPyHdONydLWP1rlYuqhRANCAARBBsoZJYCrhZrqNbfl+H76yOBsU+Gd
         BTFoPykC5WJqasDEG4lx0XIz0jjRbZjRGnr0BiOiUulfODDP6iKAqz6c
         -----END PRIVATE KEY-----
-      # EC公钥 (ES256算法) - P-256曲线
-      public-key: |
-        -----BEGIN PUBLIC KEY-----
-        MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEQQbKGSWAq4Wa6jW35fh++sjgbFPh
-        nQUxaD8pAuViamrAxBuJcdFyM9I40W2Y0Rp69AYjolLpXzgwz+oigKs+nA==
-        -----END PUBLIC KEY-----
-      issuer: kawaii-wallet-auth
-      # Access Token过期时间(秒) - 15分钟
-      access-token-expiration: 900
-      # Refresh Token过期时间(秒) - 30天
-      refresh-token-expiration: 2592000
 
     # CORS配置 - 本地开发允许所有来源
     cors:

@@ -16,6 +16,7 @@
         <module>kawaii-common-core</module>
         <module>kawaii-common-spring</module>
         <module>kawaii-common-business</module>
+        <module>kawaii-common-auth</module>
     </modules>
 
     <dependencyManagement>
@@ -34,6 +35,11 @@
             <dependency>
                 <groupId>com.kawaiichainwallet</groupId>
                 <artifactId>kawaii-common-business</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.kawaiichainwallet</groupId>
+                <artifactId>kawaii-common-auth</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

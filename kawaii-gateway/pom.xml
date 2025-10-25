@@ -72,6 +72,13 @@
             <version>${project.parent.version}</version>
         </dependency>
 
+        <!-- Kawaii Common Auth - JWT验证服务 -->
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>kawaii-common-auth</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
         <!-- API接口模块 -->
         <dependency>
             <groupId>${project.parent.groupId}</groupId>

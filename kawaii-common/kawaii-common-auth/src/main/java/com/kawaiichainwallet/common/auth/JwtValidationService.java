@@ -1,4 +1,4 @@
-package com.kawaiichainwallet.gateway.service;
+package com.kawaiichainwallet.common.auth;
 
 import com.kawaiichainwallet.common.core.exception.JwtException;
 import com.nimbusds.jose.JOSEException;
@@ -18,7 +18,11 @@ import java.util.Base64;
 import java.util.Date;
 
 /**
- * JWT验证服务 - 使用ES256算法和EC公钥验证
+ * JWT验证服务 - 公共认证模块
+ * 使用ES256算法和EC公钥验证JWT Token
+ *
+ * 此服务可被gateway、user等多个微服务复用
+ * 不依赖Spring MVC或WebFlux，可在任何Spring应用中使用
  */
 @Slf4j
 @Service
@@ -144,7 +148,7 @@ public class JwtValidationService {
     }
 
     /**
-     * 验证访问令牌
+     * 验证访问令牌（Access Token）
      */
     public boolean validateAccessToken(String token) {
         if (!validateToken(token)) {

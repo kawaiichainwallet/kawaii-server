@@ -1,5 +1,5 @@
 -- ================================================================
--- KawaiiChain Wallet - 商户服务数据库 (kawaii-merchant-db)
+-- KawaiiChain Wallet - 商户服务数据库 (kawaii_merchant_db)
 -- 负责：商户管理、API配置
 --
 -- 【时间字段约定】

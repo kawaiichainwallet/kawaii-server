@@ -1,5 +1,5 @@
 -- ================================================================
--- KawaiiChain Wallet - 管理后台数据库 (kawaii-admin-db)
+-- KawaiiChain Wallet - 管理后台数据库 (kawaii_admin_db)
 -- 负责：系统配置、运营审计、管理员权限（由kawaii-admin-service管理）
 --
 -- 【时间字段约定】

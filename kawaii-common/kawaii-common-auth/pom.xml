@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.kawaiichainwallet</groupId>
+        <artifactId>kawaii-common</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>kawaii-common-auth</artifactId>
+    <packaging>jar</packaging>
+    <name>kawaii-common-auth</name>
+    <description>认证授权公共模块 - 不依赖Spring MVC或WebFlux</description>
+
+    <dependencies>
+        <!-- 核心模块依赖 -->
+        <dependency>
+            <groupId>com.kawaiichainwallet</groupId>
+            <artifactId>kawaii-common-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Nimbus JOSE + JWT - JWT处理库 -->
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+        </dependency>
+
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- SLF4J API -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!-- Spring Core (仅用于@Value注解) -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+</project>

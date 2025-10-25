@@ -12,10 +12,7 @@ import java.math.BigDecimal;
 /**
  * 钱包核心服务Feign客户端 - 支付服务调用
  */
-@FeignClient(
-    name = "kawaii-core",
-    url = "${app.services.core.url:http://localhost:8083}"
-)
+@FeignClient(name = "kawaii-core")
 public interface CoreServiceClient {
 
     /**

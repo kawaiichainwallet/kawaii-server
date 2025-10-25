@@ -8,10 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 /**
  * 用户服务Feign客户端 - 支付服务调用
  */
-@FeignClient(
-    name = "kawaii-user",
-    url = "${app.services.user.url:http://localhost:8082}"
-)
+@FeignClient(name = "kawaii-user")
 public interface UserServiceClient {
 
     /**

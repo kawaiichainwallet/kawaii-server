@@ -36,16 +36,9 @@ spring:
         group: ${NACOS_GROUP:DEFAULT_GROUP}
         file-extension: yaml
 
-# MyBatis-Plus通用配置
+# MyBatis-Plus配置
 mybatis-plus:
-  configuration:
-    map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-  global-config:
-    db-config:
-      logic-delete-field: deleted
-      logic-delete-value: 1
-      logic-not-delete-value: 0
+  # 实体类包路径
   type-aliases-package: com.kawaiichainwallet.user.entity
 
 # Leaf分布式ID生成器配置

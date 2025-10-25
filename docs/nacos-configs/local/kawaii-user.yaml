@@ -33,15 +33,6 @@ app:
     password: test
     from: noreply@localhost
 
-  # 微服务地址配置 (本地环境)
-  services:
-    user:
-      url: http://localhost:8082
-    core:
-      url: http://localhost:8083
-    payment:
-      url: http://localhost:8084
-
   # 安全配置
   security:
     # JWT配置

@@ -20,7 +20,7 @@ import java.util.Date;
 /**
  * JWT验证服务 - 公共认证模块
  * 使用ES256算法和EC公钥验证JWT Token
- *
+ * <p>
  * 此服务可被gateway、user等多个微服务复用
  * 不依赖Spring MVC或WebFlux，可在任何Spring应用中使用
  */
@@ -93,13 +93,14 @@ public class JwtValidationService {
     /**
      * 从JWT Token中提取用户ID
      */
-    public String getUserIdFromToken(String token) {
+    public Long getUserIdFromToken(String token) {
         try {
             SignedJWT signedJWT = SignedJWT.parse(token);
             JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
             // JWT的subject字段存储的是userId
-            return claims.getSubject();
-        } catch (ParseException e) {
+            String subject = claims.getSubject();
+            return subject != null ? Long.parseLong(subject) : null;
+        } catch (ParseException | NumberFormatException e) {
             log.debug("Failed to extract userId from token: {}", e.getMessage());
             return null;
         }
@@ -156,6 +157,17 @@ public class JwtValidationService {
         }
         String tokenType = getTokenTypeFromToken(token);
         return "access".equals(tokenType);
+    }
+
+    /**
+     * 验证刷新令牌（Refresh Token）
+     */
+    public boolean validateRefreshToken(String token) {
+        if (!validateToken(token)) {
+            return false;
+        }
+        String tokenType = getTokenTypeFromToken(token);
+        return "refresh".equals(tokenType);
     }
 
     /**

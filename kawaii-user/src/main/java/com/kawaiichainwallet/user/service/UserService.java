@@ -1,29 +1,29 @@
 package com.kawaiichainwallet.user.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.kawaiichainwallet.common.auth.JwtTokenService;
 import com.kawaiichainwallet.common.core.enums.ApiCode;
 import com.kawaiichainwallet.common.core.exception.BusinessException;
 import com.kawaiichainwallet.common.core.utils.ValidationUtil;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import com.kawaiichainwallet.user.dto.UserDetailsDto;
-import com.kawaiichainwallet.user.dto.UpdateUserInfoRequest;
+import com.kawaiichainwallet.user.converter.UserConverter;
 import com.kawaiichainwallet.user.dto.RegisterRequest;
 import com.kawaiichainwallet.user.dto.RegisterResponse;
+import com.kawaiichainwallet.user.dto.UpdateUserInfoRequest;
+import com.kawaiichainwallet.user.dto.UserDetailsDto;
 import com.kawaiichainwallet.user.entity.User;
-import com.kawaiichainwallet.user.entity.UserProfile;
 import com.kawaiichainwallet.user.entity.UserKyc;
+import com.kawaiichainwallet.user.entity.UserProfile;
+import com.kawaiichainwallet.user.mapper.UserKycMapper;
 import com.kawaiichainwallet.user.mapper.UserMapper;
 import com.kawaiichainwallet.user.mapper.UserProfileMapper;
-import com.kawaiichainwallet.user.mapper.UserKycMapper;
-import com.kawaiichainwallet.user.converter.UserConverter;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * 用户服务 - 专注用户信息管理
@@ -244,7 +244,7 @@ public class UserService {
                 user.getUserId(), user.getUsername(), request.getType(), clientIp);
 
         // 8. 生成JWT令牌
-        String accessToken = jwtTokenService.generateAccessToken(user.getUserId(), user.getUsername());
+        String accessToken = jwtTokenService.generateAccessToken(user.getUserId(), user.getUsername(), "USER");
         String refreshToken = jwtTokenService.generateRefreshToken(user.getUserId(), user.getUsername());
 
         // 9. 使用MapStruct转换响应对象并设置令牌

@@ -1,32 +1,36 @@
 package com.kawaiichainwallet.user.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.kawaiichainwallet.user.dto.LoginRequest;
-import com.kawaiichainwallet.user.dto.LoginResponse;
-import com.kawaiichainwallet.user.dto.OtpLoginRequest;
-import com.kawaiichainwallet.user.dto.RefreshTokenRequest;
-import com.kawaiichainwallet.user.dto.TokenValidationResponse;
-import com.kawaiichainwallet.user.dto.RegisterRequest;
-import com.kawaiichainwallet.user.dto.RegisterResponse;
-import com.kawaiichainwallet.user.entity.User;
-import com.kawaiichainwallet.user.mapper.UserMapper;
-import com.kawaiichainwallet.user.converter.AuthConverter;
+import com.kawaiichainwallet.common.auth.JwtTokenService;
+import com.kawaiichainwallet.common.auth.JwtValidationService;
 import com.kawaiichainwallet.common.core.enums.ApiCode;
 import com.kawaiichainwallet.common.core.exception.BusinessException;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import com.kawaiichainwallet.common.core.utils.TimeUtil;
 import com.kawaiichainwallet.common.core.utils.ValidationUtil;
+import com.kawaiichainwallet.user.converter.AuthConverter;
+import com.kawaiichainwallet.user.dto.*;
+import com.kawaiichainwallet.user.entity.User;
+import com.kawaiichainwallet.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.kawaiichainwallet.common.core.utils.TimeUtil;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 /**
  * 认证服务
+ * <p>
+ * JWT使用说明：
+ * - JwtTokenService: 生成Access Token和Refresh Token（登录、注册、刷新Token时使用）
+ * - JwtValidationService: 仅用于验证Refresh Token（刷新Token接口使用）
+ * <p>
+ * 架构设计：
+ * - Gateway验证所有外部请求的Access Token，并将用户信息注入到请求头
+ * - User服务通过请求头获取用户信息，无需再次验证Access Token
+ * - 只在刷新Token场景需要验证Refresh Token的有效性
  */
 @Slf4j
 @Service
@@ -37,6 +41,7 @@ public class AuthService {
     private final AuthConverter authConverter;
     private final OtpService otpService;
     private final JwtTokenService jwtTokenService;
+    private final JwtValidationService jwtValidationService;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final VerificationTokenService verificationTokenService;
@@ -145,13 +150,13 @@ public class AuthService {
     public LoginResponse refreshToken(RefreshTokenRequest request, String clientIp, String userAgent) {
         try {
             // 验证Refresh Token
-            if (!jwtTokenService.validateRefreshToken(request.getRefreshToken())) {
+            if (!jwtValidationService.validateRefreshToken(request.getRefreshToken())) {
                 throw new BusinessException(ApiCode.INVALID_TOKEN, "Refresh Token无效");
             }
 
             // 从Token中提取用户信息
-            Long userId = jwtTokenService.extractUserIdFromToken(request.getRefreshToken());
-            String username = jwtTokenService.extractUsernameFromToken(request.getRefreshToken());
+            Long userId = jwtValidationService.getUserIdFromToken(request.getRefreshToken());
+            String username = jwtValidationService.getUsernameFromToken(request.getRefreshToken());
 
             // 验证用户是否仍然有效
             User user = userMapper.selectById(userId);
@@ -159,8 +164,8 @@ public class AuthService {
                 throw new BusinessException(ApiCode.USER_NOT_FOUND, "用户不存在或已被禁用");
             }
 
-            // 生成新的Token
-            String newAccessToken = jwtTokenService.generateAccessToken(userId, username);
+            // 生成新的Token（roles使用用户的实际角色）
+            String newAccessToken = jwtTokenService.generateAccessToken(userId, username, "USER");
             String newRefreshToken = jwtTokenService.generateRefreshToken(userId, username);
 
             // 记录审计日志
@@ -190,47 +195,6 @@ public class AuthService {
         // 记录登出审计日志
         // TODO: 将Token加入黑名单（需要Redis实现）
         log.info("用户登出成功: userId={}, IP={}", userId, clientIp);
-    }
-
-    /**
-     * 验证Token
-     */
-    public TokenValidationResponse validateToken(String token) {
-        TokenValidationResponse response = new TokenValidationResponse();
-
-        try {
-            if (token == null || token.isEmpty()) {
-                response.setValid(false);
-                response.setErrorMessage("Token为空");
-                return response;
-            }
-
-            boolean isValid = jwtTokenService.validateAccessToken(token);
-            response.setValid(isValid);
-
-            if (isValid) {
-                Long userId = jwtTokenService.extractUserIdFromToken(token);
-                String username = jwtTokenService.extractUsernameFromToken(token);
-
-                response.setUserId(userId);
-                response.setUsername(username);
-                response.setTokenType("Bearer");
-
-                // 提取过期时间
-                Map<String, Object> claims = jwtTokenService.extractAllClaims(token);
-                if (claims != null && claims.containsKey("exp")) {
-                    response.setExpiresAt((Long) claims.get("exp"));
-                }
-            } else {
-                response.setErrorMessage("Token无效或已过期");
-            }
-        } catch (Exception e) {
-            response.setValid(false);
-            response.setErrorMessage("Token验证失败: " + e.getMessage());
-            log.debug("Token验证失败", e);
-        }
-
-        return response;
     }
 
     /**
@@ -336,7 +300,7 @@ public class AuthService {
         userMapper.updateLoginInfo(user.getUserId(), TimeUtil.nowUtc(), clientIp);
 
         // 生成JWT令牌
-        String accessToken = jwtTokenService.generateAccessToken(user.getUserId(), user.getUsername());
+        String accessToken = jwtTokenService.generateAccessToken(user.getUserId(), user.getUsername(), "USER");
         String refreshToken = jwtTokenService.generateRefreshToken(user.getUserId(), user.getUsername());
 
         // 记录登录成功审计日志
@@ -356,7 +320,7 @@ public class AuthService {
     /**
      * 验证OTP验证码
      *
-     * @return 验证成功返回验证Token,验证失败返回null
+     * @return 验证成功返回验证Token, 验证失败返回null
      */
     public String verifyOtp(String target, String type, String otpCode, String purpose, String clientIp) {
         log.info("验证OTP: target={}, type={}, purpose={}, IP={}", target, type, purpose, clientIp);

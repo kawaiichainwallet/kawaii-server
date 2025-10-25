@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * 用户上下文信息
- * 用于在微服务间传递用户身份和权限信息
+ * 用于Gateway内部传递用户身份和权限信息
  */
 @Data
 @Builder
@@ -16,7 +16,7 @@ public class UserContext {
     /**
      * 用户ID
      */
-    private String userId;
+    private Long userId;
 
     /**
      * 用户邮箱

@@ -18,9 +18,20 @@ public class UserContextHolder {
     /**
      * 获取当前用户ID
      */
-    public static String getCurrentUserId() {
+    public static Long getCurrentUserId() {
         HttpServletRequest request = getCurrentRequest();
-        return request != null ? request.getHeader("X-User-Id") : null;
+        if (request == null) {
+            return null;
+        }
+        String userIdStr = request.getHeader("X-User-Id");
+        if (userIdStr == null || userIdStr.isEmpty()) {
+            return null;
+        }
+        try {
+            return Long.parseLong(userIdStr);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     /**
@@ -66,7 +77,7 @@ public class UserContextHolder {
         }
 
         UserContext context = new UserContext();
-        context.setUserId(request.getHeader("X-User-Id"));
+        context.setUserId(getCurrentUserId());
         context.setEmail(request.getHeader("X-User-Email"));
         context.setRoles(getCurrentUserRoles());
         context.setAuthenticated("true".equals(request.getHeader("X-Authenticated")));

@@ -27,30 +27,7 @@ import java.util.List;
 public class InternalUserController implements UserServiceApi {
 
     private final UserService userService;
-    private final AuthService authService;
     private final ServiceApiConverter serviceApiConverter;
-
-    @Override
-    public R<TokenValidationResponse> validateToken(String authHeader) {
-        log.info("内部服务Token验证请求");
-
-        try {
-            // 验证内部调用Token
-
-            // 调用认证服务验证Token
-            var validationResponse = authService.validateToken(authHeader);
-
-            // 转换为API DTO
-            TokenValidationResponse dto = convertToTokenValidationResponse(validationResponse);
-
-            return R.success(dto);
-        } catch (Exception e) {
-            log.error("Token验证失败: {}", e.getMessage());
-            TokenValidationResponse errorDto = serviceApiConverter.createFailedValidationResponse(
-                    e.getMessage(), "VALIDATION_ERROR");
-            return R.success(errorDto);
-        }
-    }
 
     @Override
     public R<UserInfoResponse> getUserInfo(long userId) {

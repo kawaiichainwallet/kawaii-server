@@ -1,17 +1,20 @@
 package com.kawaiichainwallet.user.controller;
 
 import com.kawaiichainwallet.common.core.enums.ApiCode;
+import com.kawaiichainwallet.common.core.response.R;
 import com.kawaiichainwallet.common.spring.utils.RequestUtil;
 import com.kawaiichainwallet.user.dto.*;
 import com.kawaiichainwallet.user.service.AuthService;
-import com.kawaiichainwallet.common.core.response.R;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 认证控制器 - 提供外部认证API
@@ -97,8 +100,7 @@ public class AuthController {
     public R<Void> logout(HttpServletRequest httpRequest) {
         String clientIp = RequestUtil.getClientIpAddress(httpRequest);
         String userAgent = httpRequest.getHeader("User-Agent");
-        String userIdStr = RequestUtil.getCurrentUserId();
-        Long userId = userIdStr != null ? Long.parseLong(userIdStr) : null;
+        Long userId = RequestUtil.getCurrentUserId();
 
         authService.logout(userId, clientIp, userAgent);
         return R.success("登出成功");
@@ -160,19 +162,6 @@ public class AuthController {
         } else {
             return R.error(ApiCode.OTP_INVALID);
         }
-    }
-
-    /**
-     * 验证Token
-     */
-    @GetMapping("/validate")
-    @Operation(summary = "验证Token", description = "验证Access Token是否有效")
-    public R<TokenValidationResponse> validateToken(
-            @RequestHeader(value = "Authorization", required = false) String authHeader) {
-
-        String token = extractTokenFromAuthHeader(authHeader);
-        TokenValidationResponse response = authService.validateToken(token);
-        return R.success(response, "Token验证完成");
     }
 
     /**

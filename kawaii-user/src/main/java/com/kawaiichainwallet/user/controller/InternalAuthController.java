@@ -1,11 +1,8 @@
 package com.kawaiichainwallet.user.controller;
 
 import com.kawaiichainwallet.api.user.client.AuthServiceApi;
-import com.kawaiichainwallet.api.user.dto.TokenValidationResponse;
 import com.kawaiichainwallet.common.core.enums.ApiCode;
 import com.kawaiichainwallet.common.core.response.R;
-import com.kawaiichainwallet.user.converter.ServiceApiConverter;
-import com.kawaiichainwallet.user.service.AuthService;
 import com.kawaiichainwallet.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,36 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class InternalAuthController implements AuthServiceApi {
 
-    private final AuthService authService;
     private final UserService userService;
-    private final ServiceApiConverter serviceApiConverter;
-
-    @Override
-    public R<TokenValidationResponse> validateToken(String authHeader) {
-        log.info("内部服务Token验证请求");
-
-        try {
-
-            // 调用认证服务验证Token
-            String token = extractTokenFromAuthHeader(authHeader);
-            var validationResponse = authService.validateToken(token);
-
-            // 转换为API DTO
-            if (validationResponse instanceof com.kawaiichainwallet.user.dto.TokenValidationResponse response) {
-                TokenValidationResponse dto = serviceApiConverter.validationResponseToApiDto(response);
-                return R.success(dto);
-            }
-
-            // 默认返回成功状态
-            TokenValidationResponse dto = serviceApiConverter.createSuccessValidationResponse(null, null, null);
-            return R.success(dto);
-        } catch (Exception e) {
-            log.error("Token验证失败: {}", e.getMessage());
-            TokenValidationResponse errorDto = serviceApiConverter.createFailedValidationResponse(
-                    e.getMessage(), "VALIDATION_ERROR");
-            return R.success(errorDto);
-        }
-    }
 
     @Override
     public R<Boolean> checkAuthentication(long userId) {

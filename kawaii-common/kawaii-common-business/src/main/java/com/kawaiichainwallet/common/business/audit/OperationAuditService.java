@@ -17,7 +17,7 @@ public class OperationAuditService {
      * 记录用户操作
      */
     public void logUserOperation(String operation, String details) {
-        String userId = UserContextHolder.getCurrentUserId();
+        Long userId = UserContextHolder.getCurrentUserId();
         String userEmail = UserContextHolder.getCurrentUserEmail();
         String timestamp = TimeUtil.formatToIso(TimeUtil.nowInstant());
 
@@ -29,7 +29,7 @@ public class OperationAuditService {
     /**
      * 记录认证事件
      */
-    public void logAuthEvent(String userId, String email, String eventType, String details) {
+    public void logAuthEvent(Long userId, String email, String eventType, String details) {
         String timestamp = TimeUtil.formatToIso(TimeUtil.nowInstant());
 
         log.info("AUTH_EVENT | userId={} | email={} | eventType={} | details={} | timestamp={}",
@@ -39,7 +39,7 @@ public class OperationAuditService {
     /**
      * 记录支付操作
      */
-    public void logPaymentOperation(String userId, String operation, String amount, String currency, String details) {
+    public void logPaymentOperation(Long userId, String operation, String amount, String currency, String details) {
         String timestamp = TimeUtil.formatToIso(TimeUtil.nowInstant());
 
         log.info("PAYMENT_OPERATION | userId={} | operation={} | amount={} | currency={} | details={} | timestamp={}",
@@ -49,7 +49,7 @@ public class OperationAuditService {
     /**
      * 记录钱包操作
      */
-    public void logWalletOperation(String userId, String operation, String walletAddress, String details) {
+    public void logWalletOperation(Long userId, String operation, String walletAddress, String details) {
         String timestamp = TimeUtil.formatToIso(TimeUtil.nowInstant());
 
         log.info("WALLET_OPERATION | userId={} | operation={} | walletAddress={} | details={} | timestamp={}",

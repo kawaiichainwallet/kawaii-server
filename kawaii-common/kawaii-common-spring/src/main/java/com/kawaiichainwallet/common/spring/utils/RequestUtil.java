@@ -76,7 +76,7 @@ public class RequestUtil {
     /**
      * 获取当前用户ID（从Gateway传递的请求头中获取）
      */
-    public static String getCurrentUserId() {
+    public static Long getCurrentUserId() {
         return UserContextHolder.getCurrentUserId();
     }
 

@@ -1,30 +1,26 @@
 package com.kawaiichainwallet.api.user.client;
 
 import com.kawaiichainwallet.api.user.dto.UserInfoResponse;
-import com.kawaiichainwallet.api.user.dto.TokenValidationResponse;
 import com.kawaiichainwallet.api.user.dto.UserPaymentPermissionResponse;
 import com.kawaiichainwallet.api.user.fallback.UserServiceApiFallbackFactory;
 import com.kawaiichainwallet.common.core.response.R;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 /**
  * 用户服务API接口定义
  * 该接口由用户服务实现，其他服务通过Feign调用
  */
 @FeignClient(
-    name = "kawaii-user",
-    contextId = "userServiceApi",
+        name = "kawaii-user",
+        contextId = "userServiceApi",
         path = "/user/internal/users",
-    fallbackFactory = UserServiceApiFallbackFactory.class
+        fallbackFactory = UserServiceApiFallbackFactory.class
 )
 public interface UserServiceApi {
-
-    /**
-     * 验证Token并获取用户信息
-     */
-    @PostMapping("/validate-token")
-    R<TokenValidationResponse> validateToken(@RequestHeader("Authorization") String authHeader);
 
     /**
      * 根据用户ID获取用户信息（内部调用）

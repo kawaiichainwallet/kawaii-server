@@ -115,7 +115,7 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
             // 9. 添加用户信息到请求头
             ServerHttpRequest modifiedRequest = request.mutate()
                     // 基础用户信息
-                    .header("X-User-Id", userContext.getUserId())
+                    .header("X-User-Id", String.valueOf(userContext.getUserId()))
                     .header("X-User-Email", userContext.getEmail())
                     .header("X-User-Roles", String.join(",", userContext.getRoles()))
                     .header("X-Authenticated", "true")
@@ -134,9 +134,14 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
 
     private UserContext extractUserContextFromToken(String token) {
         try {
-            String userId = jwtValidationService.getUserIdFromToken(token);
+            Long userId = jwtValidationService.getUserIdFromToken(token);
             String username = jwtValidationService.getUsernameFromToken(token);
             String rolesStr = jwtValidationService.getRolesFromToken(token);
+
+            if (userId == null) {
+                log.error("Failed to extract userId from token");
+                return null;
+            }
 
             // 解析角色字符串（可能是逗号分隔的）
             List<String> roles = rolesStr != null && !rolesStr.isEmpty()

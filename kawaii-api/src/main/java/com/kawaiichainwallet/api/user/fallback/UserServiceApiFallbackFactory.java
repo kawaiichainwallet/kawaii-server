@@ -1,11 +1,10 @@
 package com.kawaiichainwallet.api.user.fallback;
 
 import com.kawaiichainwallet.api.user.client.UserServiceApi;
-import com.kawaiichainwallet.api.user.dto.TokenValidationResponse;
 import com.kawaiichainwallet.api.user.dto.UserInfoResponse;
 import com.kawaiichainwallet.api.user.dto.UserPaymentPermissionResponse;
-import com.kawaiichainwallet.common.core.response.R;
 import com.kawaiichainwallet.common.core.enums.ApiCode;
+import com.kawaiichainwallet.common.core.response.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.openfeign.FallbackFactory;
 import org.springframework.stereotype.Component;
@@ -22,16 +21,6 @@ public class UserServiceApiFallbackFactory implements FallbackFactory<UserServic
     @Override
     public UserServiceApi create(Throwable cause) {
         return new UserServiceApi() {
-            @Override
-            public R<TokenValidationResponse> validateToken(String authHeader) {
-                log.error("用户服务Token验证失败", cause);
-                TokenValidationResponse dto = new TokenValidationResponse();
-                dto.setValid(false);
-                dto.setErrorMessage("服务暂时不可用");
-                dto.setErrorCode("SERVICE_UNAVAILABLE");
-                return R.error(ApiCode.SERVICE_UNAVAILABLE);
-            }
-
             @Override
             public R<UserInfoResponse> getUserInfo(long userId) {
                 log.error("获取用户信息失败: userId={}", userId, cause);

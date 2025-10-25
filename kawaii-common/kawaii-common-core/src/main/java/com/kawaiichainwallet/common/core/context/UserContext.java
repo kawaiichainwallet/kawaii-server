@@ -13,7 +13,7 @@ public class UserContext {
     /**
      * 用户ID
      */
-    private String userId;
+    private Long userId;
 
     /**
      * 用户邮箱

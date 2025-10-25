@@ -19,16 +19,6 @@ public class AuthServiceApiFallbackFactory implements FallbackFactory<AuthServic
     public AuthServiceApi create(Throwable cause) {
         return new AuthServiceApi() {
             @Override
-            public R<TokenValidationResponse> validateToken(String authHeader) {
-                log.error("认证服务Token验证失败", cause);
-                TokenValidationResponse dto = new TokenValidationResponse();
-                dto.setValid(false);
-                dto.setErrorMessage("认证服务暂时不可用");
-                dto.setErrorCode("SERVICE_UNAVAILABLE");
-                return R.error(ApiCode.SERVICE_UNAVAILABLE);
-            }
-
-            @Override
             public R<Boolean> checkAuthentication(long userId) {
                 log.error("检查用户认证状态失败: userId={}", userId, cause);
                 return R.error(ApiCode.SERVICE_UNAVAILABLE);

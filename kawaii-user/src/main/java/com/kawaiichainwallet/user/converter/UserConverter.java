@@ -35,7 +35,7 @@ public interface UserConverter {
     @Mapping(source = "user.twoFactorEnabled", target = "twoFactorEnabled")
     @Mapping(source = "user.createdAt", target = "createdAt")
     @Mapping(source = "userProfile.displayName", target = "displayName")
-    @Mapping(source = "userProfile.avatar", target = "avatarUrl")
+    @Mapping(source = "userProfile.avatarUrl", target = "avatarUrl")
     @Mapping(source = "userProfile.language", target = "language")
     @Mapping(source = "userProfile.timezone", target = "timezone")
     @Mapping(source = "userProfile.currency", target = "currency")

@@ -13,6 +13,7 @@ import java.time.LocalDate;
 
 /**
  * 用户资料实体类 - 对应 user_profiles 表
+ * 注意：user_profiles 表中没有 created_by 和 updated_by 字段
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -21,6 +22,13 @@ public class UserProfile extends BaseEntity {
 
     @Serial
     private static final long serialVersionUID = 7725232293474192226L;
+
+    // 排除 BaseEntity 中在数据库表中不存在的字段
+    @TableField(exist = false)
+    private String createdBy;
+
+    @TableField(exist = false)
+    private String updatedBy;
 
     /**
      * 资料ID (使用Leaf分布式ID生成器)
@@ -52,12 +60,8 @@ public class UserProfile extends BaseEntity {
     /**
      * 头像URL
      */
-    private String avatar;
-
-    /**
-     * 个人简介
-     */
-    private String bio;
+    @TableField("avatar_url")
+    private String avatarUrl;
 
     /**
      * 出生日期

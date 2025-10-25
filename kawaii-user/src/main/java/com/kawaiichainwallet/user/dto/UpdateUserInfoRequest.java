@@ -31,12 +31,7 @@ public class UpdateUserInfoRequest {
     /**
      * 头像URL
      */
-    private String avatar;
-
-    /**
-     * 个人简介
-     */
-    private String bio;
+    private String avatarUrl;
 
     /**
      * 语言偏好

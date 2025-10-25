@@ -54,7 +54,7 @@ public interface ServiceApiConverter {
     @Mapping(target = "createdAt", source = "user.createdAt")
     @Mapping(target = "lastLoginAt", source = "user.lastLoginAt")
     @Mapping(target = "displayName", source = "userProfile.displayName")
-    @Mapping(target = "avatarUrl", source = "userProfile.avatar")
+    @Mapping(target = "avatarUrl", source = "userProfile.avatarUrl")
     @Mapping(target = "language", source = "userProfile.language")
     @Mapping(target = "timezone", source = "userProfile.timezone")
     @Mapping(target = "currency", source = "userProfile.currency")

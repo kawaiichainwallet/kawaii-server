@@ -405,11 +405,8 @@ public class UserService {
         if (request.getDisplayName() != null) {
             userProfile.setDisplayName(request.getDisplayName());
         }
-        if (request.getAvatar() != null) {
-            userProfile.setAvatar(request.getAvatar());
-        }
-        if (request.getBio() != null) {
-            userProfile.setBio(request.getBio());
+        if (request.getAvatarUrl() != null) {
+            userProfile.setAvatarUrl(request.getAvatarUrl());
         }
         if (request.getLanguage() != null) {
             userProfile.setLanguage(request.getLanguage());

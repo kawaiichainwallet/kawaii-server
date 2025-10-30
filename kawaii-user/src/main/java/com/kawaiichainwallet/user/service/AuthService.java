@@ -3,6 +3,7 @@ package com.kawaiichainwallet.user.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.kawaiichainwallet.common.auth.JwtTokenService;
 import com.kawaiichainwallet.common.auth.JwtValidationService;
+import com.kawaiichainwallet.common.auth.TokenBlacklistService;
 import com.kawaiichainwallet.common.core.enums.ApiCode;
 import com.kawaiichainwallet.common.core.exception.BusinessException;
 import com.kawaiichainwallet.common.core.utils.TimeUtil;
@@ -45,6 +46,7 @@ public class AuthService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final VerificationTokenService verificationTokenService;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Value("${app.auth.max-login-attempts:5}")
     private int maxLoginAttempts;
@@ -185,15 +187,25 @@ public class AuthService {
     /**
      * 用户登出
      */
-    public void logout(Long userId, String clientIp, String userAgent) {
+    public void logout(Long userId, String token, String clientIp, String userAgent) {
         // 如果userId为null，说明Token无效或已过期，直接返回成功
         if (userId == null) {
             log.info("匿名用户登出: IP={}", clientIp);
             return;
         }
 
+        // 将Access Token加入黑名单
+        if (token != null && !token.isEmpty()) {
+            try {
+                tokenBlacklistService.addToBlacklist(token);
+                log.info("Token已加入黑名单: userId={}", userId);
+            } catch (Exception e) {
+                log.error("将Token加入黑名单失败: userId={}", userId, e);
+                // 不抛出异常，确保登出操作能够完成
+            }
+        }
+
         // 记录登出审计日志
-        // TODO: 将Token加入黑名单（需要Redis实现）
         log.info("用户登出成功: userId={}, IP={}", userId, clientIp);
     }
 

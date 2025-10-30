@@ -102,7 +102,11 @@ public class AuthController {
         String userAgent = httpRequest.getHeader("User-Agent");
         Long userId = RequestUtil.getCurrentUserId();
 
-        authService.logout(userId, clientIp, userAgent);
+        // 提取 Token
+        String authHeader = httpRequest.getHeader("Authorization");
+        String token = extractTokenFromAuthHeader(authHeader);
+
+        authService.logout(userId, token, clientIp, userAgent);
         return R.success("登出成功");
     }
 

@@ -2,6 +2,7 @@ package com.kawaiichainwallet.gateway.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kawaiichainwallet.common.auth.JwtValidationService;
+import com.kawaiichainwallet.common.auth.TokenBlacklistService;
 import com.kawaiichainwallet.gateway.config.RouteSecurityConfig;
 import com.kawaiichainwallet.gateway.dto.ApiResponse;
 import com.kawaiichainwallet.gateway.dto.UserContext;
@@ -29,14 +30,19 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
 
     private final ObjectMapper objectMapper;
     private final RouteSecurityConfig routeSecurityConfig;
-
     private final JwtValidationService jwtValidationService;
+    private final TokenBlacklistService tokenBlacklistService;
 
-    public AuthenticationGatewayFilterFactory(ObjectMapper objectMapper, RouteSecurityConfig routeSecurityConfig, JwtValidationService jwtValidationService) {
+    public AuthenticationGatewayFilterFactory(
+            ObjectMapper objectMapper,
+            RouteSecurityConfig routeSecurityConfig,
+            JwtValidationService jwtValidationService,
+            TokenBlacklistService tokenBlacklistService) {
         super(Config.class);
         this.objectMapper = objectMapper;
         this.routeSecurityConfig = routeSecurityConfig;
         this.jwtValidationService = jwtValidationService;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     @Override
@@ -81,6 +87,17 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
                     return chain.filter(exchange);
                 }
                 return unauthorized(exchange.getResponse(), "Invalid or expired token");
+            }
+
+            // 5.5 检查Token是否在黑名单中（已登出）
+            if (tokenBlacklistService.isBlacklisted(token)) {
+                if (isOptionalAuth) {
+                    // 可选认证路径，Token在黑名单时也允许访问
+                    log.debug("Optional auth path accessed with blacklisted token: {}", path);
+                    return chain.filter(exchange);
+                }
+                log.warn("Blacklisted token attempted access: path={}", path);
+                return unauthorized(exchange.getResponse(), "Token has been revoked");
             }
 
             // 6. 解析用户信息

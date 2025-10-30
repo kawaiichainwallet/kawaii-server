@@ -179,4 +179,19 @@ public class JwtValidationService {
         }
         return null;
     }
+
+    /**
+     * 获取Token的过期时间（毫秒时间戳）
+     */
+    public long getExpirationTime(String token) {
+        try {
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
+            Date expirationTime = claims.getExpirationTime();
+            return expirationTime != null ? expirationTime.getTime() : 0;
+        } catch (ParseException e) {
+            log.debug("Failed to extract expiration time from token: {}", e.getMessage());
+            return 0;
+        }
+    }
 }

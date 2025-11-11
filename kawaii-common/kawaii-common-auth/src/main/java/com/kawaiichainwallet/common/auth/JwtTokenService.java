@@ -81,14 +81,15 @@ public class JwtTokenService {
     }
 
     /**
-     * 生成访问令牌
+     * 生成访问令牌（带用户类型）
      *
      * @param userId   用户ID
      * @param username 用户名
      * @param roles    角色列表（逗号分隔）
+     * @param userType 用户类型：USER-普通用户, ADMIN-管理员, MERCHANT-商户
      * @return JWT Token字符串
      */
-    public String generateAccessToken(long userId, String username, String roles) {
+    public String generateAccessToken(long userId, String username, String roles, String userType) {
         Date now = new Date();
         Date expiresAt = new Date(now.getTime() + accessTokenExpiration * 1000);
 
@@ -97,6 +98,7 @@ public class JwtTokenService {
                 .subject(String.valueOf(userId))
                 .claim("username", username)
                 .claim("roles", roles)
+                .claim("userType", userType)  // 🔑 关键：添加用户类型
                 .claim("tokenType", "access")
                 .issueTime(now)
                 .expirationTime(expiresAt)
@@ -106,13 +108,28 @@ public class JwtTokenService {
     }
 
     /**
-     * 生成刷新令牌
+     * 生成访问令牌（兼容旧版本，默认为USER类型）
      *
      * @param userId   用户ID
      * @param username 用户名
+     * @param roles    角色列表（逗号分隔）
+     * @return JWT Token字符串
+     * @deprecated 请使用 {@link #generateAccessToken(long, String, String, String)} 并明确指定用户类型
+     */
+    @Deprecated
+    public String generateAccessToken(long userId, String username, String roles) {
+        return generateAccessToken(userId, username, roles, "USER");
+    }
+
+    /**
+     * 生成刷新令牌（带用户类型）
+     *
+     * @param userId   用户ID
+     * @param username 用户名
+     * @param userType 用户类型：USER-普通用户, ADMIN-管理员, MERCHANT-商户
      * @return JWT Token字符串
      */
-    public String generateRefreshToken(long userId, String username) {
+    public String generateRefreshToken(long userId, String username, String userType) {
         Date now = new Date();
         Date expiresAt = new Date(now.getTime() + refreshTokenExpiration * 1000);
 
@@ -120,12 +137,26 @@ public class JwtTokenService {
                 .issuer(issuer)
                 .subject(String.valueOf(userId))
                 .claim("username", username)
+                .claim("userType", userType)  // 🔑 关键：添加用户类型
                 .claim("tokenType", "refresh")
                 .issueTime(now)
                 .expirationTime(expiresAt)
                 .build();
 
         return signToken(claims);
+    }
+
+    /**
+     * 生成刷新令牌（兼容旧版本，默认为USER类型）
+     *
+     * @param userId   用户ID
+     * @param username 用户名
+     * @return JWT Token字符串
+     * @deprecated 请使用 {@link #generateRefreshToken(long, String, String)} 并明确指定用户类型
+     */
+    @Deprecated
+    public String generateRefreshToken(long userId, String username) {
+        return generateRefreshToken(userId, username, "USER");
     }
 
     /**

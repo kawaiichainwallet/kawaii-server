@@ -146,9 +146,9 @@ public class AdminAuthService {
                     .map(AdminRole::getRoleCode)
                     .collect(Collectors.joining(","));
 
-            // 生成新的Token
-            String newAccessToken = jwtTokenService.generateAccessToken(adminId, username, rolesStr);
-            String newRefreshToken = jwtTokenService.generateRefreshToken(adminId, username);
+            // 生成新的Token（指定用户类型为ADMIN）
+            String newAccessToken = jwtTokenService.generateAccessToken(adminId, username, rolesStr, "ADMIN");
+            String newRefreshToken = jwtTokenService.generateRefreshToken(adminId, username, "ADMIN");
 
             // 构建响应
             AdminLoginResponse response = buildLoginResponse(admin, roles);
@@ -252,13 +252,18 @@ public class AdminAuthService {
                 .map(AdminRole::getRoleCode)
                 .collect(Collectors.joining(","));
 
-        // 生成JWT令牌
+        // 生成JWT令牌（指定用户类型为ADMIN）
         String accessToken = jwtTokenService.generateAccessToken(
                 admin.getAdminId(),
                 admin.getUsername(),
-                rolesStr.isEmpty() ? "ADMIN" : rolesStr
+                rolesStr.isEmpty() ? "ADMIN" : rolesStr,
+                "ADMIN"  // 用户类型
         );
-        String refreshToken = jwtTokenService.generateRefreshToken(admin.getAdminId(), admin.getUsername());
+        String refreshToken = jwtTokenService.generateRefreshToken(
+                admin.getAdminId(),
+                admin.getUsername(),
+                "ADMIN"  // 用户类型
+        );
 
         // 构建响应
         AdminLoginResponse response = buildLoginResponse(admin, roles);

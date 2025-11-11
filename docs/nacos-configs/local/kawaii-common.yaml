@@ -96,10 +96,20 @@ app:
       refresh-token-expiration: 604800   # 7天
       issuer: kawaii-wallet
 
+      # EC私钥 (ES256算法，PKCS#8格式) - P-256曲线
+      # 注意：只有需要生成Token的服务才配置此项（kawaii-user, kawaii-admin）
+      # Gateway等只验证Token的服务不需要配置私钥
+      private-key: |
+        -----BEGIN PRIVATE KEY-----
+        MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg2AJ2kBFehW0AM6uk
+        iJ0D5q34KqSuFK6A1IdB/6Y8xZyhRANCAASbDotAQBQ1G/Mp8upZAW5GeQPNvHZL
+        SgfaBhkYIF+2UnHJOFK4ae4iSVPI92WliHF2eSvc8u36//GMd2yjhbxs
+        -----END PRIVATE KEY-----
+
       # EC公钥 (ES256算法) - P-256曲线
-      # 用于验证JWT Token签名
+      # 用于验证JWT Token签名 - 所有服务都需要配置
       public-key: |
         -----BEGIN PUBLIC KEY-----
-        MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEQQbKGSWAq4Wa6jW35fh++sjgbFPh
-        nQUxaD8pAuViamrAxBuJcdFyM9I40W2Y0Rp69AYjolLpXzgwz+oigKs+nA==
+        MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEmw6LQEAUNRvzKfLqWQFuRnkDzbx2
+        S0oH2gYZGCBftlJxyThSuGnuIklTyPdlpYhxdnkr3PLt+v/xjHdso4W8bA==
         -----END PUBLIC KEY-----

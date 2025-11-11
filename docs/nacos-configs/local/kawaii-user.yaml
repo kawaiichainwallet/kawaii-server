@@ -35,16 +35,7 @@ app:
 
   # 安全配置
   security:
-    # JWT配置
-    jwt:
-      # EC私钥 (ES256算法，PKCS#8格式) - P-256曲线
-      # 仅user服务需要私钥用于生成Token
-      private-key: |
-        -----BEGIN PRIVATE KEY-----
-        MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgQlwptdFKqSYDlfrm
-        Ho42sEgGxgPyHdONydLWP1rlYuqhRANCAARBBsoZJYCrhZrqNbfl+H76yOBsU+Gd
-        BTFoPykC5WJqasDEG4lx0XIz0jjRbZjRGnr0BiOiUulfODDP6iKAqz6c
-        -----END PRIVATE KEY-----
+    # 所有服务使用同一套密钥对，通过 userType claim 区分用户类型
 
     # CORS配置 - 本地开发允许所有来源
     cors:

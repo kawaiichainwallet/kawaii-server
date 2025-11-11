@@ -166,9 +166,9 @@ public class AuthService {
                 throw new BusinessException(ApiCode.USER_NOT_FOUND, "用户不存在或已被禁用");
             }
 
-            // 生成新的Token（roles使用用户的实际角色）
-            String newAccessToken = jwtTokenService.generateAccessToken(userId, username, "USER");
-            String newRefreshToken = jwtTokenService.generateRefreshToken(userId, username);
+            // 生成新的Token（指定用户类型为USER）
+            String newAccessToken = jwtTokenService.generateAccessToken(userId, username, "USER", "USER");
+            String newRefreshToken = jwtTokenService.generateRefreshToken(userId, username, "USER");
 
             // 记录审计日志
 
@@ -311,9 +311,9 @@ public class AuthService {
         // 更新最后登录信息（使用 UTC 时间）
         userMapper.updateLoginInfo(user.getUserId(), TimeUtil.nowUtc(), clientIp);
 
-        // 生成JWT令牌
-        String accessToken = jwtTokenService.generateAccessToken(user.getUserId(), user.getUsername(), "USER");
-        String refreshToken = jwtTokenService.generateRefreshToken(user.getUserId(), user.getUsername());
+        // 生成JWT令牌（指定用户类型为USER）
+        String accessToken = jwtTokenService.generateAccessToken(user.getUserId(), user.getUsername(), "USER", "USER");
+        String refreshToken = jwtTokenService.generateRefreshToken(user.getUserId(), user.getUsername(), "USER");
 
         // 记录登录成功审计日志
 

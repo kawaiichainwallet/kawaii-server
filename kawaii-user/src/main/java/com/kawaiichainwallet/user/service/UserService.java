@@ -243,9 +243,9 @@ public class UserService {
         log.info("用户注册成功: userId={}, username={}, type={}, IP={}",
                 user.getUserId(), user.getUsername(), request.getType(), clientIp);
 
-        // 8. 生成JWT令牌
-        String accessToken = jwtTokenService.generateAccessToken(user.getUserId(), user.getUsername(), "USER");
-        String refreshToken = jwtTokenService.generateRefreshToken(user.getUserId(), user.getUsername());
+        // 8. 生成JWT令牌（指定用户类型为USER）
+        String accessToken = jwtTokenService.generateAccessToken(user.getUserId(), user.getUsername(), "USER", "USER");
+        String refreshToken = jwtTokenService.generateRefreshToken(user.getUserId(), user.getUsername(), "USER");
 
         // 9. 使用MapStruct转换响应对象并设置令牌
         RegisterResponse response = userConverter.userToRegisterResponse(user);

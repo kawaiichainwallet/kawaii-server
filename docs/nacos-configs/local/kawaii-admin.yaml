@@ -71,17 +71,8 @@ app:
 
   # 安全配置
   security:
-    # JWT配置 - 管理员系统使用独立的密钥对
-    jwt:
-      # EC私钥 (ES256算法，PKCS#8格式) - P-256曲线
-      # 管理员服务需要私钥用于生成Admin Token
-      # 注意：与用户系统使用不同的密钥对，提高安全性
-      private-key: |
-        -----BEGIN PRIVATE KEY-----
-        MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgVX8mK2pLdN7JhY3w
-        5FqR8tPzGxYnH9WJLmKvU4DfE6qhRANCAATZxPwH5K8nYzQvLmF3J9dR2hT8UqWe
-        7vNcX1mF9YpK2JhLrT8VwXqE4nH7DyU9Gf3mZk1RtYwPxLqK8vH2J4nT
-        -----END PRIVATE KEY-----
+    # 管理员和普通用户使用同一套密钥对，通过 userType claim 区分
+    # Gateway 可以用统一的公钥验证所有 Token
 
     # CORS配置 - 本地开发允许管理后台来源
     cors:

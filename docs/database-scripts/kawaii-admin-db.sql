@@ -49,7 +49,7 @@ CREATE TABLE audit_logs (
     resource_id BIGINT,
 
     -- 请求信息
-    ip_address INET,
+    ip_address VARCHAR(45), -- IP地址（支持IPv4和IPv6，最长39字符）
     user_agent TEXT,
     request_path VARCHAR(500),
     request_method VARCHAR(10),
@@ -99,7 +99,7 @@ CREATE TABLE admin_users (
     login_attempts INTEGER DEFAULT 0,
     locked_until TIMESTAMP,
     last_login_at TIMESTAMP,
-    last_login_ip INET,
+    last_login_ip VARCHAR(45), -- 最后登录IP（支持IPv4和IPv6）
 
     -- 权限控制
     is_super_admin BOOLEAN DEFAULT FALSE,

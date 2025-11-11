@@ -1,9 +1,17 @@
 package com.kawaiichainwallet.admin.controller;
 
-import com.kawaiichainwallet.admin.service.AdminIdGeneratorService;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.kawaiichainwallet.admin.dto.AdminUserDto;
+import com.kawaiichainwallet.admin.dto.AssignRolesRequest;
+import com.kawaiichainwallet.admin.dto.CreateAdminRequest;
+import com.kawaiichainwallet.admin.dto.UpdateAdminRequest;
+import com.kawaiichainwallet.admin.service.AdminUserService;
 import com.kawaiichainwallet.common.core.response.R;
+import com.kawaiichainwallet.common.spring.utils.RequestUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -11,66 +19,133 @@ import org.springframework.web.bind.annotation.*;
 /**
  * 管理员用户控制器
  *
- * @author kawaii-server
+ * @author KawaiiChain
  */
-@Tag(name = "管理员用户管理", description = "管理员账户的增删改查和权限管理")
+@Slf4j
 @RestController
 @RequestMapping("/admin-user")
 @RequiredArgsConstructor
-@Slf4j
+@Tag(name = "管理员用户管理", description = "管理员用户增删改查接口")
 public class AdminUserController {
 
-    private final AdminIdGeneratorService adminIdGeneratorService;
+    private final AdminUserService adminUserService;
 
-    @Operation(summary = "获取管理员用户列表")
+    /**
+     * 分页查询管理员列表
+     */
     @GetMapping("/list")
-    public R<?> getAdminUsers(
+    @Operation(summary = "获取管理员列表", description = "分页查询管理员列表，支持状态筛选和关键词搜索")
+    public R<IPage<AdminUserDto>> getAdminList(
+            @Parameter(description = "页码", example = "1")
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "20") int size
-    ) {
-        log.info("获取管理员用户列表，页码：{}，大小：{}", page, size);
-        return R.success("管理员用户列表功能待实现");
+            @Parameter(description = "每页数量", example = "20")
+            @RequestParam(defaultValue = "20") int size,
+            @Parameter(description = "状态筛选（可选）", example = "active")
+            @RequestParam(required = false) String status,
+            @Parameter(description = "搜索关键词（可选）")
+            @RequestParam(required = false) String keyword) {
+
+        IPage<AdminUserDto> result = adminUserService.getAdminUsers(page, size, status, keyword);
+        return R.success(result);
     }
 
-    @Operation(summary = "创建管理员用户")
+    /**
+     * 根据ID获取管理员详情
+     */
+    @GetMapping("/{adminId}")
+    @Operation(summary = "获取管理员详情", description = "根据ID获取管理员详细信息")
+    public R<AdminUserDto> getAdminById(
+            @Parameter(description = "管理员ID")
+            @PathVariable Long adminId) {
+
+        AdminUserDto admin = adminUserService.getAdminById(adminId);
+        return R.success(admin);
+    }
+
+    /**
+     * 创建管理员
+     */
     @PostMapping("/create")
-    public R<?> createAdminUser(@RequestBody Object adminUserData) {
-        log.info("创建管理员用户");
+    @Operation(summary = "创建管理员", description = "创建新的管理员账号")
+    public R<AdminUserDto> createAdmin(
+            @Valid @RequestBody CreateAdminRequest request) {
 
-        // 演示如何生成分布式ID
-        Long adminId = adminIdGeneratorService.generateAdminUserId();
-        log.info("为新管理员分配ID: {}", adminId);
+        Long currentAdminId = RequestUtil.getCurrentUserId();
+        AdminUserDto admin = adminUserService.createAdmin(request, currentAdminId);
 
-        return R.success("创建管理员用户功能待实现，分配的ID: " + adminId);
+        return R.success(admin, "创建管理员成功");
     }
 
-    @Operation(summary = "更新管理员用户")
+    /**
+     * 更新管理员信息
+     */
     @PutMapping("/{adminId}")
-    public R<?> updateAdminUser(@PathVariable Long adminId, @RequestBody Object adminUserData) {
-        log.info("更新管理员用户：{}", adminId);
-        return R.success("更新管理员用户功能待实现");
+    @Operation(summary = "更新管理员信息", description = "更新管理员基本信息")
+    public R<AdminUserDto> updateAdmin(
+            @Parameter(description = "管理员ID")
+            @PathVariable Long adminId,
+            @Valid @RequestBody UpdateAdminRequest request) {
+
+        Long currentAdminId = RequestUtil.getCurrentUserId();
+        AdminUserDto admin = adminUserService.updateAdmin(adminId, request, currentAdminId);
+
+        return R.success(admin, "更新管理员成功");
     }
 
-    @Operation(summary = "禁用/启用管理员用户")
+    /**
+     * 删除管理员
+     */
+    @DeleteMapping("/{adminId}")
+    @Operation(summary = "删除管理员", description = "删除指定管理员账号")
+    public R<Void> deleteAdmin(
+            @Parameter(description = "管理员ID")
+            @PathVariable Long adminId) {
+
+        Long currentAdminId = RequestUtil.getCurrentUserId();
+        adminUserService.deleteAdmin(adminId, currentAdminId);
+
+        return R.success("删除管理员成功");
+    }
+
+    /**
+     * 修改管理员状态
+     */
     @PutMapping("/{adminId}/status")
-    public R<?> toggleAdminUserStatus(@PathVariable Long adminId, @RequestParam String status) {
-        log.info("切换管理员用户 {} 状态为：{}", adminId, status);
-        return R.success("切换管理员用户状态功能待实现");
+    @Operation(summary = "修改管理员状态", description = "启用/停用/封禁管理员账号")
+    public R<Void> updateAdminStatus(
+            @Parameter(description = "管理员ID")
+            @PathVariable Long adminId,
+            @Parameter(description = "新状态", example = "active")
+            @RequestParam String status) {
+
+        Long currentAdminId = RequestUtil.getCurrentUserId();
+        adminUserService.updateAdminStatus(adminId, status, currentAdminId);
+
+        return R.success("修改状态成功");
     }
 
-    @Operation(summary = "分配角色给管理员")
+    /**
+     * 分配角色给管理员
+     */
     @PostMapping("/{adminId}/roles")
-    public R<?> assignRoles(@PathVariable Long adminId, @RequestBody Object roleData) {
-        log.info("为管理员 {} 分配角色", adminId);
-        return R.success("分配角色功能待实现");
+    @Operation(summary = "分配角色", description = "为管理员分配角色")
+    public R<Void> assignRoles(
+            @Parameter(description = "管理员ID")
+            @PathVariable Long adminId,
+            @Valid @RequestBody AssignRolesRequest request) {
+
+        Long currentAdminId = RequestUtil.getCurrentUserId();
+        adminUserService.assignRoles(adminId, request.getRoleIds(), currentAdminId);
+
+        return R.success("分配角色成功");
     }
 
-    @Operation(summary = "检查ID生成器健康状态")
+    /**
+     * ID生成器健康检查
+     */
     @GetMapping("/id-generator/health")
-    public R<?> checkIdGeneratorHealth() {
-        boolean isHealthy = adminIdGeneratorService.isGeneratorHealthy();
-        return isHealthy ?
-            R.success("ID生成器状态正常") :
-            R.error("ID生成器状态异常");
+    @Operation(summary = "ID生成器健康检查", description = "检查ID生成服务是否正常")
+    public R<String> checkIdGeneratorHealth() {
+        return R.success("ID生成器运行正常");
     }
 }

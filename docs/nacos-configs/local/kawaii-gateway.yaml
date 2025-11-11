@@ -70,6 +70,12 @@ spring:
                 - Path=/kawaii-notification/**
               filters:
                 - StripPrefix=1
+            - id: kawaii-admin-route
+              uri: lb://kawaii-admin
+              predicates:
+                - Path=/kawaii-admin/**
+              filters:
+                - StripPrefix=1
 
 # 应用配置
 app:
@@ -79,12 +85,14 @@ app:
     routes:
       # 公开路径 - 无需认证
       public-paths:
-        - "/kawaii-user/auth/login"           # 登录接口
+        - "/kawaii-user/auth/login"           # 用户登录接口
         - "/kawaii-user/auth/login-with-otp"  # OTP登录接口
         - "/kawaii-user/auth/register"        # 注册接口
         - "/kawaii-user/auth/send-*-otp"      # 发送OTP接口
         - "/kawaii-user/auth/refresh"         # 刷新Token接口
         - "/kawaii-user/check-**"             # 用户检查接口
+        - "/kawaii-admin/auth/login"          # 管理员登录接口
+        - "/kawaii-admin/auth/refresh"        # 管理员刷新Token接口
         - "/kawaii-core/health"               # 健康检查
         - "/kawaii-payment/webhook/**"        # 支付回调
         - "/actuator/**"                      # 监控端点
@@ -92,7 +100,8 @@ app:
 
       # 可选认证路径 - Token无效也允许访问
       optional-auth-paths:
-        - "/kawaii-user/auth/logout"          # 登出接口
+        - "/kawaii-user/auth/logout"          # 用户登出接口
+        - "/kawaii-admin/auth/logout"         # 管理员登出接口
 
       # 内部路径 - 仅服务间调用，阻止外部直接访问
       internal-paths:

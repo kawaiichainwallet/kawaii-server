@@ -1,7 +1,33 @@
 spring:
   # 数据库配置 - 本地PostgreSQL
   datasource:
-    url: jdbc:postgresql://localhost:5432/kawaii-admin-db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC
+    url: jdbc:postgresql://localhost:5432/kawaii_admin_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC
+
+  # Redis配置
+  data:
+    redis:
+      database: 2  # 使用独立的database，与其他服务隔离（user=1, gateway=0）
+      # host、port、password 继承自 kawaii-common.yaml
+
+  # Cloud配置
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 5000   # 连接超时5秒
+            readTimeout: 10000     # 读取超时10秒
+            loggerLevel: basic     # 日志级别：NONE, BASIC, HEADERS, FULL
+      # 启用okhttp客户端（性能更好）
+      okhttp:
+        enabled: true
+      # 启用压缩
+      compression:
+        request:
+          enabled: true
+          min-request-size: 2048
+        response:
+          enabled: true
 
 # 应用业务配置 - 本地开发
 app:
@@ -45,6 +71,18 @@ app:
 
   # 安全配置
   security:
+    # JWT配置 - 管理员系统使用独立的密钥对
+    jwt:
+      # EC私钥 (ES256算法，PKCS#8格式) - P-256曲线
+      # 管理员服务需要私钥用于生成Admin Token
+      # 注意：与用户系统使用不同的密钥对，提高安全性
+      private-key: |
+        -----BEGIN PRIVATE KEY-----
+        MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgVX8mK2pLdN7JhY3w
+        5FqR8tPzGxYnH9WJLmKvU4DfE6qhRANCAATZxPwH5K8nYzQvLmF3J9dR2hT8UqWe
+        7vNcX1mF9YpK2JhLrT8VwXqE4nH7DyU9Gf3mZk1RtYwPxLqK8vH2J4nT
+        -----END PRIVATE KEY-----
+
     # CORS配置 - 本地开发允许管理后台来源
     cors:
       allowed-origins:

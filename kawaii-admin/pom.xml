@@ -25,6 +25,12 @@
             <artifactId>kawaii-common-business</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        <!-- Kawaii Common Auth - 公共认证模块(JWT) -->
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>kawaii-common-auth</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
